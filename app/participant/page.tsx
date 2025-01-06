@@ -1,5 +1,4 @@
 "use client";
-import * as React from "react";
 import { Box, Typography, Paper } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import { styled } from "@mui/material/styles";
@@ -9,6 +8,14 @@ import SearchBar from "../components/searchComponent";
 import SelectInput from "../components/selectInput";
 import CustomSeparator from "../components/pathSeperation";
 import DetailsData from "../components/detailsCard";
+import { ParticipantsApi, Configuration, Participants } from '../../services/api-client';
+import { useEffect, useState } from "react";
+
+const apiConfig = new Configuration({
+  basePath: process.env.NEXT_PUBLIC_API_BASE_URL,
+});
+
+const participantApi = new ParticipantsApi(apiConfig);
 
 const mockData = [
   {
@@ -63,11 +70,29 @@ const options = [
 ];
 
 export default function Dashboard() {
-  const [selectedCard, setSelectedCard] = React.useState(mockData[0]);
+  const [selectedCard, setSelectedCard] = useState(mockData[0]);
+  const [data, setData] = useState<Participants>({});
+  const [error, setError] = useState<any>(null);
+
 
   const handleCardClick = (card: (typeof mockData)[0]) => {
     setSelectedCard(card);
   };
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await participantApi.getParticipants();
+        setData(response.data);
+      } catch (err) {
+        setError(err);
+      }
+    }
+    fetchData();
+  }, []);
+
+  console.log("data", data);
+  console.log("error", error);
 
   return (
     <div>
