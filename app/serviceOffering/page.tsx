@@ -63,6 +63,24 @@ const options = [
   { label: "value 4", id: "4" },
 ];
 
+const CardContainer = styled(Grid, {
+  shouldForwardProp: (prop) => prop !== "isSelected",
+})<{ isSelected: boolean }>(({ theme, isSelected }) => ({
+  marginBottom: theme.spacing(2),
+  cursor: "pointer",
+  padding: theme.spacing(2),
+  border: isSelected
+    ? `2px solid ${theme.palette.primary.main}`
+    : "1px solid transparent",
+  borderRadius: theme.shape.borderRadius,
+  boxShadow: isSelected ? theme.shadows[4] : theme.shadows[1],
+  transition: "all 0.3s ease-in-out",
+  "&:hover": {
+    boxShadow: theme.shadows[6],
+    transform: "scale(1.02)",
+  },
+}));
+
 export default function Dashboard() {
   const [selectedCard, setSelectedCard] = React.useState(mockData[0]);
 
@@ -73,24 +91,27 @@ export default function Dashboard() {
   return (
     <div>
       <MenuAppBar />
-      <CustomSeparator />
-      <SearchBar />
-      <SelectInput options={options} fieldLabel="Sorted by"/>
+      <Box sx={{ py: 1 }}>
+        <CustomSeparator />
+        <Grid container spacing={2} sx={{ mb: 3, alignItems: "center" }}>
+          <Grid size={{ xs: 4 }} sx={{ textAlign: "right" }}>
+            <SelectInput options={options} fieldLabel="Sorted by" />
+          </Grid>
+          <Grid size={{ xs: 8 }}>
+            <SearchBar />
+          </Grid>
+        </Grid>
+      </Box>
       <Grid container sx={{ height: "100vh" }}>
         {/* Left Pane: Vertical Cards */}
-        <Grid size={{ xs: 4, md: 4 }}>
+        <Grid size={{ xs: 4 }}>
           <Sidebar>
             {mockData.map((card) => (
-              <Grid
-                key={card.id}
-                sx={{
-                  mb: 2,
-                  cursor: "pointer",
-                  border:
-                    card.id === selectedCard.id ? "2px solid #1976d2" : "none",
-                }}
-                onClick={() => handleCardClick(card)}
-              >
+              <CardContainer
+              key={card.id}
+              isSelected={card.id === selectedCard.id}
+              onClick={() => handleCardClick(card)}
+            >
                 <LeftCard
                   id={card.id}
                   name={card.name}
@@ -98,7 +119,7 @@ export default function Dashboard() {
                   address={card.address}
                   logoUrl={card.logo}
                 />
-              </Grid>
+              </CardContainer>
             ))}
           </Sidebar>
         </Grid>

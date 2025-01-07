@@ -8,7 +8,11 @@ import SearchBar from "../components/searchComponent";
 import SelectInput from "../components/selectInput";
 import CustomSeparator from "../components/pathSeperation";
 import DetailsData from "../components/detailsCard";
-import { ParticipantsApi, Configuration, Participants } from '../../services/api-client';
+import {
+  ParticipantsApi,
+  Configuration,
+  Participants,
+} from "../../services/api-client";
 import { useEffect, useState } from "react";
 
 const apiConfig = new Configuration({
@@ -62,6 +66,24 @@ const DetailsPane = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.background.default,
 }));
 
+const CardContainer = styled(Grid, {
+  shouldForwardProp: (prop) => prop !== "isSelected",
+})<{ isSelected: boolean }>(({ theme, isSelected }) => ({
+  marginBottom: theme.spacing(2),
+  cursor: "pointer",
+  padding: theme.spacing(2),
+  border: isSelected
+    ? `2px solid ${theme.palette.primary.main}`
+    : "1px solid transparent",
+  borderRadius: theme.shape.borderRadius,
+  boxShadow: isSelected ? theme.shadows[4] : theme.shadows[1],
+  transition: "all 0.3s ease-in-out",
+  "&:hover": {
+    boxShadow: theme.shadows[6],
+    transform: "scale(1.02)",
+  },
+}));
+
 const options = [
   { label: "value 1", id: "1" },
   { label: "value 2", id: "2" },
@@ -73,7 +95,6 @@ export default function Dashboard() {
   const [selectedCard, setSelectedCard] = useState(mockData[0]);
   const [data, setData] = useState<Participants>({});
   const [error, setError] = useState<any>(null);
-
 
   const handleCardClick = (card: (typeof mockData)[0]) => {
     setSelectedCard(card);
@@ -97,22 +118,25 @@ export default function Dashboard() {
   return (
     <div>
       <MenuAppBar />
-      <CustomSeparator />
-      <SearchBar />
-      <SelectInput options={options} fieldLabel="Sorted by"/>
+      <Box sx={{ py: 1 }}>
+        <CustomSeparator />
+        <Grid container spacing={2} sx={{ mb: 3, alignItems: "center" }}>
+          <Grid size={{ xs: 4 }} sx={{ textAlign: "right" }}>
+            <SelectInput options={options} fieldLabel="Sorted by" />
+          </Grid>
+          <Grid size={{ xs: 8 }}>
+            <SearchBar />
+          </Grid>
+        </Grid>
+      </Box>
       <Grid container sx={{ height: "100vh" }}>
         {/* Left Pane: Vertical Cards */}
-        <Grid size={{ xs: 4, md: 4 }}>
+        <Grid size={{ xs: 4 }}>
           <Sidebar>
             {mockData.map((card) => (
-              <Grid
+              <CardContainer
                 key={card.id}
-                sx={{
-                  mb: 2,
-                  cursor: "pointer",
-                  border:
-                    card.id === selectedCard.id ? "2px solid #1976d2" : "none",
-                }}
+                isSelected={card.id === selectedCard.id}
                 onClick={() => handleCardClick(card)}
               >
                 <LeftCard
@@ -122,13 +146,13 @@ export default function Dashboard() {
                   address={card.address}
                   logoUrl={card.logo}
                 />
-              </Grid>
+              </CardContainer>
             ))}
           </Sidebar>
         </Grid>
 
         {/* Right Pane: Card Details */}
-        <Grid size={{ xs: 8, md: 8 }}>
+        <Grid size={{ xs: 8 }}>
           <DetailsPane>
             <Typography variant="h4" gutterBottom>
               {selectedCard.name}
