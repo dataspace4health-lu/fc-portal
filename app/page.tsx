@@ -12,6 +12,7 @@ import Stack from "@mui/material/Stack";
 import MuiCard from "@mui/material/Card";
 import { styled } from "@mui/material/styles";
 import { useRouter } from "next/navigation";
+import { login } from "./components/oidcIntegration";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -53,7 +54,7 @@ export default function SignIn() {
 
     let isValid = true;
 
-    if (!email.value || !/\S+@\S+\.\S+/.test(email.value)) {
+    if (!email.value) {
       setEmailError(true);
       setEmailErrorMessage("Please enter a valid email address.");
       isValid = false;
@@ -86,7 +87,9 @@ export default function SignIn() {
     });
 
     // Navigate to dashboard after successful sign-in
-    router.push("/dashboard");
+    // router.push("/dashboard");
+
+    login();
   };
 
   return (
@@ -112,7 +115,7 @@ export default function SignIn() {
             }}
           >
             <FormControl>
-              <FormLabel htmlFor="email">Email</FormLabel>
+              <FormLabel htmlFor="email">Username or Email</FormLabel>
               <TextField
                 error={emailError}
                 helperText={emailErrorMessage}

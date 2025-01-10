@@ -14,12 +14,7 @@ import {
   Participants,
 } from "../../services/api-client";
 import { useEffect, useState } from "react";
-
-const apiConfig = new Configuration({
-  basePath: process.env.NEXT_PUBLIC_API_BASE_URL,
-});
-
-const participantApi = new ParticipantsApi(apiConfig);
+import { getToken } from "../components/oidcIntegration";
 
 const mockData = [
   {
@@ -95,23 +90,42 @@ export default function Dashboard() {
   const [selectedCard, setSelectedCard] = useState(mockData[0]);
   const [data, setData] = useState<Participants>({});
   const [error, setError] = useState<any>(null);
+  const [token, setToken] = useState<string>();
+
+  const apiConfig = new Configuration({
+    basePath: process.env.NEXT_PUBLIC_API_BASE_URL,
+    accessToken: token,
+  });
+
+  const participantApi = new ParticipantsApi(apiConfig);
 
   const handleCardClick = (card: (typeof mockData)[0]) => {
     setSelectedCard(card);
   };
 
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const response = await participantApi.getParticipants();
-        setData(response.data);
-      } catch (err) {
-        setError(err);
+    if (token) {
+      async function fetchData() {
+        try {
+          const response = await participantApi.getParticipants();
+          setData(response.data);
+        } catch (err) {
+          setError(err);
+        }
       }
+      fetchData();
     }
-    fetchData();
+  }, [token]);
+
+  useEffect(() => {
+    async function fetchToken() {
+      const token = await getToken();
+      setToken(token);
+    }
+    fetchToken();
   }, []);
 
+  console.log("token", token);
   console.log("data", data);
   console.log("error", error);
 
