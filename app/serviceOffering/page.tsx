@@ -10,6 +10,14 @@ import SelectInput from "../components/selectInput";
 import CustomSeparator from "../components/pathSeperation";
 import DetailsData from "../components/detailsCard";
 import ServiceOfferingDetailsData from "../components/serviceOfferingDetails";
+import {
+  Configuration,
+  SelfDescriptions,
+  SelfDescriptionsApi,
+} from "@/services/api-client";
+import { useEffect, useState } from "react";
+import { getToken } from "../components/oidcIntegration";
+import ProtectedRoute from "../components/protectedRoute";
 
 const mockData = [
   {
@@ -82,60 +90,93 @@ const CardContainer = styled(Grid, {
 }));
 
 export default function Dashboard() {
-  const [selectedCard, setSelectedCard] = React.useState(mockData[0]);
+  const [selectedCard, setSelectedCard] = useState(mockData[0]);
+  const [token, setToken] = useState<string>();
+  const [selfDescriptionsData, setSelfDescriptionsData] =
+    useState<SelfDescriptions>();
+  const [error, setError] = useState<any>();
+  const apiConfig = new Configuration({
+    basePath: process.env.NEXT_PUBLIC_API_BASE_URL,
+    accessToken: token,
+  });
+  const selfDescriptionApi = new SelfDescriptionsApi(apiConfig);
 
   const handleCardClick = (card: (typeof mockData)[0]) => {
     setSelectedCard(card);
   };
 
-  return (
-    <div>
-      <MenuAppBar />
-      <Box sx={{ py: 1 }}>
-        <CustomSeparator />
-        <Grid container spacing={2} sx={{ mb: 3, alignItems: "center" }}>
-          <Grid size={{ xs: 4 }} sx={{ textAlign: "right" }}>
-            <SelectInput options={options} fieldLabel="Sorted by" />
-          </Grid>
-          <Grid size={{ xs: 8 }}>
-            <SearchBar />
-          </Grid>
-        </Grid>
-      </Box>
-      <Grid container sx={{ height: "100vh" }}>
-        {/* Left Pane: Vertical Cards */}
-        <Grid size={{ xs: 4 }}>
-          <Sidebar>
-            {mockData.map((card) => (
-              <CardContainer
-              key={card.id}
-              isSelected={card.id === selectedCard.id}
-              onClick={() => handleCardClick(card)}
-            >
-                <LeftCard
-                  id={card.id}
-                  name={card.name}
-                  vatNumber={card.vatNumber}
-                  address={card.address}
-                  logoUrl={card.logo}
-                />
-              </CardContainer>
-            ))}
-          </Sidebar>
-        </Grid>
+  useEffect(() => {
+    async function fetchToken() {
+      const token = await getToken();
+      setToken(token);
+    }
+    fetchToken();
+  }, []);
 
-        {/* Right Pane: Card Details */}
-        <Grid size={{ xs: 8, md: 8 }}>
-          <DetailsPane>
-            <Typography variant="h4" gutterBottom>
-              {selectedCard.name}
-            </Typography>
-            <Paper elevation={3}>
-              <ServiceOfferingDetailsData />
-            </Paper>
-          </DetailsPane>
+  useEffect(() => {
+    if (token) {
+      async function fetchData() {
+        try {
+          const response = await selfDescriptionApi.readSelfDescriptions();
+          setSelfDescriptionsData(response.data);
+        } catch (err) {
+          setError(err);
+        }
+      }
+      fetchData();
+    }
+  }, [token]);
+
+  return (
+    <ProtectedRoute>
+      <div>
+        <MenuAppBar />
+        <Box sx={{ py: 1 }}>
+          <CustomSeparator />
+          <Grid container spacing={2} sx={{ mb: 3, alignItems: "center" }}>
+            <Grid size={{ xs: 4 }} sx={{ textAlign: "right" }}>
+              <SelectInput options={options} fieldLabel="Sorted by" />
+            </Grid>
+            <Grid size={{ xs: 8 }}>
+              <SearchBar />
+            </Grid>
+          </Grid>
+        </Box>
+        <Grid container sx={{ height: "100vh" }}>
+          {/* Left Pane: Vertical Cards */}
+          <Grid size={{ xs: 4 }}>
+            <Sidebar>
+              {mockData.map((card) => (
+                <CardContainer
+                  key={card.id}
+                  isSelected={card.id === selectedCard.id}
+                  onClick={() => handleCardClick(card)}
+                >
+                  <LeftCard
+                    id={card.id}
+                    name={card.name}
+                    vatNumber={card.vatNumber}
+                    address={card.address}
+                    logoUrl={card.logo}
+                  />
+                </CardContainer>
+              ))}
+            </Sidebar>
+          </Grid>
+
+          {/* Right Pane: Card Details */}
+          <Grid size={{ xs: 8, md: 8 }}>
+            <DetailsPane>
+              <Typography variant="h4" gutterBottom>
+                {selectedCard.name}
+              </Typography>
+              <Paper elevation={3}>
+                <ServiceOfferingDetailsData />
+              </Paper>
+            </DetailsPane>
+          </Grid>
         </Grid>
-      </Grid>
-    </div>
+      </div>
+    </ProtectedRoute>
   );
 }

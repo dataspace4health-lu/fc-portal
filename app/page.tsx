@@ -81,13 +81,10 @@ export default function SignIn() {
     if (!validateInputs()) return;
 
     const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get("email"),
-      password: data.get("password"),
-    });
-
-    // Navigate to dashboard after successful sign-in
-    // router.push("/dashboard");
+    // console.log({
+    //   email: data.get("email"),
+    //   password: data.get("password"),
+    // });
 
     login();
   };

@@ -41,7 +41,7 @@ export default function Onboarding() {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     const selfDescription = data.get("selfDescription");
-    console.log({ selfDescription });
+    // console.log({ selfDescription });
 
   };
 

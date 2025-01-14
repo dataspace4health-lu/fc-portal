@@ -13,7 +13,6 @@ interface LeftCardProps {
 
 export default function LeftCard(leftCardProps: LeftCardProps) {
   const { name, id, logoUrl, address, vatNumber } = leftCardProps;
-  console.log("logoUrl", logoUrl);
 
   return (
     // <Paper

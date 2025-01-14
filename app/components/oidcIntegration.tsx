@@ -1,27 +1,22 @@
-import { useSearchParams } from "next/navigation";
-import {
-  OidcClientSettings,
-  UserManager,
-  WebStorageStateStore,
-} from "oidc-client-ts";
+import { UserManager, WebStorageStateStore } from "oidc-client-ts";
 
 // Helper to check if we're running in a browser
 const isBrowser = typeof window !== "undefined";
 
 // OIDC Configuration
 export const oidcConfig = {
-  authority: process.env.NEXT_PUBLIC_OIDC_AUTHORITY!,
-  client_id: process.env.NEXT_PUBLIC_OIDC_CLIENT_ID!,
-  client_secret: process.env.NEXT_PUBLIC_OIDC_CLIENT_SECRET!,
-  grant_type: process.env.NEXT_PUBLIC_OIDC_GRANT_TYPE!,
-  redirect_uri: process.env.NEXT_PUBLIC_OIDC_REDIRECT_URI!,
-  response_type: process.env.NEXT_PUBLIC_RESPONSE_TYPE!,
-  scope: process.env.NEXT_PUBLIC_SCOPE!, // Customize scopes
+  authority: "https://dataspace4health.local/iam/realms/gaia-x",
+  client_id: "federated-catalogue",
+  client_secret: "cf|J{G3z7a,@su5j(EJzq^G$a6)4D9",
+  grant_type: "authorization_code",
+  redirect_uri: `http://localhost:3000/redirect`,
+  response_type: "code",
+  scope: "openid", // Customize scopes
   userStore: isBrowser
     ? new WebStorageStateStore({ store: window.localStorage })
     : undefined, // Avoid using window.localStorage on the server
   loadUserInfo: true,
-  post_logout_redirect_uri: process.env.NEXT_PUBLIC_OIDC_POST_LOGOUT_REDIRECT_URI!,
+  post_logout_redirect_uri: "http://localhost:3000/",
 };
 
 // Initialize UserManager
@@ -50,6 +45,5 @@ export const getToken = async () => {
     }
   }
   const user = await userManager.getUser();
-  console.log("user", user);
   return user?.access_token;
 };
