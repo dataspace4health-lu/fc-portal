@@ -93,7 +93,6 @@ export default function ServiceOffering() {
   const [token, setToken] = useState<string>();
   const [selfDescriptionsData, setSelfDescriptionsData] =
     useState<SelfDescriptions>();
-  const [error, setError] = useState<any>();
   const apiConfig = new Configuration({
     basePath: process.env.NEXT_PUBLIC_API_BASE_URL,
     accessToken: token,
@@ -119,12 +118,14 @@ export default function ServiceOffering() {
           const response = await selfDescriptionApi.readSelfDescriptions();
           setSelfDescriptionsData(response.data);
         } catch (err) {
-          setError(err);
+          console.log(err);
         }
       }
       fetchData();
     }
   }, [token]);
+
+  console.log("selfDescriptionsData", selfDescriptionsData);
 
   return (
     <ProtectedRoute>

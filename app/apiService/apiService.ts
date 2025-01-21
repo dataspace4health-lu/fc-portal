@@ -1,6 +1,11 @@
 import { Configuration, ParticipantsApi } from "../../services/api-client";
 import { getToken } from "../components/oidcIntegration";
 
+interface ApiError extends Error {
+  response?: {
+    status: number;
+  };
+}
 class ApiService {
   private configuration: Configuration;
   private participantsApi: ParticipantsApi;
@@ -29,15 +34,15 @@ class ApiService {
     await this.fetchTokenIfNeeded();
     try {
       return await this.participantsApi.getParticipants();
-    } catch (error: any) {
-      if (error.response && error.response.status === 401) {
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      if (apiError.response && apiError.response.status === 401) {
         this.redirectToLogin(); // Handle redirection here
         return;
       }
-      throw error;
+      throw apiError;
     }
   }
-
 }
 
 export default ApiService;

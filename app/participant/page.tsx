@@ -8,7 +8,7 @@ import SearchBar from "../components/searchComponent";
 import SelectInput from "../components/selectInput";
 import CustomSeparator from "../components/pathSeperation";
 import DetailsData from "../components/detailsCard";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ProtectedRoute from "../components/protectedRoute";
 import { useRouter } from "next/navigation";
 import ApiService from "../apiService/apiService";
@@ -27,6 +27,15 @@ interface ParticipantsList {
   legalRepresentativeName: string;
   legalRepresentativeEmail: string;
   legalRepresentativePhoneNumber: string;
+}
+
+interface ApiError extends Error {
+  response?: {
+    data?: {
+      items?: any[];
+    };
+    status: number;
+  };
 }
 
 const Sidebar = styled(Box)(({ theme }) => ({
@@ -76,15 +85,16 @@ export default function Participant() {
     id: string;
     label: string;
   } | null>(options[0]);
-  const [filteredParticipants, setFilteredParticipants] = useState<ParticipantsList[]>([]);
+  const [filteredParticipants, setFilteredParticipants] = useState<
+    ParticipantsList[]
+  >([]);
   const router = useRouter();
 
   const handleCardClick = (card: ParticipantsList) => {
     setSelectedCard(card);
   };
 
-  const apiService = new ApiService(() => router.push("/"));
-
+  const apiService = useMemo(() => new ApiService(() => router.push("/")), []);
   useEffect(() => {
     async function fetchData() {
       try {
@@ -124,8 +134,9 @@ export default function Participant() {
           });
           setParticipantsList(formattedData);
         }
-      } catch (err: any) {
-        console.error(err.message || "An error occurred");
+      } catch (err: unknown) {
+        const apiError = err as ApiError;
+        console.error(apiError.message || "An error occurred");
       }
     }
     fetchData();
@@ -156,7 +167,7 @@ export default function Participant() {
       setFilteredParticipants(participantsList || []); // Reset to the full list
       return;
     }
-  
+
     const lowerCaseQuery = query.toLowerCase();
     const filtered = (participantsList || []).filter((participant) => {
       return (
@@ -166,7 +177,7 @@ export default function Participant() {
         participant.description.toLowerCase().includes(lowerCaseQuery)
       );
     });
-  
+
     setFilteredParticipants(filtered);
   };
 
@@ -182,10 +193,11 @@ export default function Participant() {
                 options={options}
                 fieldLabel="Sorted by"
                 onValueChange={handleValueChange}
+                value={selectedOption}
               />
             </Grid>
             <Grid size={{ xs: 8 }}>
-              <SearchBar handleSearch={handleSearch}/>
+              <SearchBar handleSearch={handleSearch} />
             </Grid>
           </Grid>
         </Box>

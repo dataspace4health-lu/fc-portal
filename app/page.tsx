@@ -80,7 +80,7 @@ export default function SignIn() {
 
     if (!validateInputs()) return;
 
-    const data = new FormData(event.currentTarget);
+    // const data = new FormData(event.currentTarget);
     // console.log({
     //   email: data.get("email"),
     //   password: data.get("password"),
@@ -165,7 +165,7 @@ export default function SignIn() {
           </Box>
           <Divider>or</Divider>
           <Typography variant="body2" align="center">
-            Don't have an account?{" "}
+            Don't have an account?
             <Button
               variant="text"
               onClick={() => router.push("/onboarding")}

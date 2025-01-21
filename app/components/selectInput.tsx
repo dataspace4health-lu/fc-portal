@@ -1,6 +1,6 @@
-import * as React from 'react';
-import TextField from '@mui/material/TextField';
-import Autocomplete from '@mui/material/Autocomplete';
+import * as React from "react";
+import TextField from "@mui/material/TextField";
+import Autocomplete from "@mui/material/Autocomplete";
 
 interface SelectInputOptions {
   id: string;
@@ -11,11 +11,11 @@ interface SelectInputProps {
   options: SelectInputOptions[];
   fieldLabel: string;
   onValueChange?: (value: SelectInputOptions | null) => void; // Callback to pass selected value
+  value: SelectInputOptions | null;
 }
 
 export default function SelectInput(props: SelectInputProps) {
-  const { options, fieldLabel, onValueChange } = props;
-
+  const { options, fieldLabel, onValueChange, value } = props;
 
   return (
     <Autocomplete
@@ -26,6 +26,7 @@ export default function SelectInput(props: SelectInputProps) {
       sx={{ width: 300, m: 2 }}
       onChange={(event, value) => onValueChange && onValueChange(value)} // Capture value on change
       renderInput={(params) => <TextField {...params} label={fieldLabel} />}
+      value={value}
     />
   );
 }

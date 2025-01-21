@@ -13,6 +13,6 @@ export default function Redirect() {
     fetchToken();
     router.push("/participant");
     router.refresh();
-  }, []);
+  }, [router]);
   return <div>redirecting...</div>;
 }

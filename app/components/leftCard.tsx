@@ -1,7 +1,8 @@
 "use client";
 import * as React from "react";
-import { Paper, Typography, Box } from "@mui/material";
+import { Typography, Box } from "@mui/material";
 import Grid from "@mui/material/Grid2";
+import Image from "next/image";
 
 interface LeftCardProps {
   name: string;
@@ -26,17 +27,7 @@ export default function LeftCard(leftCardProps: LeftCardProps) {
         <Grid size={{ xs: 12, sm: 6 }}>
           <Box display="flex" alignItems="center" gap={2} sx={{ mb: 2 }}>
             {logoUrl ? (
-              <img
-                src={logoUrl}
-                alt={`${name} logo`}
-                style={{
-                  width: 50,
-                  height: 50,
-                  borderRadius: "50%",
-                  objectFit: "cover",
-                  border: "2px solid #ccc",
-                }}
-              />
+              <Image alt={`${name} logo`} src={logoUrl} width={50} height={50}/>
             ) : (
               <Box
                 sx={{

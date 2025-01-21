@@ -15,7 +15,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     if (!storedData) {
       router.push("/");
     }
-  }, []);
+  }, [router]);
 
   return <>{children}</>;
 };

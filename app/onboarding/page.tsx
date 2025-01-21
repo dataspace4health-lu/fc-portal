@@ -39,9 +39,7 @@ export default function Onboarding() {
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    const selfDescription = data.get("selfDescription");
-    // console.log({ selfDescription });
+    // const data = new FormData(event.currentTarget);
 
   };
 
