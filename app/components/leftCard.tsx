@@ -15,18 +15,6 @@ export default function LeftCard(leftCardProps: LeftCardProps) {
   const { name, id, logoUrl, address, vatNumber } = leftCardProps;
 
   return (
-    // <Paper
-    //   elevation={3}
-    //   sx={{
-    //     p: 3,
-    //     borderRadius: 2,
-    //     bgcolor: "background.default",
-    //     boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-    //     "&:hover": {
-    //       boxShadow: "0 6px 12px rgba(0, 0, 0, 0.2)",
-    //     },
-    //   }}
-    // >
       <Grid
         container
         spacing={2}
@@ -87,6 +75,5 @@ export default function LeftCard(leftCardProps: LeftCardProps) {
           </Typography>
         </Grid>
       </Grid>
-    // </Paper>
   );
 }

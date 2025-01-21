@@ -8,45 +8,26 @@ import SearchBar from "../components/searchComponent";
 import SelectInput from "../components/selectInput";
 import CustomSeparator from "../components/pathSeperation";
 import DetailsData from "../components/detailsCard";
-import {
-  ParticipantsApi,
-  Configuration,
-  Participants,
-} from "../../services/api-client";
 import { useEffect, useState } from "react";
-import { getToken } from "../components/oidcIntegration";
 import ProtectedRoute from "../components/protectedRoute";
+import { useRouter } from "next/navigation";
+import ApiService from "../apiService/apiService";
 
-const mockData = [
-  {
-    id: "1",
-    name: "NTT LUXEMBOURG PSF S.A",
-    logo: "logo1",
-    address: "Luxembourg - Capellen",
-    vatNumber: "LU20769255",
-  },
-  {
-    id: "2",
-    name: "Luxembourg Institute of Health",
-    logo: "logo2",
-    address: "Luxembourg - Capellen",
-    vatNumber: "LU20769255",
-  },
-  {
-    id: "3",
-    name: "Agence national des information",
-    logo: "logo3",
-    address: "Luxembourg - Capellen",
-    vatNumber: "LU20769255",
-  },
-  {
-    id: "4",
-    name: "HRS - Hopitaux",
-    logo: "logo4",
-    address: "Luxembourg - Capellen",
-    vatNumber: "LU20769255",
-  },
-];
+interface ParticipantsList {
+  id: string;
+  name: string;
+  address: string;
+  vatNumber: string;
+  description: string;
+  street: string;
+  houseNumber: string;
+  postalCode: string;
+  city: string;
+  country: string;
+  legalRepresentativeName: string;
+  legalRepresentativeEmail: string;
+  legalRepresentativePhoneNumber: string;
+}
 
 const Sidebar = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
@@ -81,51 +62,113 @@ const CardContainer = styled(Grid, {
 }));
 
 const options = [
-  { label: "value 1", id: "1" },
-  { label: "value 2", id: "2" },
-  { label: "value 3", id: "3" },
-  { label: "value 4", id: "4" },
+  { id: "name", label: "name" },
+  { id: "id", label: "id" },
+  { id: "address", label: "address" },
+  { id: "Vat number", label: "Vat number" },
 ];
 
-export default function Dashboard() {
-  const [selectedCard, setSelectedCard] = useState(mockData[0]);
-  const [data, setData] = useState<Participants>({});
-  const [error, setError] = useState<any>(null);
-  const [token, setToken] = useState<string>();
+export default function Participant() {
+  const [selectedCard, setSelectedCard] = useState<ParticipantsList>();
+  const [participantsList, setParticipantsList] =
+    useState<ParticipantsList[]>();
+  const [selectedOption, setSelectedOption] = useState<{
+    id: string;
+    label: string;
+  } | null>(options[0]);
+  const [filteredParticipants, setFilteredParticipants] = useState<ParticipantsList[]>([]);
+  const router = useRouter();
 
-  const apiConfig = new Configuration({
-    basePath: process.env.NEXT_PUBLIC_API_BASE_URL,
-    accessToken: token,
-  });
-
-  const participantApi = new ParticipantsApi(apiConfig);
-
-  const handleCardClick = (card: (typeof mockData)[0]) => {
+  const handleCardClick = (card: ParticipantsList) => {
     setSelectedCard(card);
   };
 
-  useEffect(() => {
-    if (token) {
-      async function fetchData() {
-        try {
-          const response = await participantApi.getParticipants();
-          setData(response.data);
-        } catch (err) {
-          setError(err);
-        }
-      }
-      fetchData();
-    }
-  }, [token]);
+  const apiService = new ApiService(() => router.push("/"));
 
   useEffect(() => {
-    async function fetchToken() {
-      const token = await getToken();
-      setToken(token);
+    async function fetchData() {
+      try {
+        const response = await apiService.getParticipants(); // Call the instance method
+        if (response?.data?.items) {
+          const formattedData = response.data.items.map((item) => {
+            const description = JSON.parse(item.selfDescription || "");
+            const credential = description.verifiableCredential[0];
+            return {
+              id: item?.id?.split("/")[1] || "",
+              name: credential.credentialSubject["gx:legalName"],
+              address:
+                credential.credentialSubject["gx:legalAddress"][
+                  "gx:countrySubdivisionCode"
+                ],
+              vatNumber:
+                credential.credentialSubject["gx:legalRegistrationNumber"].id,
+              description:
+                credential.credentialSubject["gx:description"] || "-",
+              street: credential.credentialSubject["gx:street"] || "-",
+              houseNumber:
+                credential.credentialSubject["gx:houseNumber"] || "-",
+              postalCode: credential.credentialSubject["gx:postalCode"] || "-",
+              city: credential.credentialSubject["gx:city"] || "-",
+              country: credential.credentialSubject["gx:country"] || "-",
+              legalRepresentativeName:
+                credential.credentialSubject["gx:legalRepresentativeName"] ||
+                "-",
+              legalRepresentativeEmail:
+                credential.credentialSubject["gx:legalRepresentativeEmail"] ||
+                "-",
+              legalRepresentativePhoneNumber:
+                credential.credentialSubject[
+                  "gx:legalRepresentativePhoneNumber"
+                ] || "-",
+            };
+          });
+          setParticipantsList(formattedData);
+        }
+      } catch (err: any) {
+        console.error(err.message || "An error occurred");
+      }
     }
-    fetchToken();
+    fetchData();
   }, []);
 
+  useEffect(() => {
+    if (participantsList) {
+      setFilteredParticipants(participantsList); // Initialize with the full list
+    }
+  }, [participantsList]);
+
+  const handleValueChange = (value: { id: string; label: string } | null) => {
+    setSelectedOption(value);
+    if (value && participantsList) {
+      const sortedList = [...participantsList].sort((a, b) => {
+        const key = value.id as keyof ParticipantsList;
+        if (typeof a[key] === "string" && typeof b[key] === "string") {
+          return (a[key] as string).localeCompare(b[key] as string);
+        }
+        return 0;
+      });
+      setParticipantsList(sortedList);
+    }
+  };
+
+  const handleSearch = (query: string | null) => {
+    if (!query) {
+      setFilteredParticipants(participantsList || []); // Reset to the full list
+      return;
+    }
+  
+    const lowerCaseQuery = query.toLowerCase();
+    const filtered = (participantsList || []).filter((participant) => {
+      return (
+        participant.name.toLowerCase().includes(lowerCaseQuery) ||
+        participant.address.toLowerCase().includes(lowerCaseQuery) ||
+        participant.vatNumber.toLowerCase().includes(lowerCaseQuery) ||
+        participant.description.toLowerCase().includes(lowerCaseQuery)
+      );
+    });
+  
+    setFilteredParticipants(filtered);
+  };
 
   return (
     <ProtectedRoute>
@@ -135,47 +178,75 @@ export default function Dashboard() {
           <CustomSeparator />
           <Grid container spacing={2} sx={{ mb: 3, alignItems: "center" }}>
             <Grid size={{ xs: 4 }} sx={{ textAlign: "right" }}>
-              <SelectInput options={options} fieldLabel="Sorted by" />
+              <SelectInput
+                options={options}
+                fieldLabel="Sorted by"
+                onValueChange={handleValueChange}
+              />
             </Grid>
             <Grid size={{ xs: 8 }}>
-              <SearchBar />
+              <SearchBar handleSearch={handleSearch}/>
             </Grid>
           </Grid>
         </Box>
-        <Grid container sx={{ height: "100vh" }}>
-          {/* Left Pane: Vertical Cards */}
-          <Grid size={{ xs: 4 }}>
-            <Sidebar>
-              {mockData.map((card) => (
-                <CardContainer
-                  key={card.id}
-                  isSelected={card.id === selectedCard.id}
-                  onClick={() => handleCardClick(card)}
-                >
-                  <LeftCard
-                    id={card.id}
-                    name={card.name}
-                    vatNumber={card.vatNumber}
-                    address={card.address}
-                    logoUrl={card.logo}
-                  />
-                </CardContainer>
-              ))}
-            </Sidebar>
-          </Grid>
+        {filteredParticipants && filteredParticipants.length > 0 && (
+          <Grid container sx={{ height: "100vh" }}>
+            {/* Left Pane: Vertical Cards */}
+            <Grid size={{ xs: 4 }}>
+              <Sidebar>
+                {filteredParticipants.map((participant) => (
+                  <CardContainer
+                    key={participant.id}
+                    isSelected={participant.id === selectedCard?.id}
+                    onClick={() => handleCardClick(participant)}
+                  >
+                    <LeftCard
+                      id={participant.id}
+                      name={participant.name}
+                      vatNumber={participant.vatNumber}
+                      address={participant.address}
+                      // logoUrl={participant.logo}
+                    />
+                  </CardContainer>
+                ))}
+              </Sidebar>
+            </Grid>
 
-          {/* Right Pane: Card Details */}
-          <Grid size={{ xs: 8 }}>
-            <DetailsPane>
-              <Typography variant="h4" gutterBottom>
-                {selectedCard.name}
-              </Typography>
-              <Paper elevation={3}>
-                <DetailsData />
-              </Paper>
-            </DetailsPane>
+            {/* Right Pane: Card Details */}
+            {selectedCard && (
+              <Grid size={{ xs: 8 }}>
+                <DetailsPane>
+                  <Typography variant="h4" gutterBottom>
+                    {selectedCard.name}
+                  </Typography>
+                  <Paper elevation={3}>
+                    <DetailsData
+                      id={selectedCard.id}
+                      name={selectedCard.name}
+                      address={selectedCard.address}
+                      vatNumber={selectedCard.vatNumber}
+                      description={selectedCard.description}
+                      street={selectedCard.street}
+                      houseNumber={selectedCard.houseNumber}
+                      postalCode={selectedCard.postalCode}
+                      city={selectedCard.city}
+                      country={selectedCard.country}
+                      legalRepresentativeName={
+                        selectedCard.legalRepresentativeName
+                      }
+                      legalRepresentativeEmail={
+                        selectedCard.legalRepresentativeEmail
+                      }
+                      legalRepresentativePhoneNumber={
+                        selectedCard.legalRepresentativePhoneNumber
+                      }
+                    />
+                  </Paper>
+                </DetailsPane>
+              </Grid>
+            )}
           </Grid>
-        </Grid>
+        )}
       </div>
     </ProtectedRoute>
   );

@@ -8,7 +8,6 @@ import MenuAppBar from "../components/appBar";
 import SearchBar from "../components/searchComponent";
 import SelectInput from "../components/selectInput";
 import CustomSeparator from "../components/pathSeperation";
-import DetailsData from "../components/detailsCard";
 import ServiceOfferingDetailsData from "../components/serviceOfferingDetails";
 import {
   Configuration,
@@ -89,7 +88,7 @@ const CardContainer = styled(Grid, {
   },
 }));
 
-export default function Dashboard() {
+export default function ServiceOffering() {
   const [selectedCard, setSelectedCard] = useState(mockData[0]);
   const [token, setToken] = useState<string>();
   const [selfDescriptionsData, setSelfDescriptionsData] =

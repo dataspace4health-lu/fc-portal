@@ -86,7 +86,11 @@ export default function SignIn() {
     //   password: data.get("password"),
     // });
 
-    login();
+    // login();
+  };
+
+  const handleKeycloakLogin = () => {
+    login(); // Assuming `login` initiates the Keycloak flow
   };
 
   return (
@@ -144,6 +148,20 @@ export default function SignIn() {
             <Button type="submit" fullWidth variant="contained" color="primary">
               Sign in
             </Button>
+            <Divider>or</Divider>
+          <Button
+            variant="outlined"
+            fullWidth
+            onClick={handleKeycloakLogin}
+            sx={{
+              mt: 2,
+              color: "primary.main",
+              fontWeight: "bold",
+              borderColor: "primary.main",
+            }}
+          >
+            Sign in with Keycloak
+          </Button>
           </Box>
           <Divider>or</Divider>
           <Typography variant="body2" align="center">
