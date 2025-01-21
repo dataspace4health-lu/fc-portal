@@ -5,8 +5,8 @@ import Grid from "@mui/material/Grid2";
 import { styled } from "@mui/material/styles";
 import LeftCard from "../components/leftCard";
 import MenuAppBar from "../components/appBar";
-import SearchBar from "../components/searchComponent";
-import SelectInput from "../components/selectInput";
+// import SearchBar from "../components/searchComponent";
+// import SelectInput from "../components/selectInput";
 import CustomSeparator from "../components/pathSeperation";
 import ServiceOfferingDetailsData from "../components/serviceOfferingDetails";
 import {
@@ -63,12 +63,12 @@ const DetailsPane = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.background.default,
 }));
 
-const options = [
-  { label: "value 1", id: "1" },
-  { label: "value 2", id: "2" },
-  { label: "value 3", id: "3" },
-  { label: "value 4", id: "4" },
-];
+// const options = [
+//   { label: "value 1", id: "1" },
+//   { label: "value 2", id: "2" },
+//   { label: "value 3", id: "3" },
+//   { label: "value 4", id: "4" },
+// ];
 
 const CardContainer = styled(Grid, {
   shouldForwardProp: (prop) => prop !== "isSelected",
@@ -135,10 +135,10 @@ export default function ServiceOffering() {
           <CustomSeparator />
           <Grid container spacing={2} sx={{ mb: 3, alignItems: "center" }}>
             <Grid size={{ xs: 4 }} sx={{ textAlign: "right" }}>
-              <SelectInput options={options} fieldLabel="Sorted by" />
+              {/* <SelectInput options={options} fieldLabel="Sorted by" /> */}
             </Grid>
             <Grid size={{ xs: 8 }}>
-              <SearchBar />
+              {/* <SearchBar /> */}
             </Grid>
           </Grid>
         </Box>

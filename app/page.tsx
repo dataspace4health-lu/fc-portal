@@ -165,7 +165,7 @@ export default function SignIn() {
           </Box>
           <Divider>or</Divider>
           <Typography variant="body2" align="center">
-            Don't have an account?
+            Don&apos;t have an account?{" "}
             <Button
               variant="text"
               onClick={() => router.push("/onboarding")}

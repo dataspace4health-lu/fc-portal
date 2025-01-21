@@ -31,9 +31,6 @@ interface ParticipantsList {
 
 interface ApiError extends Error {
   response?: {
-    data?: {
-      items?: any[];
-    };
     status: number;
   };
 }
