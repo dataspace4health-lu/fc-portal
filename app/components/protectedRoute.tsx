@@ -1,23 +1,27 @@
-import { useEffect } from "react";
+import { useEffect, ComponentType } from "react";
 import { useRouter } from "next/navigation";
+import { login } from "./oidcIntegration";
 
-interface ProtectedRouteProps {
-  children: React.ReactNode;
-}
+const ProtectedRoute = <P extends object>(WrappedComponent: ComponentType<P>) => {
+  const WithAuth: React.FC<P> = (props) => {
+    const router = useRouter();
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const router = useRouter();
+    useEffect(() => {
+      const storedData = localStorage.getItem(
+        `oidc.user:${process.env.NEXT_PUBLIC_OIDC_AUTHORITY}:${process.env.NEXT_PUBLIC_OIDC_CLIENT_ID}`
+      );
+      if (!storedData) {
+        login();
+      }
+    }, [router]);
 
-  useEffect(() => {
-    const storedData = localStorage.getItem(
-      "oidc.user:https://dataspace4health.local/iam/realms/gaia-x:federated-catalogue"
-    );
-    if (!storedData) {
-      router.push("/");
-    }
-  }, [router]);
+    return <WrappedComponent {...props} />;
+  };
 
-  return <>{children}</>;
+  // Add a displayName for debugging
+  WithAuth.displayName = `ProtectedRoute(${WrappedComponent.displayName || WrappedComponent.name || "Component"})`;
+
+  return WithAuth;
 };
 
 export default ProtectedRoute;

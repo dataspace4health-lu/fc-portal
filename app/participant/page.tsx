@@ -74,7 +74,7 @@ const options = [
   { id: "Vat number", label: "Vat number" },
 ];
 
-export default function Participant() {
+const Participant = () => {
   const [selectedCard, setSelectedCard] = useState<ParticipantsList>();
   const [participantsList, setParticipantsList] =
     useState<ParticipantsList[]>();
@@ -91,7 +91,7 @@ export default function Participant() {
     setSelectedCard(card);
   };
 
-  const apiService = useMemo(() => new ApiService(() => router.push("/")), []);
+  const apiService = useMemo(() => new ApiService(() => router.push("")), []);
   useEffect(() => {
     async function fetchData() {
       try {
@@ -179,84 +179,84 @@ export default function Participant() {
   };
 
   return (
-    <ProtectedRoute>
-      <div>
-        <MenuAppBar />
-        <Box sx={{ py: 1 }}>
-          <CustomSeparator />
-          <Grid container spacing={2} sx={{ mb: 3, alignItems: "center" }}>
-            <Grid size={{ xs: 4 }} sx={{ textAlign: "right" }}>
-              <SelectInput
-                options={options}
-                fieldLabel="Sorted by"
-                onValueChange={handleValueChange}
-                value={selectedOption}
-              />
-            </Grid>
-            <Grid size={{ xs: 8 }}>
-              <SearchBar handleSearch={handleSearch} />
-            </Grid>
+    <div>
+      <MenuAppBar />
+      <Box sx={{ py: 1 }}>
+        <CustomSeparator />
+        <Grid container spacing={2} sx={{ mb: 3, alignItems: "center" }}>
+          <Grid size={{ xs: 4 }} sx={{ textAlign: "right" }}>
+            <SelectInput
+              options={options}
+              fieldLabel="Sorted by"
+              onValueChange={handleValueChange}
+              value={selectedOption}
+            />
           </Grid>
-        </Box>
-        {filteredParticipants && filteredParticipants.length > 0 && (
-          <Grid container sx={{ height: "100vh" }}>
-            {/* Left Pane: Vertical Cards */}
-            <Grid size={{ xs: 4 }}>
-              <Sidebar>
-                {filteredParticipants.map((participant) => (
-                  <CardContainer
-                    key={participant.id}
-                    isSelected={participant.id === selectedCard?.id}
-                    onClick={() => handleCardClick(participant)}
-                  >
-                    <LeftCard
-                      id={participant.id}
-                      name={participant.name}
-                      vatNumber={participant.vatNumber}
-                      address={participant.address}
-                      // logoUrl={participant.logo}
-                    />
-                  </CardContainer>
-                ))}
-              </Sidebar>
-            </Grid>
+          <Grid size={{ xs: 8 }}>
+            <SearchBar handleSearch={handleSearch} />
+          </Grid>
+        </Grid>
+      </Box>
+      {filteredParticipants && filteredParticipants.length > 0 && (
+        <Grid container sx={{ height: "100vh" }}>
+          {/* Left Pane: Vertical Cards */}
+          <Grid size={{ xs: 4 }}>
+            <Sidebar>
+              {filteredParticipants.map((participant) => (
+                <CardContainer
+                  key={participant.id}
+                  isSelected={participant.id === selectedCard?.id}
+                  onClick={() => handleCardClick(participant)}
+                >
+                  <LeftCard
+                    id={participant.id}
+                    name={participant.name}
+                    vatNumber={participant.vatNumber}
+                    address={participant.address}
+                    // logoUrl={participant.logo}
+                  />
+                </CardContainer>
+              ))}
+            </Sidebar>
+          </Grid>
 
-            {/* Right Pane: Card Details */}
-            {selectedCard && (
-              <Grid size={{ xs: 8 }}>
-                <DetailsPane>
-                  <Typography variant="h4" gutterBottom>
-                    {selectedCard.name}
-                  </Typography>
-                  <Paper elevation={3}>
-                    <DetailsData
-                      id={selectedCard.id}
-                      name={selectedCard.name}
-                      address={selectedCard.address}
-                      vatNumber={selectedCard.vatNumber}
-                      description={selectedCard.description}
-                      street={selectedCard.street}
-                      houseNumber={selectedCard.houseNumber}
-                      postalCode={selectedCard.postalCode}
-                      city={selectedCard.city}
-                      country={selectedCard.country}
-                      legalRepresentativeName={
-                        selectedCard.legalRepresentativeName
-                      }
-                      legalRepresentativeEmail={
-                        selectedCard.legalRepresentativeEmail
-                      }
-                      legalRepresentativePhoneNumber={
-                        selectedCard.legalRepresentativePhoneNumber
-                      }
-                    />
-                  </Paper>
-                </DetailsPane>
-              </Grid>
-            )}
-          </Grid>
-        )}
-      </div>
-    </ProtectedRoute>
+          {/* Right Pane: Card Details */}
+          {selectedCard && (
+            <Grid size={{ xs: 8 }}>
+              <DetailsPane>
+                <Typography variant="h4" gutterBottom>
+                  {selectedCard.name}
+                </Typography>
+                <Paper elevation={3}>
+                  <DetailsData
+                    id={selectedCard.id}
+                    name={selectedCard.name}
+                    address={selectedCard.address}
+                    vatNumber={selectedCard.vatNumber}
+                    description={selectedCard.description}
+                    street={selectedCard.street}
+                    houseNumber={selectedCard.houseNumber}
+                    postalCode={selectedCard.postalCode}
+                    city={selectedCard.city}
+                    country={selectedCard.country}
+                    legalRepresentativeName={
+                      selectedCard.legalRepresentativeName
+                    }
+                    legalRepresentativeEmail={
+                      selectedCard.legalRepresentativeEmail
+                    }
+                    legalRepresentativePhoneNumber={
+                      selectedCard.legalRepresentativePhoneNumber
+                    }
+                  />
+                </Paper>
+              </DetailsPane>
+            </Grid>
+          )}
+        </Grid>
+      )}
+    </div>
   );
-}
+};
+
+export default ProtectedRoute(Participant);

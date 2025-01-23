@@ -10,6 +10,7 @@ export default function Redirect() {
     async function fetchToken() {
       await getToken();
       router.push("/participant");
+      router.refresh();
     }
     fetchToken();
   }, [router]);
