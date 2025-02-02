@@ -37,6 +37,7 @@ class ApiService {
     } catch (error: unknown) {
       const apiError = error as ApiError;
       if (apiError.response && apiError.response.status === 401) {
+        console.log("redirect to login");
         this.redirectToLogin(); // Handle redirection here
         return;
       }

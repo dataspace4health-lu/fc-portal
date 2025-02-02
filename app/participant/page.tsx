@@ -91,7 +91,7 @@ const Participant = () => {
     setSelectedCard(card);
   };
 
-  const apiService = useMemo(() => new ApiService(() => router.push("")), []);
+  const apiService = useMemo(() => new ApiService(() => router.push("/")), []);
   useEffect(() => {
     async function fetchData() {
       try {
@@ -100,6 +100,7 @@ const Participant = () => {
           const formattedData = response.data.items.map((item) => {
             const description = JSON.parse(item.selfDescription || "");
             const credential = description.verifiableCredential[0];
+            console.log("credential.credentialSubject", credential.credentialSubject);
             return {
               id: item?.id?.split("/")[1] || "",
               name: credential.credentialSubject["gx:legalName"],
@@ -108,7 +109,7 @@ const Participant = () => {
                   "gx:countrySubdivisionCode"
                 ],
               vatNumber:
-                credential.credentialSubject["gx:legalRegistrationNumber"].id,
+                credential.credentialSubject["gx:legalRegistrationNumber"].id || credential.credentialSubject["gx:registrationNumber"],
               description:
                 credential.credentialSubject["gx:description"] || "-",
               street: credential.credentialSubject["gx:street"] || "-",
