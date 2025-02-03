@@ -60,13 +60,13 @@ export default function LeftCard(leftCardProps: LeftCardProps) {
           VAT Number:{" "}
           <span
             style={{
-              backgroundColor: vatStatus === "valid" ? "green" : "red",
+              // backgroundColor: vatStatus === "valid" ? "green" : "red",
               color: "white",
               padding: "5px",
               borderRadius: "5px",
             }}
           >
-            {vatStatus === "valid" ? "Verified" : "Not Verified"}
+            {vatStatus === "valid" ? "✅" : "❌"}
           </span>
         </Typography>
       </Grid>

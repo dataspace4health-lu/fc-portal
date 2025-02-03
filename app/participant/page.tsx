@@ -21,14 +21,10 @@ interface ParticipantsList {
   vatNumber: string;
   vatStatus: string;
   description: string;
-  street: string;
-  houseNumber: string;
-  postalCode: string;
-  city: string;
-  country: string;
-  legalRepresentativeName: string;
-  legalRepresentativeEmail: string;
-  legalRepresentativePhoneNumber: string;
+  headquartersAddress: string;
+  legalAddress: string;
+  parentOrganization: string;
+  subOrganization: string;
 }
 
 interface ApiError extends Error {
@@ -120,17 +116,23 @@ const Participant = () => {
               postalCode: credential.credentialSubject["gx:postalCode"] || "-",
               city: credential.credentialSubject["gx:city"] || "-",
               country: credential.credentialSubject["gx:country"] || "-",
-              legalRepresentativeName:
-                credential.credentialSubject["gx:legalRepresentativeName"] ||
+              vatStatus: "",
+              headquartersAddress:
+                credential.credentialSubject["gx:headquarterAddress"][
+                  "gx:countrySubdivisionCode"
+                ] ||
+                credential.credentialSubject["gx:headquartersAddress"][
+                  "gx:countrySubdivisionCode"
+                ] ||
                 "-",
-              legalRepresentativeEmail:
-                credential.credentialSubject["gx:legalRepresentativeEmail"] ||
-                "-",
-              legalRepresentativePhoneNumber:
-                credential.credentialSubject[
-                  "gx:legalRepresentativePhoneNumber"
+              legalAddress:
+                credential.credentialSubject["gx:legalAddress"][
+                  "gx:countrySubdivisionCode"
                 ] || "-",
-                vatStatus: "",
+              parentOrganization:
+                credential.credentialSubject["gx:parentOrganization"] || "-",
+              subOrganization:
+                credential.credentialSubject["gx:subOrganization"] || "-",
             };
           });
           setParticipantsList(formattedData);
@@ -140,10 +142,8 @@ const Participant = () => {
         const apiError = err as ApiError;
         console.error(apiError.message || "An error occurred");
       }
-      
     }
     fetchData();
-    
   }, []);
 
   useEffect(() => {
@@ -151,8 +151,6 @@ const Participant = () => {
       setFilteredParticipants(participantsList); // Initialize with the full list
     }
   }, [participantsList]);
-
-  console.log("participants list", participantsList);
 
   const handleValueChange = (value: { id: string; label: string } | null) => {
     setSelectedOption(value);
@@ -266,20 +264,10 @@ const Participant = () => {
                     vatNumber={selectedCard.vatNumber}
                     vatStatus={selectedCard.vatStatus}
                     description={selectedCard.description}
-                    street={selectedCard.street}
-                    houseNumber={selectedCard.houseNumber}
-                    postalCode={selectedCard.postalCode}
-                    city={selectedCard.city}
-                    country={selectedCard.country}
-                    legalRepresentativeName={
-                      selectedCard.legalRepresentativeName
-                    }
-                    legalRepresentativeEmail={
-                      selectedCard.legalRepresentativeEmail
-                    }
-                    legalRepresentativePhoneNumber={
-                      selectedCard.legalRepresentativePhoneNumber
-                    }
+                    headquartersAddress={selectedCard.headquartersAddress}
+                    legalAddress={selectedCard.legalAddress}
+                    parentOrganization={selectedCard.parentOrganization}
+                    subOrganization={selectedCard.parentOrganization}
                   />
                 </Paper>
               </DetailsPane>

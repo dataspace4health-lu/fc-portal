@@ -15,14 +15,10 @@ interface detailsProps {
   address: string;
   vatNumber: string;
   description: string;
-  street: string;
-  houseNumber: string;
-  postalCode: string;
-  city: string;
-  country: string;
-  legalRepresentativeName: string;
-  legalRepresentativeEmail: string;
-  legalRepresentativePhoneNumber: string;
+  legalAddress: string;
+  headquartersAddress: string;
+  parentOrganization: string;
+  subOrganization: string;
   vatStatus: string;
 }
 
@@ -33,27 +29,20 @@ export default function DetailsData(detailsProps: detailsProps) {
     // vatNumber,
     address,
     description,
-    street,
-    houseNumber,
-    postalCode,
-    city,
-    country,
-    legalRepresentativeName,
-    legalRepresentativeEmail,
-    legalRepresentativePhoneNumber,
+    legalAddress,
+    headquartersAddress,
+    parentOrganization,
+    subOrganization,
     vatStatus,
   } = detailsProps;
   const addressList = [
-    { key: "Street & House Number", value: `${houseNumber}, ${street}` },
-    { key: "Postal code", value: postalCode },
-    { key: "City", value: city },
-    { key: "Country", value: country },
+    { key: "Legal Address", value: legalAddress },
+    { key: "Headquarters Address", value: headquartersAddress },
   ];
 
-  const participantContactPointList = [
-    { key: "Legal representative", value: legalRepresentativeName },
-    { key: "Email", value: legalRepresentativeEmail },
-    { key: "Phone number", value: legalRepresentativePhoneNumber },
+  const participantOrganizationList = [
+    { key: "Parent organization", value: parentOrganization },
+    { key: "Sub organization", value: subOrganization },
   ];
 
   return (
@@ -98,13 +87,13 @@ export default function DetailsData(detailsProps: detailsProps) {
             VAT Number:{" "}
             <span
               style={{
-                backgroundColor: vatStatus === "valid" ? "green" : "red",
+                // backgroundColor: vatStatus === "valid" ? "green" : "red",
                 color: "white",
                 padding: "5px",
                 borderRadius: "5px",
               }}
             >
-              {vatStatus === "valid" ? "Verified" : "Not Verified"}
+              {vatStatus === "valid" ? "✅" : "❌"}
             </span>
           </Typography>
         </Box>
@@ -121,8 +110,8 @@ export default function DetailsData(detailsProps: detailsProps) {
           content: <KeyValueCard keyValueList={addressList} />,
         },
         {
-          title: "Participant contact point",
-          content: <KeyValueCard keyValueList={participantContactPointList} />,
+          title: "Organization",
+          content: <KeyValueCard keyValueList={participantOrganizationList} />,
         },
       ].map((section, index) => (
         <Accordion
