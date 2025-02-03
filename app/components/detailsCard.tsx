@@ -23,13 +23,14 @@ interface detailsProps {
   legalRepresentativeName: string;
   legalRepresentativeEmail: string;
   legalRepresentativePhoneNumber: string;
+  vatStatus: string;
 }
 
 export default function DetailsData(detailsProps: detailsProps) {
   const {
     id,
     name,
-    vatNumber,
+    // vatNumber,
     address,
     description,
     street,
@@ -40,6 +41,7 @@ export default function DetailsData(detailsProps: detailsProps) {
     legalRepresentativeName,
     legalRepresentativeEmail,
     legalRepresentativePhoneNumber,
+    vatStatus,
   } = detailsProps;
   const addressList = [
     { key: "Street & House Number", value: `${houseNumber}, ${street}` },
@@ -93,7 +95,17 @@ export default function DetailsData(detailsProps: detailsProps) {
             Address: {address}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            VAT Number: {vatNumber}
+            VAT Number:{" "}
+            <span
+              style={{
+                backgroundColor: vatStatus === "valid" ? "green" : "red",
+                color: "white",
+                padding: "5px",
+                borderRadius: "5px",
+              }}
+            >
+              {vatStatus === "valid" ? "Verified" : "Not Verified"}
+            </span>
           </Typography>
         </Box>
       </Box>

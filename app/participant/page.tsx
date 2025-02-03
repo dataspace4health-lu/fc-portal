@@ -12,12 +12,14 @@ import { useEffect, useMemo, useState } from "react";
 import ProtectedRoute from "../components/protectedRoute";
 import { useRouter } from "next/navigation";
 import ApiService from "../apiService/apiService";
+import axios from "axios";
 
 interface ParticipantsList {
   id: string;
   name: string;
   address: string;
   vatNumber: string;
+  vatStatus: string;
   description: string;
   street: string;
   houseNumber: string;
@@ -100,7 +102,6 @@ const Participant = () => {
           const formattedData = response.data.items.map((item) => {
             const description = JSON.parse(item.selfDescription || "");
             const credential = description.verifiableCredential[0];
-            console.log("credential.credentialSubject", credential.credentialSubject);
             return {
               id: item?.id?.split("/")[1] || "",
               name: credential.credentialSubject["gx:legalName"],
@@ -109,7 +110,8 @@ const Participant = () => {
                   "gx:countrySubdivisionCode"
                 ],
               vatNumber:
-                credential.credentialSubject["gx:legalRegistrationNumber"].id || credential.credentialSubject["gx:registrationNumber"],
+                credential.credentialSubject["gx:legalRegistrationNumber"].id ||
+                credential.credentialSubject["gx:registrationNumber"],
               description:
                 credential.credentialSubject["gx:description"] || "-",
               street: credential.credentialSubject["gx:street"] || "-",
@@ -128,16 +130,20 @@ const Participant = () => {
                 credential.credentialSubject[
                   "gx:legalRepresentativePhoneNumber"
                 ] || "-",
+                vatStatus: "",
             };
           });
           setParticipantsList(formattedData);
+          verifyVatNumbers(formattedData);
         }
       } catch (err: unknown) {
         const apiError = err as ApiError;
         console.error(apiError.message || "An error occurred");
       }
+      
     }
     fetchData();
+    
   }, []);
 
   useEffect(() => {
@@ -145,6 +151,8 @@ const Participant = () => {
       setFilteredParticipants(participantsList); // Initialize with the full list
     }
   }, [participantsList]);
+
+  console.log("participants list", participantsList);
 
   const handleValueChange = (value: { id: string; label: string } | null) => {
     setSelectedOption(value);
@@ -177,6 +185,27 @@ const Participant = () => {
     });
 
     setFilteredParticipants(filtered);
+  };
+
+  // Function to verify VAT numbers
+  const verifyVatNumbers = async (participants: ParticipantsList[]) => {
+    const updatedParticipants = await Promise.all(
+      participants.map(async (participant) => {
+        if (!participant.vatNumber) return participant;
+
+        try {
+          const response = await axios.get(participant.vatNumber);
+          return {
+            ...participant,
+            vatStatus: response.data ? "valid" : "invalid",
+          };
+        } catch {
+          return { ...participant, vatStatus: "invalid" };
+        }
+      })
+    );
+
+    setParticipantsList(updatedParticipants);
   };
 
   return (
@@ -213,6 +242,7 @@ const Participant = () => {
                     id={participant.id}
                     name={participant.name}
                     vatNumber={participant.vatNumber}
+                    vatStatus={participant.vatStatus}
                     address={participant.address}
                     // logoUrl={participant.logo}
                   />
@@ -234,6 +264,7 @@ const Participant = () => {
                     name={selectedCard.name}
                     address={selectedCard.address}
                     vatNumber={selectedCard.vatNumber}
+                    vatStatus={selectedCard.vatStatus}
                     description={selectedCard.description}
                     street={selectedCard.street}
                     houseNumber={selectedCard.houseNumber}
