@@ -6,6 +6,7 @@ import IconButton from "@mui/material/IconButton";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
+import { logout } from "./oidcIntegration";
 
 export default function MenuAppBar() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -18,18 +19,22 @@ export default function MenuAppBar() {
     setAnchorEl(null);
   };
 
+  const handleLogout = () => {
+    handleClose();
+    logout();
+  };
+
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
         <Toolbar sx={{ justifyContent: "space-between" }}>
-          {/* Image with Constrained Size */}
           <Box
             component="img"
-            src="/logo.png" // Update the path to your image
+            src="logo.png"
             alt="Logo"
             sx={{
-              height: 40, // Adjust height
-              width: "auto", // Maintain aspect ratio
+              height: 40,
+              width: "auto",
             }}
           />
           <div>
@@ -60,6 +65,7 @@ export default function MenuAppBar() {
             >
               <MenuItem onClick={handleClose}>Profile</MenuItem>
               <MenuItem onClick={handleClose}>Settings</MenuItem>
+              <MenuItem onClick={handleLogout}>Logout</MenuItem>
             </Menu>
           </div>
         </Toolbar>

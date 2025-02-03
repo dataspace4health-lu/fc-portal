@@ -6,19 +6,43 @@ import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import KeyValueCard from "./keyValueCard";
 import { Avatar, Box } from "@mui/material";
+import participants from "./participants.json";
 
-export default function DetailsData() {
+interface detailsProps {
+  name: string;
+  id: string;
+  logoUrl?: string; // Optional logo URL
+  address: string;
+  vatNumber: string;
+  description: string;
+  legalAddress: string;
+  headquartersAddress: string;
+  parentOrganization: string;
+  subOrganization: string;
+  vatStatus: string;
+}
+
+export default function DetailsData(detailsProps: detailsProps) {
+  const {
+    id,
+    name,
+    // vatNumber,
+    address,
+    description,
+    legalAddress,
+    headquartersAddress,
+    parentOrganization,
+    subOrganization,
+    vatStatus,
+  } = detailsProps;
   const addressList = [
-    { key: "Street & House Number", value: "89D Parc d'Activités Capellen" },
-    { key: "Postal code", value: "L-8308" },
-    { key: "City", value: "Capellen" },
-    { key: "Country", value: "Luxembourg" },
+    { key: "Legal Address", value: legalAddress },
+    { key: "Headquarters Address", value: headquartersAddress },
   ];
 
-  const participantContactPointList = [
-    { key: "Legal representative", value: "Quentin Virriat" },
-    { key: "Email", value: "Qvirriat@ntt.lu" },
-    { key: "Phone number", value: "-" },
+  const participantOrganizationList = [
+    { key: "Parent organization", value: parentOrganization },
+    { key: "Sub organization", value: subOrganization },
   ];
 
   return (
@@ -44,30 +68,51 @@ export default function DetailsData() {
         }}
       >
         <Avatar
-          alt="NTT Logo"
-          src="sds" // Replace with the actual logo URL
+          alt={name}
           sx={{ width: 56, height: 56, bgcolor: "primary.main" }}
         >
-          NTT
+          {participants.find((ele) => ele.name === name)?.abbreviation}
         </Avatar>
         <Box>
           <Typography variant="h6" fontWeight="bold">
-            NTT LUXEMBOURG PSF S.A
+            {name}
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            Luxembourg - Capellen
+            ID: {id}
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Address: {address}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            VAT Number: LU20769255
+            VAT Number:{" "}
+            <span
+              style={{
+                // backgroundColor: vatStatus === "valid" ? "green" : "red",
+                color: "white",
+                padding: "5px",
+                borderRadius: "5px",
+              }}
+            >
+              {vatStatus === "valid" ? "✅" : "❌"}
+            </span>
           </Typography>
         </Box>
       </Box>
 
       {/* Accordion Components */}
       {[
-        { title: "Description", content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse malesuada lacus ex, sit amet blandit leo lobortis eget." },
-        { title: "Address", content: <KeyValueCard keyValueList={addressList} /> },
-        { title: "Participant contact point", content: <KeyValueCard keyValueList={participantContactPointList} /> },
+        {
+          title: "Description",
+          content: description,
+        },
+        {
+          title: "Address",
+          content: <KeyValueCard keyValueList={addressList} />,
+        },
+        {
+          title: "Organization",
+          content: <KeyValueCard keyValueList={participantOrganizationList} />,
+        },
       ].map((section, index) => (
         <Accordion
           key={index}
