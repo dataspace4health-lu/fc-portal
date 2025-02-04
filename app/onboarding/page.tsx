@@ -44,7 +44,7 @@ export default function Onboarding() {
   };
 
   const handleReturnToSignIn = () => {
-    router.push("/");
+    router.push("");
   };
 
   return (

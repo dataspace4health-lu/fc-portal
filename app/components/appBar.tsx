@@ -22,20 +22,19 @@ export default function MenuAppBar() {
   const handleLogout = () => {
     handleClose();
     logout();
-  }
+  };
 
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
         <Toolbar sx={{ justifyContent: "space-between" }}>
-          {/* Image with Constrained Size */}
           <Box
             component="img"
-            src="/logo.png" // Update the path to your image
+            src="logo.png"
             alt="Logo"
             sx={{
-              height: 40, // Adjust height
-              width: "auto", // Maintain aspect ratio
+              height: 40,
+              width: "auto",
             }}
           />
           <div>

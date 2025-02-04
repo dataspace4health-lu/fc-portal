@@ -9,10 +9,10 @@ export default function Redirect() {
   useEffect(() => {
     async function fetchToken() {
       await getToken();
+      router.push("/participant");
+      router.refresh();
     }
     fetchToken();
-    router.push("/participant");
-    router.refresh();
   }, [router]);
   return <div>redirecting...</div>;
 }

@@ -12,21 +12,19 @@ import { useEffect, useMemo, useState } from "react";
 import ProtectedRoute from "../components/protectedRoute";
 import { useRouter } from "next/navigation";
 import ApiService from "../apiService/apiService";
+import axios from "axios";
 
 interface ParticipantsList {
   id: string;
   name: string;
   address: string;
   vatNumber: string;
+  vatStatus: string;
   description: string;
-  street: string;
-  houseNumber: string;
-  postalCode: string;
-  city: string;
-  country: string;
-  legalRepresentativeName: string;
-  legalRepresentativeEmail: string;
-  legalRepresentativePhoneNumber: string;
+  headquartersAddress: string;
+  legalAddress: string;
+  parentOrganization: string;
+  subOrganization: string;
 }
 
 interface ApiError extends Error {
@@ -74,7 +72,7 @@ const options = [
   { id: "Vat number", label: "Vat number" },
 ];
 
-export default function Participant() {
+const Participant = () => {
   const [selectedCard, setSelectedCard] = useState<ParticipantsList>();
   const [participantsList, setParticipantsList] =
     useState<ParticipantsList[]>();
@@ -108,7 +106,8 @@ export default function Participant() {
                   "gx:countrySubdivisionCode"
                 ],
               vatNumber:
-                credential.credentialSubject["gx:legalRegistrationNumber"].id,
+                credential.credentialSubject["gx:legalRegistrationNumber"].id ||
+                credential.credentialSubject["gx:registrationNumber"],
               description:
                 credential.credentialSubject["gx:description"] || "-",
               street: credential.credentialSubject["gx:street"] || "-",
@@ -117,19 +116,27 @@ export default function Participant() {
               postalCode: credential.credentialSubject["gx:postalCode"] || "-",
               city: credential.credentialSubject["gx:city"] || "-",
               country: credential.credentialSubject["gx:country"] || "-",
-              legalRepresentativeName:
-                credential.credentialSubject["gx:legalRepresentativeName"] ||
+              vatStatus: "",
+              headquartersAddress:
+                credential.credentialSubject["gx:headquarterAddress"][
+                  "gx:countrySubdivisionCode"
+                ] ||
+                credential.credentialSubject["gx:headquartersAddress"][
+                  "gx:countrySubdivisionCode"
+                ] ||
                 "-",
-              legalRepresentativeEmail:
-                credential.credentialSubject["gx:legalRepresentativeEmail"] ||
-                "-",
-              legalRepresentativePhoneNumber:
-                credential.credentialSubject[
-                  "gx:legalRepresentativePhoneNumber"
+              legalAddress:
+                credential.credentialSubject["gx:legalAddress"][
+                  "gx:countrySubdivisionCode"
                 ] || "-",
+              parentOrganization:
+                credential.credentialSubject["gx:parentOrganization"] || "-",
+              subOrganization:
+                credential.credentialSubject["gx:subOrganization"] || "-",
             };
           });
           setParticipantsList(formattedData);
+          verifyVatNumbers(formattedData);
         }
       } catch (err: unknown) {
         const apiError = err as ApiError;
@@ -178,85 +185,98 @@ export default function Participant() {
     setFilteredParticipants(filtered);
   };
 
-  return (
-    <ProtectedRoute>
-      <div>
-        <MenuAppBar />
-        <Box sx={{ py: 1 }}>
-          <CustomSeparator />
-          <Grid container spacing={2} sx={{ mb: 3, alignItems: "center" }}>
-            <Grid size={{ xs: 4 }} sx={{ textAlign: "right" }}>
-              <SelectInput
-                options={options}
-                fieldLabel="Sorted by"
-                onValueChange={handleValueChange}
-                value={selectedOption}
-              />
-            </Grid>
-            <Grid size={{ xs: 8 }}>
-              <SearchBar handleSearch={handleSearch} />
-            </Grid>
-          </Grid>
-        </Box>
-        {filteredParticipants && filteredParticipants.length > 0 && (
-          <Grid container sx={{ height: "100vh" }}>
-            {/* Left Pane: Vertical Cards */}
-            <Grid size={{ xs: 4 }}>
-              <Sidebar>
-                {filteredParticipants.map((participant) => (
-                  <CardContainer
-                    key={participant.id}
-                    isSelected={participant.id === selectedCard?.id}
-                    onClick={() => handleCardClick(participant)}
-                  >
-                    <LeftCard
-                      id={participant.id}
-                      name={participant.name}
-                      vatNumber={participant.vatNumber}
-                      address={participant.address}
-                      // logoUrl={participant.logo}
-                    />
-                  </CardContainer>
-                ))}
-              </Sidebar>
-            </Grid>
+  // Function to verify VAT numbers
+  const verifyVatNumbers = async (participants: ParticipantsList[]) => {
+    const updatedParticipants = await Promise.all(
+      participants.map(async (participant) => {
+        if (!participant.vatNumber) return participant;
 
-            {/* Right Pane: Card Details */}
-            {selectedCard && (
-              <Grid size={{ xs: 8 }}>
-                <DetailsPane>
-                  <Typography variant="h4" gutterBottom>
-                    {selectedCard.name}
-                  </Typography>
-                  <Paper elevation={3}>
-                    <DetailsData
-                      id={selectedCard.id}
-                      name={selectedCard.name}
-                      address={selectedCard.address}
-                      vatNumber={selectedCard.vatNumber}
-                      description={selectedCard.description}
-                      street={selectedCard.street}
-                      houseNumber={selectedCard.houseNumber}
-                      postalCode={selectedCard.postalCode}
-                      city={selectedCard.city}
-                      country={selectedCard.country}
-                      legalRepresentativeName={
-                        selectedCard.legalRepresentativeName
-                      }
-                      legalRepresentativeEmail={
-                        selectedCard.legalRepresentativeEmail
-                      }
-                      legalRepresentativePhoneNumber={
-                        selectedCard.legalRepresentativePhoneNumber
-                      }
-                    />
-                  </Paper>
-                </DetailsPane>
-              </Grid>
-            )}
+        try {
+          const response = await axios.get(participant.vatNumber);
+          return {
+            ...participant,
+            vatStatus: response.data ? "valid" : "invalid",
+          };
+        } catch {
+          return { ...participant, vatStatus: "invalid" };
+        }
+      })
+    );
+
+    setParticipantsList(updatedParticipants);
+  };
+
+  return (
+    <div>
+      <MenuAppBar />
+      <Box sx={{ py: 1 }}>
+        <CustomSeparator />
+        <Grid container spacing={2} sx={{ mb: 3, alignItems: "center" }}>
+          <Grid size={{ xs: 4 }} sx={{ textAlign: "right" }}>
+            <SelectInput
+              options={options}
+              fieldLabel="Sorted by"
+              onValueChange={handleValueChange}
+              value={selectedOption}
+            />
           </Grid>
-        )}
-      </div>
-    </ProtectedRoute>
+          <Grid size={{ xs: 8 }}>
+            <SearchBar handleSearch={handleSearch} />
+          </Grid>
+        </Grid>
+      </Box>
+      {filteredParticipants && filteredParticipants.length > 0 && (
+        <Grid container sx={{ height: "100vh" }}>
+          {/* Left Pane: Vertical Cards */}
+          <Grid size={{ xs: 4 }}>
+            <Sidebar>
+              {filteredParticipants.map((participant) => (
+                <CardContainer
+                  key={participant.id}
+                  isSelected={participant.id === selectedCard?.id}
+                  onClick={() => handleCardClick(participant)}
+                >
+                  <LeftCard
+                    id={participant.id}
+                    name={participant.name}
+                    vatNumber={participant.vatNumber}
+                    vatStatus={participant.vatStatus}
+                    address={participant.address}
+                    // logoUrl={participant.logo}
+                  />
+                </CardContainer>
+              ))}
+            </Sidebar>
+          </Grid>
+
+          {/* Right Pane: Card Details */}
+          {selectedCard && (
+            <Grid size={{ xs: 8 }}>
+              <DetailsPane>
+                <Typography variant="h4" gutterBottom>
+                  {selectedCard.name}
+                </Typography>
+                <Paper elevation={3}>
+                  <DetailsData
+                    id={selectedCard.id}
+                    name={selectedCard.name}
+                    address={selectedCard.address}
+                    vatNumber={selectedCard.vatNumber}
+                    vatStatus={selectedCard.vatStatus}
+                    description={selectedCard.description}
+                    headquartersAddress={selectedCard.headquartersAddress}
+                    legalAddress={selectedCard.legalAddress}
+                    parentOrganization={selectedCard.parentOrganization}
+                    subOrganization={selectedCard.parentOrganization}
+                  />
+                </Paper>
+              </DetailsPane>
+            </Grid>
+          )}
+        </Grid>
+      )}
+    </div>
   );
-}
+};
+
+export default ProtectedRoute(Participant);
