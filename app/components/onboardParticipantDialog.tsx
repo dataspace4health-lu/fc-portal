@@ -4,7 +4,6 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle,
   useMediaQuery,
   styled,
@@ -86,7 +85,7 @@ export default function OnboardParticipant(props: ResponsiveDialogProps) {
     const allowedTypes = ["application/json", "application/pdf"];
     const maxFileSize = 5 * 1024 * 1024; // 5MB
 
-    let validFiles: File[] = [];
+    const validFiles: File[] = [];
     let errorMsg = "";
 
     Array.from(selectedFiles).forEach((file) => {
@@ -103,6 +102,7 @@ export default function OnboardParticipant(props: ResponsiveDialogProps) {
               const parsedData = JSON.parse(e.target?.result as string);
               setJsonContent(parsedData); // Store parsed JSON in state
             } catch (err) {
+              console.error(err);
               setError("Error parsing JSON file.");
             }
           };
@@ -114,8 +114,6 @@ export default function OnboardParticipant(props: ResponsiveDialogProps) {
     setError(errorMsg);
     if (validFiles.length > 0) setFiles(validFiles);
   };
-
-  console.log("files", files);
 
   const handleUpload = () => {
     setUploading(true);
