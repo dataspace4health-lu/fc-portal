@@ -113,7 +113,7 @@ const Participant = () => {
               address: normalize(
                 credential.credentialSubject["gx:legalAddress"],
                 ["gx:countrySubdivisionCode"]
-              )["gx:countrySubdivisionCode"],
+              ),
               vatNumber: normalize(credential.credentialSubject, [
                 "gx:legalRegistrationNumber",
                 "gx:registrationNumber",
