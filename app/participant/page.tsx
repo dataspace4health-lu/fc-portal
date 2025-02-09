@@ -1,5 +1,5 @@
 "use client";
-import { Box, Typography, Paper } from "@mui/material";
+import { Box, Typography, Paper, Button } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import { styled } from "@mui/material/styles";
 import LeftCard from "../components/leftCard";
@@ -13,6 +13,7 @@ import ProtectedRoute from "../components/protectedRoute";
 import { useRouter } from "next/navigation";
 import ApiService from "../apiService/apiService";
 import axios from "axios";
+import OnboardParticipant from "../components/onboardParticipantDialog";
 
 interface ParticipantsList {
   id: string;
@@ -83,6 +84,7 @@ const Participant = () => {
   const [filteredParticipants, setFilteredParticipants] = useState<
     ParticipantsList[]
   >([]);
+  const [openModal, setOpenModal] = useState<boolean>(false);
   const router = useRouter();
 
   const handleCardClick = (card: ParticipantsList) => {
@@ -206,12 +208,20 @@ const Participant = () => {
     setParticipantsList(updatedParticipants);
   };
 
+  const openOnboardingDialog = () => {
+    setOpenModal(true);
+  }
+
   return (
     <div>
       <MenuAppBar />
       <Box sx={{ py: 1 }}>
         <CustomSeparator />
         <Grid container spacing={2} sx={{ mb: 3, alignItems: "center" }}>
+          <Grid size={{ xs: 4, md: 12 }} sx={{ m: 2 }}>
+            <Button variant="contained" onClick={openOnboardingDialog}>Onboard new Participant</Button>
+          </Grid>
+
           <Grid size={{ xs: 4 }} sx={{ textAlign: "right" }}>
             <SelectInput
               options={options}
@@ -275,6 +285,7 @@ const Participant = () => {
           )}
         </Grid>
       )}
+      <OnboardParticipant open={openModal} setOpen={setOpenModal} />
     </div>
   );
 };
