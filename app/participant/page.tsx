@@ -92,63 +92,63 @@ const Participant = () => {
   };
 
   const apiService = useMemo(() => new ApiService(() => router.push("/")), []);
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const response = await apiService.getParticipants(); // Call the instance method
-        if (response?.data?.items) {
-          const formattedData = response.data.items.map((item) => {
-            const description = JSON.parse(item.selfDescription || "");
-            const credential = description.verifiableCredential[0];
-            // Normalize attribute names
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const normalize = (obj: any, keys: string[]) => {
-              const foundKey = keys.find((key) => obj[key]);
-              return foundKey ? obj[foundKey] : "-";
-            };
+  async function fetchData() {
+    try {
+      const response = await apiService.getParticipants(); // Call the instance method
+      if (response?.data?.items) {
+        const formattedData = response.data.items.map((item) => {
+          const description = JSON.parse(item.selfDescription || "");
+          const credential = description.verifiableCredential[0];
+          // Normalize attribute names
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const normalize = (obj: any, keys: string[]) => {
+            const foundKey = keys.find((key) => obj[key]);
+            return foundKey ? obj[foundKey] : "-";
+          };
 
-            return {
-              id: item?.id?.split("/")[1] || "",
-              name: normalize(credential.credentialSubject, ["gx:legalName"]),
-              address: normalize(
-                credential.credentialSubject["gx:legalAddress"],
-                ["gx:countrySubdivisionCode"]
-              ),
-              vatNumber: normalize(credential.credentialSubject, [
-                "gx:legalRegistrationNumber",
-                "gx:registrationNumber",
-              ]).id,
-              description: normalize(credential.credentialSubject, [
-                "gx:description",
-              ]),
-              headquartersAddress: normalize(credential.credentialSubject, [
-                "gx:headquarterAddress",
-                "gx:headquartersAddress",
-              ])["gx:countrySubdivisionCode"],
-              legalAddress: normalize(
-                credential.credentialSubject["gx:legalAddress"],
-                ["gx:countrySubdivisionCode"]
-              ),
-              parentOrganization: normalize(credential.credentialSubject, [
-                "gx:parentOrganization",
-                "gx:parentOrganizationOf",
-              ]),
-              subOrganization: normalize(credential.credentialSubject, [
-                "gx:subOrganization",
-                "gx:subOrganizationOf",
-              ]),
-              vatStatus: "",
-            };
-          });
-          console.log("formattedData", formattedData);
-          setParticipantsList(formattedData);
-          verifyVatNumbers(formattedData);
-        }
-      } catch (err: unknown) {
-        const apiError = err as ApiError;
-        console.error(apiError.message || "An error occurred");
+          return {
+            id: item?.id?.split("/")[1] || "",
+            name: normalize(credential.credentialSubject, ["gx:legalName"]),
+            address: normalize(
+              credential.credentialSubject["gx:legalAddress"],
+              ["gx:countrySubdivisionCode"]
+            ),
+            vatNumber: normalize(credential.credentialSubject, [
+              "gx:legalRegistrationNumber",
+              "gx:registrationNumber",
+            ]).id,
+            description: normalize(credential.credentialSubject, [
+              "gx:description",
+            ]),
+            headquartersAddress: normalize(credential.credentialSubject, [
+              "gx:headquarterAddress",
+              "gx:headquartersAddress",
+            ])["gx:countrySubdivisionCode"],
+            legalAddress: normalize(
+              credential.credentialSubject["gx:legalAddress"],
+              ["gx:countrySubdivisionCode"]
+            ),
+            parentOrganization: normalize(credential.credentialSubject, [
+              "gx:parentOrganization",
+              "gx:parentOrganizationOf",
+            ]),
+            subOrganization: normalize(credential.credentialSubject, [
+              "gx:subOrganization",
+              "gx:subOrganizationOf",
+            ]),
+            vatStatus: "",
+          };
+        });
+        console.log("formattedData", formattedData);
+        setParticipantsList(formattedData);
+        verifyVatNumbers(formattedData);
       }
+    } catch (err: unknown) {
+      const apiError = err as ApiError;
+      console.error(apiError.message || "An error occurred");
     }
+  }
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -291,7 +291,7 @@ const Participant = () => {
           )}
         </Grid>
       )}
-      <OnboardParticipant open={openModal} setOpen={setOpenModal} />
+      <OnboardParticipant open={openModal} setOpen={setOpenModal} refreshParticipants={fetchData} />
     </div>
   );
 };

@@ -44,6 +44,21 @@ class ApiService {
       throw apiError;
     }
   }
+
+  async createParticipant(body: string) {
+    await this.fetchTokenIfNeeded();
+    try {
+      return await this.participantsApi.addParticipant(body);
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      if (apiError.response && apiError.response.status === 401) {
+        console.log("redirect to login");
+        this.redirectToLogin(); // Handle redirection here
+        return;
+      }
+      throw apiError;
+    }
+  }
 }
 
 export default ApiService;

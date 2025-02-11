@@ -20,10 +20,14 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import TextFieldsIcon from "@mui/icons-material/TextFields";
 import Grid from "@mui/material/Grid2";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
+import ApiService from "../apiService/apiService";
+import { useRouter } from "next/navigation";
+import SnackbarComponent from "./snackbar";
 
 interface ResponsiveDialogProps {
   open: boolean;
   setOpen: (val: boolean) => void;
+  refreshParticipants: () => void;
 }
 
 const VisuallyHiddenInput = styled("input")({
@@ -39,7 +43,8 @@ const VisuallyHiddenInput = styled("input")({
 });
 
 export default function OnboardParticipant(props: ResponsiveDialogProps) {
-  const { open, setOpen } = props;
+  const { open, setOpen, refreshParticipants } = props;
+  const router = useRouter();
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
 
@@ -50,6 +55,15 @@ export default function OnboardParticipant(props: ResponsiveDialogProps) {
   const [error, setError] = React.useState<string | null>(null);
   const [jsonContent, setJsonContent] = React.useState<object | null>(null); // Store parsed JSON
   const [isDragging, setIsDragging] = React.useState(false);
+  const [snackbarOpen, setSnackbarOpen] = React.useState(false);
+  const [snackbarMessage, setSnackbarMessage] = React.useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = React.useState<
+    "success" | "error"
+  >("success");
+  const apiService = React.useMemo(
+    () => new ApiService(() => router.push("/")),
+    []
+  );
 
   console.log("jsonContent", jsonContent);
 
@@ -115,17 +129,28 @@ export default function OnboardParticipant(props: ResponsiveDialogProps) {
     if (validFiles.length > 0) setFiles(validFiles);
   };
 
-  const handleUpload = () => {
+  const handleUpload = async () => {
     setUploading(true);
-
-    setTimeout(() => {
-      setUploading(false);
-      setFiles([]);
-      setTextInput("");
-      setJsonContent(null);
-      setError(null);
-      setOpen(false);
-    }, 2000);
+    const selfDescription = jsonContent || JSON.parse(textInput);
+    try {
+      await apiService.createParticipant(JSON.stringify(selfDescription));
+      handleApiResponse("Participant created successfully!", "success");
+    } catch (error) {
+      handleApiResponse(
+        "Failed to create participant. Please try again.",
+        "error"
+      );
+      console.error("Failed to create participant", error);
+      // setError("Failed to create participant. Please try again.");
+    }
+    // Refresh participants list
+    refreshParticipants();
+    setUploading(false);
+    setFiles([]);
+    setTextInput("");
+    setJsonContent(null);
+    setError(null);
+    setOpen(false);
   };
 
   const handleDragOver = (event: React.DragEvent) => {
@@ -136,6 +161,21 @@ export default function OnboardParticipant(props: ResponsiveDialogProps) {
   const handleDragLeave = () => {
     setIsDragging(false);
   };
+
+  const handleApiResponse = (
+    message: string,
+    severity: "success" | "error"
+  ) => {
+    setSnackbarMessage(message);
+    setSnackbarSeverity(severity);
+    setSnackbarOpen(true);
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbarOpen(false);
+  };
+
+  console.log("textinput", textInput);
 
   return (
     <>
@@ -280,6 +320,12 @@ export default function OnboardParticipant(props: ResponsiveDialogProps) {
           </Button>
         </DialogActions>
       </Dialog>
+      <SnackbarComponent
+        open={snackbarOpen}
+        message={snackbarMessage}
+        severity={snackbarSeverity}
+        onClose={handleCloseSnackbar}
+      />
     </>
   );
 }
