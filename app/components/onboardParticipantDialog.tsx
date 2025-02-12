@@ -102,7 +102,7 @@ export default function OnboardParticipant(props: ResponsiveDialogProps) {
 
     Array.from(selectedFiles).forEach((file) => {
       if (!allowedTypes.includes(file.type)) {
-        errorMsg = "Invalid file type. Only JSON are allowed.";
+        errorMsg = "Invalid file type. Only JSON and Text are allowed.";
       } else if (file.size > maxFileSize) {
         errorMsg = "File size exceeds the 5MB limit.";
       } else {
