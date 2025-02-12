@@ -1,7 +1,6 @@
 "use client";
 import * as React from "react";
 import { Typography, Box } from "@mui/material";
-import Grid from "@mui/material/Grid2";
 import Image from "next/image";
 
 interface LeftCardProps {

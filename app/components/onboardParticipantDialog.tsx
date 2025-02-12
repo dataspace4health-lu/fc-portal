@@ -65,8 +65,6 @@ export default function OnboardParticipant(props: ResponsiveDialogProps) {
     []
   );
 
-  console.log("jsonContent", jsonContent);
-
   const handleClose = () => {
     setOpen(false);
   };
@@ -96,7 +94,7 @@ export default function OnboardParticipant(props: ResponsiveDialogProps) {
   };
 
   const handleFiles = (selectedFiles: FileList) => {
-    const allowedTypes = ["application/json", "application/pdf"];
+    const allowedTypes = ["application/json", "text/plain"];
     const maxFileSize = 5 * 1024 * 1024; // 5MB
 
     const validFiles: File[] = [];
@@ -104,7 +102,7 @@ export default function OnboardParticipant(props: ResponsiveDialogProps) {
 
     Array.from(selectedFiles).forEach((file) => {
       if (!allowedTypes.includes(file.type)) {
-        errorMsg = "Invalid file type. Only JSON and PDF are allowed.";
+        errorMsg = "Invalid file type. Only JSON are allowed.";
       } else if (file.size > maxFileSize) {
         errorMsg = "File size exceeds the 5MB limit.";
       } else {
@@ -118,6 +116,18 @@ export default function OnboardParticipant(props: ResponsiveDialogProps) {
             } catch (err) {
               console.error(err);
               setError("Error parsing JSON file.");
+            }
+          };
+          reader.readAsText(file);
+        }
+        if (file.type === "text/plain") {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            try {
+              setJsonContent(e.target?.result as object); // Store parsed JSON in state
+            } catch (err) {
+              console.error(err);
+              setError("Error parsing text file.");
             }
           };
           reader.readAsText(file);
@@ -174,8 +184,6 @@ export default function OnboardParticipant(props: ResponsiveDialogProps) {
   const handleCloseSnackbar = () => {
     setSnackbarOpen(false);
   };
-
-  console.log("textinput", textInput);
 
   return (
     <>

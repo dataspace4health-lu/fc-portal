@@ -132,7 +132,7 @@ export default function DetailsData(detailsProps: detailsProps) {
                   router.push("/serviceOffering");
                 }}
               >
-                Go to participant's datasets
+                {"Go to participant's datasets"}
               </Button>
             </Grid>
           </Grid>
