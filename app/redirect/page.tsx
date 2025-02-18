@@ -9,7 +9,7 @@ export default function Redirect() {
   useEffect(() => {
     async function fetchToken() {
       await getToken();
-      router.push("/participant");
+      router.push(`${process.env.NEXT_PUBLIC_FRONTEND_BASE_URL}/participant`);
       router.refresh();
     }
     fetchToken();

@@ -2,7 +2,18 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
-  basePath: process.env.NEXT_PUBLIC_FRONTEND_BASE_URL
+  basePath: process.env.NEXT_PUBLIC_FRONTEND_BASE_URL || '',
+  env: {
+    NEXT_PUBLIC_FRONTEND_BASE_URL: process.env.NEXT_PUBLIC_FRONTEND_BASE_URL, 
+    NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL,
+    NEXT_PUBLIC_OIDC_AUTHORITY: process.env.NEXT_PUBLIC_OIDC_AUTHORITY,
+    NEXT_PUBLIC_OIDC_CLIENT_ID: process.env.NEXT_PUBLIC_OIDC_CLIENT_ID,
+    NEXT_PUBLIC_OIDC_CLIENT_SECRET: process.env.NEXT_PUBLIC_OIDC_CLIENT_SECRET,
+    NEXT_PUBLIC_OIDC_GRANT_TYPE: process.env.NEXT_PUBLIC_OIDC_GRANT_TYPE,
+    NEXT_PUBLIC_OIDC_REDIRECT_URI: process.env.NEXT_PUBLIC_OIDC_REDIRECT_URI,
+    NEXT_PUBLIC_RESPONSE_TYPE: process.env.NEXT_PUBLIC_RESPONSE_TYPE,
+    NEXT_PUBLIC_SCOPE: process.env.NEXT_PUBLIC_SCOPE
+  },
 };
 
 export default nextConfig;
