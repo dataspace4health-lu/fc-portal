@@ -91,7 +91,7 @@ const Participant = () => {
     setSelectedCard(card);
   };
 
-  const apiService = useMemo(() => new ApiService(() => router.push("/")), []);
+  const apiService = useMemo(() => new ApiService(() => router.push("/")), [router]);
   async function fetchData() {
     try {
       const response = await apiService.getParticipants(); // Call the instance method

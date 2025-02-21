@@ -62,7 +62,7 @@ export default function OnboardParticipant(props: ResponsiveDialogProps) {
   >("success");
   const apiService = React.useMemo(
     () => new ApiService(() => router.push("/")),
-    []
+    [router]
   );
 
   const handleClose = () => {

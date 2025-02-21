@@ -1,18 +1,19 @@
 "use client";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname  } from "next/navigation";
 import { useEffect } from "react";
 import { getToken } from "../components/oidcIntegration";
 
 export default function Redirect() {
   const router = useRouter();
+  const basepath = '/' + (usePathname().split("/")[1] || '');
 
   useEffect(() => {
     async function fetchToken() {
       await getToken();
-      router.push(`${process.env.NEXT_PUBLIC_FRONTEND_BASE_URL}/participant`);
+      router.push(`${basepath}/participant`);
       router.refresh();
     }
     fetchToken();
-  }, [router]);
+  }, [router, basepath]);
   return <div>redirecting...</div>;
 }
