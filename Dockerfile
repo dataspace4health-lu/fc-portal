@@ -38,6 +38,9 @@ RUN \
   else echo "Lockfile not found." && exit 1; \
   fi
 
+# Remove development dependencies
+# RUN npm prune --production
+
 # 3. Production image, copy all the files and run next
 FROM base AS runner
 WORKDIR /app
@@ -49,10 +52,16 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S nextjs -u 1001
 
-COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+# Copy only the necessary files from the builder stage
+COPY --from=builder --chown=nextjs:nodejs /app/package*.json /app/next.config.ts ./
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
-COPY --from=builder --chown=nextjs:nodejs /app/package.json /app/next.config.ts ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+
+# Workaround for basePAth issue
+ENV NEXT_PUBLIC_FRONTEND_BASE_URL=
+RUN \
+  find /app/.next/ -type f -name "*.json" -o -name "*.js" -exec sed -i 's~"/_next/~"__NEXT_PUBLIC_FRONTEND_BASE_URL__/_next/~g' {} \;
 
 COPY ./entrypoint.sh /usr/bin/
 RUN chmod +x /usr/bin/entrypoint.sh
