@@ -10,8 +10,8 @@ export const oidcConfig = {
   client_secret: process.env.NEXT_PUBLIC_OIDC_CLIENT_SECRET!,
   grant_type: process.env.NEXT_PUBLIC_OIDC_GRANT_TYPE!,
   redirect_uri: process.env.NEXT_PUBLIC_OIDC_REDIRECT_URI!,
-  response_type: process.env.NEXT_PUBLIC_RESPONSE_TYPE!,
-  scope: process.env.NEXT_PUBLIC_SCOPE!, // Customize scopes
+  response_type: process.env.NEXT_PUBLIC_OIDC_RESPONSE_TYPE!,
+  scope: process.env.NEXT_PUBLIC_OIDC_SCOPE!, // Customize scopes
   userStore: isBrowser
     ? new WebStorageStateStore({ store: window.localStorage })
     : undefined, // Avoid using window.localStorage on the server

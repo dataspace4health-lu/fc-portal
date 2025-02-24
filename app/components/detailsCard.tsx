@@ -5,8 +5,10 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import KeyValueCard from "./keyValueCard";
-import { Avatar, Box } from "@mui/material";
+import { Avatar, Box, Button } from "@mui/material";
+import Grid from "@mui/material/Grid2";
 import participants from "./participants.json";
+import { useRouter } from "next/navigation";
 
 interface detailsProps {
   name: string;
@@ -35,6 +37,7 @@ export default function DetailsData(detailsProps: detailsProps) {
     subOrganization,
     vatStatus,
   } = detailsProps;
+  const router = useRouter();
   const addressList = [
     { key: "Legal Address", value: legalAddress },
     { key: "Headquarters Address", value: headquartersAddress },
@@ -62,40 +65,77 @@ export default function DetailsData(detailsProps: detailsProps) {
           borderColor: "grey.300",
           borderRadius: 2,
           boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-          display: "flex",
           alignItems: "center",
           gap: 2,
         }}
       >
-        <Avatar
-          alt={name}
-          sx={{ width: 56, height: 56, bgcolor: "primary.main" }}
-        >
-          {participants.find((ele) => ele.name === name)?.abbreviation}
-        </Avatar>
         <Box>
-          <Typography variant="h6" fontWeight="bold">
-            {name}
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            ID: {id}
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Address: {address}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            VAT Number:{" "}
-            <span
-              style={{
-                // backgroundColor: vatStatus === "valid" ? "green" : "red",
-                color: "white",
-                padding: "5px",
-                borderRadius: "5px",
-              }}
+          <Grid
+            container
+            spacing={2}
+            direction="row"
+            sx={{
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+            }}
+          >
+            <Grid sx={{ mb: 6 }}>
+              <Typography variant="h6" fontWeight="bold">
+                {name}
+              </Typography>
+              <Typography
+                variant="body1"
+                color="text.secondary"
+                fontWeight="bold"
+              >
+                DS4H ID: {id}
+              </Typography>
+            </Grid>
+            <Avatar
+              alt={name}
+              sx={{ width: 56, height: 56, bgcolor: "primary.main" }}
             >
-              {vatStatus === "valid" ? "✅" : "❌"}
-            </span>
-          </Typography>
+              {participants.find((ele) => ele.name === name)?.abbreviation}
+            </Avatar>
+          </Grid>
+          <Grid
+            container
+            spacing={2}
+            direction="row"
+            sx={{
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Grid>
+              <Typography variant="body1" color="text.secondary">
+                Address: {address}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                VAT Number:{" "}
+                <span
+                  style={{
+                    // backgroundColor: vatStatus === "valid" ? "green" : "red",
+                    color: "white",
+                    padding: "5px",
+                    borderRadius: "5px",
+                  }}
+                >
+                  {vatStatus === "valid" ? "✅" : "❌"}
+                </span>
+              </Typography>
+            </Grid>
+            <Grid>
+              <Button
+                variant="contained"
+                onClick={() => {
+                  router.push("/serviceOffering");
+                }}
+              >
+                {"Go to participant's datasets"}
+              </Button>
+            </Grid>
+          </Grid>
         </Box>
       </Box>
 

@@ -1,5 +1,5 @@
 "use client";
-import { Box, Typography, Paper } from "@mui/material";
+import { Box, Typography, Paper, Button } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import { styled } from "@mui/material/styles";
 import LeftCard from "../components/leftCard";
@@ -13,6 +13,7 @@ import ProtectedRoute from "../components/protectedRoute";
 import { useRouter } from "next/navigation";
 import ApiService from "../apiService/apiService";
 import axios from "axios";
+import OnboardParticipant from "../components/onboardParticipantDialog";
 
 interface ParticipantsList {
   id: string;
@@ -83,66 +84,71 @@ const Participant = () => {
   const [filteredParticipants, setFilteredParticipants] = useState<
     ParticipantsList[]
   >([]);
+  const [openModal, setOpenModal] = useState<boolean>(false);
   const router = useRouter();
 
   const handleCardClick = (card: ParticipantsList) => {
     setSelectedCard(card);
   };
 
-  const apiService = useMemo(() => new ApiService(() => router.push("/")), []);
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const response = await apiService.getParticipants(); // Call the instance method
-        if (response?.data?.items) {
-          const formattedData = response.data.items.map((item) => {
-            const description = JSON.parse(item.selfDescription || "");
-            const credential = description.verifiableCredential[0];
-            return {
-              id: item?.id?.split("/")[1] || "",
-              name: credential.credentialSubject["gx:legalName"],
-              address:
-                credential.credentialSubject["gx:legalAddress"][
-                  "gx:countrySubdivisionCode"
-                ],
-              vatNumber:
-                credential.credentialSubject["gx:legalRegistrationNumber"].id ||
-                credential.credentialSubject["gx:registrationNumber"],
-              description:
-                credential.credentialSubject["gx:description"] || "-",
-              street: credential.credentialSubject["gx:street"] || "-",
-              houseNumber:
-                credential.credentialSubject["gx:houseNumber"] || "-",
-              postalCode: credential.credentialSubject["gx:postalCode"] || "-",
-              city: credential.credentialSubject["gx:city"] || "-",
-              country: credential.credentialSubject["gx:country"] || "-",
-              vatStatus: "",
-              headquartersAddress:
-                credential.credentialSubject["gx:headquarterAddress"][
-                  "gx:countrySubdivisionCode"
-                ] ||
-                credential.credentialSubject["gx:headquartersAddress"][
-                  "gx:countrySubdivisionCode"
-                ] ||
-                "-",
-              legalAddress:
-                credential.credentialSubject["gx:legalAddress"][
-                  "gx:countrySubdivisionCode"
-                ] || "-",
-              parentOrganization:
-                credential.credentialSubject["gx:parentOrganization"] || "-",
-              subOrganization:
-                credential.credentialSubject["gx:subOrganization"] || "-",
-            };
-          });
-          setParticipantsList(formattedData);
-          verifyVatNumbers(formattedData);
-        }
-      } catch (err: unknown) {
-        const apiError = err as ApiError;
-        console.error(apiError.message || "An error occurred");
+  const apiService = useMemo(() => new ApiService(() => router.push("/")), [router]);
+  async function fetchData() {
+    try {
+      const response = await apiService.getParticipants(); // Call the instance method
+      if (response?.data?.items) {
+        const formattedData = response.data.items.map((item) => {
+          const description = JSON.parse(item.selfDescription || "");
+          const credential = description.verifiableCredential[0];
+          // Normalize attribute names
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const normalize = (obj: any, keys: string[]) => {
+            const foundKey = keys.find((key) => obj[key]);
+            return foundKey ? obj[foundKey] : "-";
+          };
+
+          return {
+            id: item?.id?.split("/")[1] || "",
+            name: normalize(credential.credentialSubject, ["gx:legalName"]),
+            address: normalize(
+              credential.credentialSubject["gx:legalAddress"],
+              ["gx:countrySubdivisionCode"]
+            ),
+            vatNumber: normalize(credential.credentialSubject, [
+              "gx:legalRegistrationNumber",
+              "gx:registrationNumber",
+            ]).id,
+            description: normalize(credential.credentialSubject, [
+              "gx:description",
+            ]),
+            headquartersAddress: normalize(credential.credentialSubject, [
+              "gx:headquarterAddress",
+              "gx:headquartersAddress",
+            ])["gx:countrySubdivisionCode"],
+            legalAddress: normalize(
+              credential.credentialSubject["gx:legalAddress"],
+              ["gx:countrySubdivisionCode"]
+            ),
+            parentOrganization: normalize(credential.credentialSubject, [
+              "gx:parentOrganization",
+              "gx:parentOrganizationOf",
+            ]),
+            subOrganization: normalize(credential.credentialSubject, [
+              "gx:subOrganization",
+              "gx:subOrganizationOf",
+            ]),
+            vatStatus: "",
+          };
+        });
+        console.log("formattedData", formattedData);
+        setParticipantsList(formattedData);
+        verifyVatNumbers(formattedData);
       }
+    } catch (err: unknown) {
+      const apiError = err as ApiError;
+      console.error(apiError.message || "An error occurred");
     }
+  }
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -206,12 +212,22 @@ const Participant = () => {
     setParticipantsList(updatedParticipants);
   };
 
+  const openOnboardingDialog = () => {
+    setOpenModal(true);
+  };
+
   return (
     <div>
       <MenuAppBar />
       <Box sx={{ py: 1 }}>
         <CustomSeparator />
         <Grid container spacing={2} sx={{ mb: 3, alignItems: "center" }}>
+          <Grid size={{ xs: 4, md: 12 }} sx={{ m: 2 }}>
+            <Button variant="contained" onClick={openOnboardingDialog}>
+              Onboard new Participant
+            </Button>
+          </Grid>
+
           <Grid size={{ xs: 4 }} sx={{ textAlign: "right" }}>
             <SelectInput
               options={options}
@@ -275,6 +291,7 @@ const Participant = () => {
           )}
         </Grid>
       )}
+      <OnboardParticipant open={openModal} setOpen={setOpenModal} refreshParticipants={fetchData} />
     </div>
   );
 };

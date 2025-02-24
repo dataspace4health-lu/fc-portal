@@ -1,7 +1,6 @@
 "use client";
 import * as React from "react";
 import { Typography, Box } from "@mui/material";
-import Grid from "@mui/material/Grid2";
 import Image from "next/image";
 
 interface LeftCardProps {
@@ -17,50 +16,62 @@ export default function LeftCard(leftCardProps: LeftCardProps) {
   const { name, id, logoUrl, address, vatStatus } = leftCardProps;
 
   return (
-    <Grid
-      container
-      spacing={2}
+    <Box
       sx={{
-        justifyContent: "space-between",
-        alignItems: "center",
+        display: "flex",
+        flexDirection: "column",
+        gap: 1,
+        p: 2,
+        height: "100%",
       }}
     >
-      <Grid size={{ xs: 12, sm: 6 }}>
-        <Box display="flex" alignItems="center" gap={2} sx={{ mb: 2 }}>
-          {logoUrl ? (
-            <Image alt={`${name} logo`} src={logoUrl} width={50} height={50} />
-          ) : (
-            <Box
-              sx={{
-                width: 50,
-                height: 50,
-                borderRadius: "50%",
-                bgcolor: "grey.300",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontWeight: "bold",
-                color: "white",
-              }}
-            >
-              N/A
-            </Box>
-          )}
-          <Typography variant="h6" fontWeight="bold">
-            {name}
-          </Typography>
-        </Box>
-      </Grid>
-
-      <Grid size={{ xs: 12, sm: 6 }}>
-        <Typography variant="body1" sx={{ color: "text.secondary", mb: 1 }}>
-          DS4H ID: <strong>{id}</strong>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <Typography variant="h6" fontWeight="bold">
+          {name}
         </Typography>
-        <Typography variant="body1" sx={{ color: "text.secondary", mb: 1 }}>
+        {logoUrl ? (
+          <Image alt={`${name} logo`} src={logoUrl} width={50} height={50} />
+        ) : (
+          <Box
+            sx={{
+              width: 50,
+              height: 50,
+              borderRadius: "50%",
+              bgcolor: "grey.300",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontWeight: "bold",
+              color: "white",
+            }}
+          >
+            N/A
+          </Box>
+        )}
+      </Box>
+
+      <Typography
+        fontWeight="bold"
+        variant="body1"
+        sx={{ color: "text.secondary", mb: 1 }}
+      >
+        DS4H ID: {id}
+      </Typography>
+
+      <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
+        <Typography variant="body2" sx={{ color: "text.primary" }}>
+          Address: {address}
+        </Typography>
+        <Typography variant="body1" sx={{ color: "text.secondary" }}>
           VAT Number:{" "}
           <span
             style={{
-              // backgroundColor: vatStatus === "valid" ? "green" : "red",
               color: "white",
               padding: "5px",
               borderRadius: "5px",
@@ -69,13 +80,7 @@ export default function LeftCard(leftCardProps: LeftCardProps) {
             {vatStatus === "valid" ? "✅" : "❌"}
           </span>
         </Typography>
-      </Grid>
-
-      <Grid size={{ xs: 12 }}>
-        <Typography variant="body2" sx={{ mt: 2, color: "text.primary" }}>
-          Address: {address}
-        </Typography>
-      </Grid>
-    </Grid>
+      </Box>
+    </Box>
   );
 }
