@@ -5,43 +5,84 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import KeyValueCard from "./keyValueCard";
-import { Avatar, Box, Divider } from "@mui/material";
+import { Box, Button, Divider } from "@mui/material";
+import { formatDate } from "../utils/functions";
+import Grid from "@mui/material/Grid2";
 
-export default function ServiceOfferingDetailsData() {
+
+interface DetailsProps {
+  content: string | undefined;
+  status: string;
+  projectTitle: string | undefined;
+  projectWebsite: string;
+  studyTitle: string;
+  version: string;
+  issuanceDate: string;
+  statusDatetime: string;
+  experimentTypes: string;
+  typeOfSamplesCollected: string;
+  numberOfSamplesCollected: string;
+  diseasesInSamples: string;
+  issuer: string;
+  dataManager: string;
+  email: string;
+  affiliation: string;
+}
+export default function ServiceOfferingDetailsData(props: DetailsProps) {
+  const {
+    content,
+    status,
+    projectTitle,
+    projectWebsite,
+    studyTitle,
+    version,
+    issuanceDate,
+    statusDatetime,
+    experimentTypes,
+    typeOfSamplesCollected,
+    numberOfSamplesCollected,
+    diseasesInSamples,
+    issuer,
+    dataManager,
+    email,
+    affiliation,
+  } = props;
   const projectList = [
     {
       key: "Project title",
-      value:
-        "A global trascriptome analyses of keratinocytes upon suppression of endogenous",
+      value: projectTitle || "-",
     },
-    { key: "Project website", value: "https://www.google.com/" },
+    { key: "Project website", value: projectWebsite || "-" },
   ];
 
   const studiesList = [
     {
       key: "Study title",
-      value: "A global transcriptome analysis of keratinocytes upon",
+      value: studyTitle || "-",
     },
   ];
 
   const generalDatasetInfoList = [
-    { key: "Version", value: "-" },
-    { key: "Date of creation of the dataset", value: "2024-10-29" },
+    { key: "Version", value: version || "-" },
+    { key: "Date of creation of the dataset", value: formatDate(issuanceDate) },
     {
-      key: "Date of creation of the last update of the dataset",
-      value: "2024-10-29",
+      key: "Date of the last update of the dataset",
+      value: formatDate(statusDatetime),
     },
-    { key: "Experiment types", value: "expression profiling by array" },
-    { key: "Type of Samples Collected", value: "-" },
-    { key: "Number of Samples Collected", value: "6" },
-    { key: "Diseases in samples", value: "psoriasis" },
+    { key: "Experiment types", value: experimentTypes || "-" },
+    { key: "Type of Samples Collected", value: typeOfSamplesCollected || "-" },
+    {
+      key: "Number of Samples Collected",
+      value: numberOfSamplesCollected || "-",
+    },
+    { key: "Diseases in samples", value: diseasesInSamples || "-" },
   ];
 
   const DatasetContactsList = [
-    { key: "Data owner", value: "Person A" },
-    { key: "Data manager", value: "Manager A" },
-    { key: "email", value: "email@gmail.com" },
-    { key: "affiliation", value: "-" },
+    { key: "Data owner", value: issuer || "-" },
+    { key: "Data manager", value: dataManager || "-" },
+    { key: "email", value: email || "-" },
+    { key: "affiliation", value: affiliation || "-" },
   ];
 
   return (
@@ -62,28 +103,66 @@ export default function ServiceOfferingDetailsData() {
           borderColor: "grey.300",
           borderRadius: 2,
           boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-          display: "flex",
           alignItems: "center",
           gap: 2,
         }}
       >
-        <Avatar
-          alt="NTT Logo"
-          src="sds" // Replace with the actual logo URL
-          sx={{ width: 56, height: 56, bgcolor: "primary.main" }}
-        >
-          NTT
-        </Avatar>
         <Box>
-          <Typography variant="h6" fontWeight="bold">
-            NTT LUXEMBOURG PSF S.A
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Luxembourg - Capellen
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            VAT Number: LU20769255
-          </Typography>
+          <Grid
+            container
+            spacing={2}
+            direction="row"
+            sx={{
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+            }}
+          >
+            <Grid sx={{ mb: 6 }}>
+              <Typography variant="h6" fontWeight="bold">
+                {content}
+              </Typography>
+              <Typography
+                variant="body1"
+                color="text.secondary"
+                fontWeight="bold"
+              >
+                Data provider: {issuer}
+              </Typography>
+            </Grid>
+              <span
+                  style={{
+                    // backgroundColor: vatStatus === "valid" ? "green" : "red",
+                    color: "white",
+                    padding: "5px",
+                    borderRadius: "5px",
+                  }}
+                >
+                  {status === "active" ? "✅" : "❌"}
+                </span>
+          </Grid>
+          <Grid
+            container
+            spacing={2}
+            direction="row"
+            sx={{
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Grid>
+              <Typography variant="body1" color="text.secondary">
+                Creation date: {formatDate(issuanceDate)}
+              </Typography>
+            </Grid>
+          </Grid>
+        </Box>
+        <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
+          <Button variant="contained" color="primary">
+            Request access to the dataset
+          </Button>
+          <Button variant="contained" color="secondary">
+            Download metadata
+          </Button>
         </Box>
       </Box>
 
@@ -133,7 +212,7 @@ export default function ServiceOfferingDetailsData() {
       <Divider sx={{ my: 3 }} />
 
       <Typography variant="body2" color="text.secondary" align="center">
-        Last updated: 2024-12-01
+        Last updated: {formatDate(statusDatetime)}
       </Typography>
     </Box>
   );

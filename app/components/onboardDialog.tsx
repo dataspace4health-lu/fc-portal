@@ -27,7 +27,9 @@ import SnackbarComponent from "./snackbar";
 interface ResponsiveDialogProps {
   open: boolean;
   setOpen: (val: boolean) => void;
-  refreshParticipants: () => void;
+  refreshList: () => void;
+  dialogTitle: string;
+  isParticipant?: boolean;
 }
 
 const VisuallyHiddenInput = styled("input")({
@@ -43,7 +45,7 @@ const VisuallyHiddenInput = styled("input")({
 });
 
 export default function OnboardParticipant(props: ResponsiveDialogProps) {
-  const { open, setOpen, refreshParticipants } = props;
+  const { open, setOpen, refreshList, dialogTitle, isParticipant } = props;
   const router = useRouter();
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
@@ -143,7 +145,7 @@ export default function OnboardParticipant(props: ResponsiveDialogProps) {
     setUploading(true);
     const selfDescription = jsonContent || JSON.parse(textInput);
     try {
-      await apiService.createParticipant(JSON.stringify(selfDescription));
+      isParticipant ? await apiService.createParticipant(JSON.stringify(selfDescription)) : await apiService.createServiceOffering(JSON.stringify(selfDescription));
       handleApiResponse("Participant created successfully!", "success");
     } catch (error) {
       handleApiResponse(
@@ -154,7 +156,7 @@ export default function OnboardParticipant(props: ResponsiveDialogProps) {
       // setError("Failed to create participant. Please try again.");
     }
     // Refresh participants list
-    refreshParticipants();
+    refreshList();
     setUploading(false);
     setFiles([]);
     setTextInput("");
@@ -196,7 +198,7 @@ export default function OnboardParticipant(props: ResponsiveDialogProps) {
         fullWidth={true} // Ensure it takes the full available width
       >
         <DialogTitle id="responsive-dialog-title">
-          Onboard New Participant
+          {dialogTitle}
         </DialogTitle>
         <DialogContent sx={{ minWidth: 700, minHeight: 500 }}>
           {" "}
@@ -275,7 +277,7 @@ export default function OnboardParticipant(props: ResponsiveDialogProps) {
                 fullWidth
                 id="vc"
                 name="Verifiable Credential"
-                label="Participant Verifiable Credential"
+                label="Verifiable Credential"
                 multiline
                 rows={12} // More space for text input
                 value={textInput}

@@ -1,4 +1,4 @@
-import { Configuration, ParticipantsApi } from "../../services/api-client";
+import { Configuration, ParticipantsApi, SelfDescriptionsApi } from "../../services/api-client";
 import { getToken } from "../components/oidcIntegration";
 
 interface ApiError extends Error {
@@ -9,6 +9,7 @@ interface ApiError extends Error {
 class ApiService {
   private configuration: Configuration;
   private participantsApi: ParticipantsApi;
+  private selfDescriptionsApi: SelfDescriptionsApi;
   private redirectToLogin: () => void;
 
   constructor(redirectToLogin: () => void) {
@@ -16,6 +17,7 @@ class ApiService {
       basePath: process.env.NEXT_PUBLIC_API_BASE_URL,
     });
     this.participantsApi = new ParticipantsApi(this.configuration);
+    this.selfDescriptionsApi = new SelfDescriptionsApi(this.configuration);
     this.redirectToLogin = redirectToLogin;
   }
 
@@ -49,6 +51,51 @@ class ApiService {
     await this.fetchTokenIfNeeded();
     try {
       return await this.participantsApi.addParticipant(body);
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      if (apiError.response && apiError.response.status === 401) {
+        console.log("redirect to login");
+        this.redirectToLogin(); // Handle redirection here
+        return;
+      }
+      throw apiError;
+    }
+  }
+
+  async getServiceOfferings() {
+    await this.fetchTokenIfNeeded();
+    try {
+      return await this.selfDescriptionsApi.readSelfDescriptions();
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      if (apiError.response && apiError.response.status === 401) {
+        console.log("redirect to login");
+        this.redirectToLogin(); // Handle redirection here
+        return;
+      }
+      throw apiError;
+    }
+  }
+
+  async getServiceOfferingDetails(selfDescriptionHash: string) {
+    await this.fetchTokenIfNeeded();
+    try {
+      return await this.selfDescriptionsApi.readSelfDescriptionByHash(selfDescriptionHash);
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      if (apiError.response && apiError.response.status === 401) {
+        console.log("redirect to login");
+        this.redirectToLogin(); // Handle redirection here
+        return;
+      }
+      throw apiError;
+    }
+  }
+
+  async createServiceOffering(body: string) {
+    await this.fetchTokenIfNeeded();
+    try {
+      return await this.selfDescriptionsApi.addSelfDescription(body);
     } catch (error: unknown) {
       const apiError = error as ApiError;
       if (apiError.response && apiError.response.status === 401) {

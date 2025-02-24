@@ -13,7 +13,7 @@ import ProtectedRoute from "../components/protectedRoute";
 import { useRouter } from "next/navigation";
 import ApiService from "../apiService/apiService";
 import axios from "axios";
-import OnboardParticipant from "../components/onboardParticipantDialog";
+import OnboardParticipant from "../components/onboardDialog";
 
 interface ParticipantsList {
   id: string;
@@ -139,7 +139,6 @@ const Participant = () => {
             vatStatus: "",
           };
         });
-        console.log("formattedData", formattedData);
         setParticipantsList(formattedData);
         verifyVatNumbers(formattedData);
       }
@@ -291,7 +290,13 @@ const Participant = () => {
           )}
         </Grid>
       )}
-      <OnboardParticipant open={openModal} setOpen={setOpenModal} refreshParticipants={fetchData} />
+      <OnboardParticipant
+        open={openModal}
+        setOpen={setOpenModal}
+        refreshList={fetchData}
+        dialogTitle="Onboard New Participant"
+        isParticipant
+      />
     </div>
   );
 };
