@@ -98,7 +98,14 @@ const Participant = () => {
       if (response?.data?.items) {
         const formattedData = response.data.items.map((item) => {
           const description = JSON.parse(item.selfDescription || "");
-          const credential = description.verifiableCredential[0];
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const participant = description.verifiableCredential.find((vc: any) => 
+            vc.type.indexOf("gx:LegalParticipant") !== -1);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const lrn = description.verifiableCredential.find((vc: any) => 
+            vc.credentialSubject.type == "gx:legalRegistrationNumber");
+
           // Normalize attribute names
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const normalize = (obj: any, keys: string[]) => {
@@ -108,31 +115,32 @@ const Participant = () => {
 
           return {
             id: item?.id?.split("/")[1] || "",
-            name: normalize(credential.credentialSubject, ["gx:legalName"]),
+            name: normalize(participant.credentialSubject, ["gx:legalName"]),
             address: normalize(
-              credential.credentialSubject["gx:legalAddress"],
+              participant.credentialSubject["gx:legalAddress"],
               ["gx:countrySubdivisionCode"]
             ),
-            vatNumber: normalize(credential.credentialSubject, [
+            vatNumber: normalize(lrn.credentialSubject, [
               "gx:legalRegistrationNumber",
               "gx:registrationNumber",
+              "gx:leiCode",
             ]).id,
-            description: normalize(credential.credentialSubject, [
+            description: normalize(participant.credentialSubject, [
               "gx:description",
             ]),
-            headquartersAddress: normalize(credential.credentialSubject, [
+            headquartersAddress: normalize(participant.credentialSubject, [
               "gx:headquarterAddress",
               "gx:headquartersAddress",
             ])["gx:countrySubdivisionCode"],
             legalAddress: normalize(
-              credential.credentialSubject["gx:legalAddress"],
+              participant.credentialSubject["gx:legalAddress"],
               ["gx:countrySubdivisionCode"]
             ),
-            parentOrganization: normalize(credential.credentialSubject, [
+            parentOrganization: normalize(participant.credentialSubject, [
               "gx:parentOrganization",
               "gx:parentOrganizationOf",
             ]),
-            subOrganization: normalize(credential.credentialSubject, [
+            subOrganization: normalize(participant.credentialSubject, [
               "gx:subOrganization",
               "gx:subOrganizationOf",
             ]),
