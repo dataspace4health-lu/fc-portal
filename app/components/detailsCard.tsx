@@ -131,7 +131,7 @@ export default function DetailsData(detailsProps: detailsProps) {
               <Button
                 variant="contained"
                 onClick={() => {
-                  router.push("/serviceOffering");
+                  router.push("serviceOffering");
                 }}
               >
                 {"Go to participant's datasets"}
