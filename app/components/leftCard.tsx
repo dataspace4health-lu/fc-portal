@@ -13,7 +13,7 @@ interface LeftCardProps {
 }
 
 export default function LeftCard(leftCardProps: LeftCardProps) {
-  const { name, id, logoUrl, address, vatStatus } = leftCardProps;
+  const { name, id, logoUrl, address, vatStatus, vatNumber } = leftCardProps;
 
   return (
     <Box
@@ -69,7 +69,7 @@ export default function LeftCard(leftCardProps: LeftCardProps) {
           Address: {address}
         </Typography>
         <Typography variant="body1" sx={{ color: "text.secondary" }}>
-          VAT Number:{" "}
+          VAT Number: {vatNumber}
           <span
             style={{
               color: "white",

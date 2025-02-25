@@ -28,7 +28,7 @@ export default function DetailsData(detailsProps: detailsProps) {
   const {
     id,
     name,
-    // vatNumber,
+    vatNumber,
     address,
     description,
     legalAddress,
@@ -112,7 +112,7 @@ export default function DetailsData(detailsProps: detailsProps) {
                 Address: {address}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                VAT Number:{" "}
+                VAT Number: {vatNumber}
                 <span
                   style={{
                     // backgroundColor: vatStatus === "valid" ? "green" : "red",

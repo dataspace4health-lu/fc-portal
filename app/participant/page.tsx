@@ -12,7 +12,7 @@ import { useEffect, useMemo, useState } from "react";
 import ProtectedRoute from "../components/protectedRoute";
 import { useRouter } from "next/navigation";
 import ApiService from "../apiService/apiService";
-import axios from "axios";
+//import axios from "axios";
 import OnboardParticipant from "../components/onboardParticipantDialog";
 
 interface ParticipantsList {
@@ -111,20 +111,20 @@ const Participant = () => {
           const normalize = (obj: any, keys: string[]) => {
             const foundKey = keys.find((key) => obj[key]);
             return foundKey ? obj[foundKey] : "-";
-          };
+          };        
 
           return {
-            id: item?.id?.split("/")[1] || "",
+            id: item?.id || "",
             name: normalize(participant.credentialSubject, ["gx:legalName"]),
             address: normalize(
               participant.credentialSubject["gx:legalAddress"],
               ["gx:countrySubdivisionCode"]
             ),
             vatNumber: normalize(lrn.credentialSubject, [
-              "gx:legalRegistrationNumber",
-              "gx:registrationNumber",
               "gx:leiCode",
-            ]).id,
+              "gx:vatID",
+              "gx:EORI",
+            ]),
             description: normalize(participant.credentialSubject, [
               "gx:description",
             ]),
@@ -147,7 +147,7 @@ const Participant = () => {
             vatStatus: "",
           };
         });
-        console.log("formattedData", formattedData);
+        //console.log("formattedData", formattedData);
         setParticipantsList(formattedData);
         verifyVatNumbers(formattedData);
       }
@@ -206,10 +206,11 @@ const Participant = () => {
         if (!participant.vatNumber) return participant;
 
         try {
-          const response = await axios.get(participant.vatNumber);
+          //const response = await axios.get(participant.vatNumber);
           return {
             ...participant,
-            vatStatus: response.data ? "valid" : "invalid",
+            //vatStatus: response.data ? "valid" : "invalid",
+            vatStatus:  "invalid",
           };
         } catch {
           return { ...participant, vatStatus: "invalid" };
