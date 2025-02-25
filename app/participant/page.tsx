@@ -26,6 +26,7 @@ interface ParticipantsList {
   legalAddress: string;
   parentOrganization: string;
   subOrganization: string;
+  lrnType: string | undefined;
 }
 
 interface ApiError extends Error {
@@ -100,10 +101,10 @@ const Participant = () => {
           const description = JSON.parse(item.selfDescription || "");
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const participant = description.verifiableCredential.find((vc: any) => 
+          const participant = description.verifiableCredential.find((vc: any) =>
             vc.type.indexOf("gx:LegalParticipant") !== -1);
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const lrn = description.verifiableCredential.find((vc: any) => 
+          const lrn = description.verifiableCredential.find((vc: any) =>
             vc.credentialSubject.type == "gx:legalRegistrationNumber");
 
           // Normalize attribute names
@@ -111,8 +112,14 @@ const Participant = () => {
           const normalize = (obj: any, keys: string[]) => {
             const foundKey = keys.find((key) => obj[key]);
             return foundKey ? obj[foundKey] : "-";
-          };        
-
+          };
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any     
+          const normalizeKey = (obj: any, keys: string[]) => {
+            const foundKey = keys.find((key) => obj[key]);
+            return foundKey?.split("gx:")[1]
+              .replace(/([a-z])([A-Z])/g, '$1 $2') // Add space between camel case words
+              .replace(/(^\w| \w)/g, match => match.toUpperCase()) // Capitalize the first letter of each word
+          };
           return {
             id: item?.id || "",
             name: normalize(participant.credentialSubject, ["gx:legalName"]),
@@ -124,6 +131,15 @@ const Participant = () => {
               "gx:leiCode",
               "gx:vatID",
               "gx:EORI",
+              "gx:taxID",
+              "gx:EUID"
+            ]),
+            lrnType: normalizeKey(lrn.credentialSubject, [
+              "gx:leiCode",
+              "gx:vatID",
+              "gx:EORI",
+              "gx:taxID",
+              "gx:EUID"
             ]),
             description: normalize(participant.credentialSubject, [
               "gx:description",
@@ -210,7 +226,7 @@ const Participant = () => {
           return {
             ...participant,
             //vatStatus: response.data ? "valid" : "invalid",
-            vatStatus:  "invalid",
+            vatStatus: "invalid",
           };
         } catch {
           return { ...participant, vatStatus: "invalid" };
@@ -267,7 +283,8 @@ const Participant = () => {
                     vatNumber={participant.vatNumber}
                     vatStatus={participant.vatStatus}
                     address={participant.address}
-                    // logoUrl={participant.logo}
+                    lrnType={participant.lrnType}
+                  // logoUrl={participant.logo}
                   />
                 </CardContainer>
               ))}
@@ -293,6 +310,7 @@ const Participant = () => {
                     legalAddress={selectedCard.legalAddress}
                     parentOrganization={selectedCard.parentOrganization}
                     subOrganization={selectedCard.parentOrganization}
+                    lrnType={selectedCard.lrnType}
                   />
                 </Paper>
               </DetailsPane>

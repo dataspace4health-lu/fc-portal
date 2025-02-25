@@ -22,6 +22,7 @@ interface detailsProps {
   parentOrganization: string;
   subOrganization: string;
   vatStatus: string;
+  lrnType:string | undefined;
 }
 
 export default function DetailsData(detailsProps: detailsProps) {
@@ -36,6 +37,7 @@ export default function DetailsData(detailsProps: detailsProps) {
     parentOrganization,
     subOrganization,
     vatStatus,
+    lrnType,
   } = detailsProps;
   const router = useRouter();
   const addressList = [
@@ -112,7 +114,7 @@ export default function DetailsData(detailsProps: detailsProps) {
                 Address: {address}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                VAT Number: {vatNumber}
+              {lrnType} : {vatNumber}
                 <span
                   style={{
                     // backgroundColor: vatStatus === "valid" ? "green" : "red",

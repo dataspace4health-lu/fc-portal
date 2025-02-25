@@ -20,7 +20,7 @@ export default function CustomSeparator() {
         "&:hover": { textDecoration: "underline", color: "primary.dark" },
         transition: "color 0.3s ease, text-decoration 0.3s ease",
       }}
-      onClick={() => router.push("/participant")}
+      onClick={() => router.push("participant")}
     >
       Participant
     </Typography>,
@@ -33,7 +33,7 @@ export default function CustomSeparator() {
         fontSize: "1rem",
         "&:hover": { textDecoration: "underline", color: "primary.dark" },
       }}
-      onClick={() => router.push("/serviceOffering")}
+      onClick={() => router.push("serviceOffering")}
     >
       Data Offer
     </Typography>,

@@ -10,10 +10,11 @@ interface LeftCardProps {
   address: string;
   vatNumber: string;
   vatStatus: string;
+  lrnType: string | undefined;
 }
 
 export default function LeftCard(leftCardProps: LeftCardProps) {
-  const { name, id, logoUrl, address, vatStatus, vatNumber } = leftCardProps;
+  const { name, id, logoUrl, address, vatStatus, vatNumber, lrnType } = leftCardProps;
 
   return (
     <Box
@@ -64,12 +65,12 @@ export default function LeftCard(leftCardProps: LeftCardProps) {
         DS4H ID: {id}
       </Typography>
 
-      <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
-        <Typography variant="body2" sx={{ color: "text.primary" }}>
+      <Box >
+        <Typography variant="body2" sx={{ color: "text.primary", whiteSpace: "nowrap" }}>
           Address: {address}
         </Typography>
         <Typography variant="body1" sx={{ color: "text.secondary" }}>
-          VAT Number: {vatNumber}
+          {lrnType}: {vatNumber}
           <span
             style={{
               color: "white",
