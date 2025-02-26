@@ -5,7 +5,7 @@
 // import { styled } from "@mui/material/styles";
 // import LeftCard from "../components/leftCard";
 // import MenuAppBar from "../components/appBar";
-// import CustomSeparator from "../components/pathSeperation";
+import CustomSeparator from "../components/pathSeperation";
 // import ServiceOfferingDetailsData from "../components/serviceOfferingDetails";
 // import {
 //   Configuration,
@@ -125,11 +125,11 @@ const ServiceOffering = () => {
 
   // console.log("selfDescriptionsData", selfDescriptionsData);
 
-  return (<></>)
+  return (<><CustomSeparator /></>)
   //     <div>
   //       <MenuAppBar />
   //       <Box sx={{ py: 1 }}>
-  //         <CustomSeparator />
+          
   //         <Grid container spacing={2} sx={{ mb: 3, alignItems: "center" }}>
   //           <Grid size={{ xs: 4 }} sx={{ textAlign: "right" }}>
   //             {/* <SelectInput options={options} fieldLabel="Sorted by" /> */}

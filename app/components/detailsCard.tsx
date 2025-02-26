@@ -15,27 +15,29 @@ interface detailsProps {
   id: string;
   logoUrl?: string; // Optional logo URL
   address: string;
-  vatNumber: string;
+  lrnType:string | undefined;
+  lrnCode: string;
+  complianceStatus: string;
   description: string;
   legalAddress: string;
   headquartersAddress: string;
   parentOrganization: string;
   subOrganization: string;
-  vatStatus: string;
 }
 
 export default function DetailsData(detailsProps: detailsProps) {
   const {
     id,
     name,
-    // vatNumber,
+    lrnCode,
     address,
     description,
     legalAddress,
     headquartersAddress,
     parentOrganization,
     subOrganization,
-    vatStatus,
+    complianceStatus,
+    lrnType,
   } = detailsProps;
   const router = useRouter();
   const addressList = [
@@ -112,16 +114,16 @@ export default function DetailsData(detailsProps: detailsProps) {
                 Address: {address}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                VAT Number:{" "}
+              {lrnType} : {lrnCode}
                 <span
                   style={{
-                    // backgroundColor: vatStatus === "valid" ? "green" : "red",
+                    // backgroundColor: complianceStatus === "valid" ? "green" : "red",
                     color: "white",
                     padding: "5px",
                     borderRadius: "5px",
                   }}
                 >
-                  {vatStatus === "valid" ? "✅" : "❌"}
+                  {complianceStatus === "valid" ? "✅" : "❌"}
                 </span>
               </Typography>
             </Grid>
@@ -129,7 +131,7 @@ export default function DetailsData(detailsProps: detailsProps) {
               <Button
                 variant="contained"
                 onClick={() => {
-                  router.push("/serviceOffering");
+                  router.push("serviceOffering");
                 }}
               >
                 {"Go to participant's datasets"}
