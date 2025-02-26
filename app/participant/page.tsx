@@ -12,7 +12,7 @@ import { useEffect, useMemo, useState } from "react";
 import ProtectedRoute from "../components/protectedRoute";
 import { useRouter } from "next/navigation";
 import ApiService from "../apiService/apiService";
-import axios from "axios";
+//import axios from "axios";
 import OnboardParticipant from "../components/onboardParticipantDialog";
 
 interface ParticipantsList {
@@ -225,7 +225,7 @@ const Participant = () => {
         
         try {
           //const response = await axios.get(participant.lrnCode);
-          let status = "invalid";
+          const status = "invalid";
           // TODO: Redesign the interface to asynchronously request the compliance for every item
           // if (process.env.NEXT_PUBLIC_GAIAX_COMPLIANCE_URL) {
           //   const response = await axios.post(process.env.NEXT_PUBLIC_GAIAX_COMPLIANCE_URL, participant.vp);
