@@ -12,21 +12,22 @@ import { useEffect, useMemo, useState } from "react";
 import ProtectedRoute from "../components/protectedRoute";
 import { useRouter } from "next/navigation";
 import ApiService from "../apiService/apiService";
-//import axios from "axios";
+import axios from "axios";
 import OnboardParticipant from "../components/onboardParticipantDialog";
 
 interface ParticipantsList {
+  vp: string,
   id: string;
   name: string;
   address: string;
-  vatNumber: string;
-  vatStatus: string;
+  lrnType: string | undefined;
+  lrnCode: string;
+  complianceStatus: string;
   description: string;
   headquartersAddress: string;
   legalAddress: string;
   parentOrganization: string;
   subOrganization: string;
-  lrnType: string | undefined;
 }
 
 interface ApiError extends Error {
@@ -121,13 +122,14 @@ const Participant = () => {
               .replace(/(^\w| \w)/g, match => match.toUpperCase()) // Capitalize the first letter of each word
           };
           return {
+            vp: JSON.stringify(item),
             id: item?.id || "",
             name: normalize(participant.credentialSubject, ["gx:legalName"]),
             address: normalize(
               participant.credentialSubject["gx:legalAddress"],
               ["gx:countrySubdivisionCode"]
             ),
-            vatNumber: normalize(lrn.credentialSubject, [
+            lrnCode: normalize(lrn.credentialSubject, [
               "gx:leiCode",
               "gx:vatID",
               "gx:EORI",
@@ -160,7 +162,7 @@ const Participant = () => {
               "gx:subOrganization",
               "gx:subOrganizationOf",
             ]),
-            vatStatus: "",
+            complianceStatus: "",
           };
         });
         //console.log("formattedData", formattedData);
@@ -207,7 +209,7 @@ const Participant = () => {
       return (
         participant.name.toLowerCase().includes(lowerCaseQuery) ||
         participant.address.toLowerCase().includes(lowerCaseQuery) ||
-        participant.vatNumber.toLowerCase().includes(lowerCaseQuery) ||
+        participant.lrnCode.toLowerCase().includes(lowerCaseQuery) ||
         participant.description.toLowerCase().includes(lowerCaseQuery)
       );
     });
@@ -219,17 +221,23 @@ const Participant = () => {
   const verifyVatNumbers = async (participants: ParticipantsList[]) => {
     const updatedParticipants = await Promise.all(
       participants.map(async (participant) => {
-        if (!participant.vatNumber) return participant;
-
+        if (!participant.lrnCode) return participant;
+        
         try {
-          //const response = await axios.get(participant.vatNumber);
+          //const response = await axios.get(participant.lrnCode);
+          let status = "invalid";
+          // TODO: Redesign the interface to asynchronously request the compliance for every item
+          // if (process.env.NEXT_PUBLIC_GAIAX_COMPLIANCE_URL) {
+          //   const response = await axios.post(process.env.NEXT_PUBLIC_GAIAX_COMPLIANCE_URL, participant.vp);
+          //   status = response.status == 201 ? "valid" : "invalid";
+          // }
           return {
             ...participant,
-            //vatStatus: response.data ? "valid" : "invalid",
-            vatStatus: "invalid",
+            //complianceStatus: response.data ? "valid" : "invalid",
+            complianceStatus: status,
           };
         } catch {
-          return { ...participant, vatStatus: "invalid" };
+          return { ...participant, complianceStatus: "invalid" };
         }
       })
     );
@@ -280,8 +288,8 @@ const Participant = () => {
                   <LeftCard
                     id={participant.id}
                     name={participant.name}
-                    vatNumber={participant.vatNumber}
-                    vatStatus={participant.vatStatus}
+                    lrnCode={participant.lrnCode}
+                    complianceStatus={participant.complianceStatus}
                     address={participant.address}
                     lrnType={participant.lrnType}
                   // logoUrl={participant.logo}
@@ -303,8 +311,8 @@ const Participant = () => {
                     id={selectedCard.id}
                     name={selectedCard.name}
                     address={selectedCard.address}
-                    vatNumber={selectedCard.vatNumber}
-                    vatStatus={selectedCard.vatStatus}
+                    lrnCode={selectedCard.lrnCode}
+                    complianceStatus={selectedCard.complianceStatus}
                     description={selectedCard.description}
                     headquartersAddress={selectedCard.headquartersAddress}
                     legalAddress={selectedCard.legalAddress}

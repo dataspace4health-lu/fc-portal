@@ -8,13 +8,13 @@ interface LeftCardProps {
   id: string;
   logoUrl?: string; // Optional logo URL
   address: string;
-  vatNumber: string;
-  vatStatus: string;
   lrnType: string | undefined;
+  lrnCode: string;
+  complianceStatus: string;
 }
 
 export default function LeftCard(leftCardProps: LeftCardProps) {
-  const { name, id, logoUrl, address, vatStatus, vatNumber, lrnType } = leftCardProps;
+  const { name, id, logoUrl, address, complianceStatus, lrnCode, lrnType } = leftCardProps;
 
   return (
     <Box
@@ -70,7 +70,7 @@ export default function LeftCard(leftCardProps: LeftCardProps) {
           Address: {address}
         </Typography>
         <Typography variant="body1" sx={{ color: "text.secondary" }}>
-          {lrnType}: {vatNumber}
+          {lrnType}: {lrnCode}
           <span
             style={{
               color: "white",
@@ -78,7 +78,7 @@ export default function LeftCard(leftCardProps: LeftCardProps) {
               borderRadius: "5px",
             }}
           >
-            {vatStatus === "valid" ? "✅" : "❌"}
+            {complianceStatus === "valid" ? "✅" : "❌"}
           </span>
         </Typography>
       </Box>
