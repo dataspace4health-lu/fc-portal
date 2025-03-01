@@ -8,12 +8,13 @@ interface LeftCardProps {
   id: string;
   logoUrl?: string; // Optional logo URL
   address: string;
-  vatNumber: string;
-  vatStatus: string;
+  lrnType: string | undefined;
+  lrnCode: string;
+  complianceStatus: string;
 }
 
 export default function LeftCard(leftCardProps: LeftCardProps) {
-  const { name, id, logoUrl, address, vatStatus } = leftCardProps;
+  const { name, id, logoUrl, address, complianceStatus, lrnCode, lrnType } = leftCardProps;
 
   return (
     <Box
@@ -64,12 +65,12 @@ export default function LeftCard(leftCardProps: LeftCardProps) {
         DS4H ID: {id}
       </Typography>
 
-      <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
-        <Typography variant="body2" sx={{ color: "text.primary" }}>
+      <Box >
+        <Typography variant="body2" sx={{ color: "text.primary", whiteSpace: "nowrap" }}>
           Address: {address}
         </Typography>
         <Typography variant="body1" sx={{ color: "text.secondary" }}>
-          VAT Number:{" "}
+          {lrnType}: {lrnCode}
           <span
             style={{
               color: "white",
@@ -77,7 +78,7 @@ export default function LeftCard(leftCardProps: LeftCardProps) {
               borderRadius: "5px",
             }}
           >
-            {vatStatus === "valid" ? "✅" : "❌"}
+            {complianceStatus === "valid" ? "✅" : "❌"}
           </span>
         </Typography>
       </Box>

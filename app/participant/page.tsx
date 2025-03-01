@@ -12,15 +12,17 @@ import { useEffect, useMemo, useState } from "react";
 import ProtectedRoute from "../components/protectedRoute";
 import { useRouter } from "next/navigation";
 import ApiService from "../apiService/apiService";
-import axios from "axios";
 import OnboardParticipant from "../components/onboardDialog";
+//import axios from "axios";
 
 interface ParticipantsList {
+  vp: string,
   id: string;
   name: string;
   address: string;
-  vatNumber: string;
-  vatStatus: string;
+  lrnType: string | undefined;
+  lrnCode: string;
+  complianceStatus: string;
   description: string;
   headquartersAddress: string;
   legalAddress: string;
@@ -91,54 +93,79 @@ const Participant = () => {
     setSelectedCard(card);
   };
 
-  const apiService = useMemo(() => new ApiService(() => router.push("/")), []);
+  const apiService = useMemo(() => new ApiService(() => router.push("/")), [router]);
   async function fetchData() {
     try {
       const response = await apiService.getParticipants(); // Call the instance method
       if (response?.data?.items) {
         const formattedData = response.data.items.map((item) => {
           const description = JSON.parse(item.selfDescription || "");
-          const credential = description.verifiableCredential[0];
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const participant = description.verifiableCredential.find((vc: any) =>
+            vc.type.indexOf("gx:LegalParticipant") !== -1);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const lrn = description.verifiableCredential.find((vc: any) =>
+            vc.credentialSubject.type == "gx:legalRegistrationNumber");
+
           // Normalize attribute names
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const normalize = (obj: any, keys: string[]) => {
             const foundKey = keys.find((key) => obj[key]);
             return foundKey ? obj[foundKey] : "-";
           };
-
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any     
+          const normalizeKey = (obj: any, keys: string[]) => {
+            const foundKey = keys.find((key) => obj[key]);
+            return foundKey?.split("gx:")[1]
+              .replace(/([a-z])([A-Z])/g, '$1 $2') // Add space between camel case words
+              .replace(/(^\w| \w)/g, match => match.toUpperCase()) // Capitalize the first letter of each word
+          };
           return {
-            id: item?.id?.split("/")[1] || "",
-            name: normalize(credential.credentialSubject, ["gx:legalName"]),
+            vp: JSON.stringify(item),
+            id: item?.id || "",
+            name: normalize(participant.credentialSubject, ["gx:legalName"]),
             address: normalize(
-              credential.credentialSubject["gx:legalAddress"],
+              participant.credentialSubject["gx:legalAddress"],
               ["gx:countrySubdivisionCode"]
             ),
-            vatNumber: normalize(credential.credentialSubject, [
-              "gx:legalRegistrationNumber",
-              "gx:registrationNumber",
-            ]).id,
-            description: normalize(credential.credentialSubject, [
+            lrnCode: normalize(lrn.credentialSubject, [
+              "gx:leiCode",
+              "gx:vatID",
+              "gx:EORI",
+              "gx:taxID",
+              "gx:EUID"
+            ]),
+            lrnType: normalizeKey(lrn.credentialSubject, [
+              "gx:leiCode",
+              "gx:vatID",
+              "gx:EORI",
+              "gx:taxID",
+              "gx:EUID"
+            ]),
+            description: normalize(participant.credentialSubject, [
               "gx:description",
             ]),
-            headquartersAddress: normalize(credential.credentialSubject, [
+            headquartersAddress: normalize(participant.credentialSubject, [
               "gx:headquarterAddress",
               "gx:headquartersAddress",
             ])["gx:countrySubdivisionCode"],
             legalAddress: normalize(
-              credential.credentialSubject["gx:legalAddress"],
+              participant.credentialSubject["gx:legalAddress"],
               ["gx:countrySubdivisionCode"]
             ),
-            parentOrganization: normalize(credential.credentialSubject, [
+            parentOrganization: normalize(participant.credentialSubject, [
               "gx:parentOrganization",
               "gx:parentOrganizationOf",
             ]),
-            subOrganization: normalize(credential.credentialSubject, [
+            subOrganization: normalize(participant.credentialSubject, [
               "gx:subOrganization",
               "gx:subOrganizationOf",
             ]),
-            vatStatus: "",
+            complianceStatus: "",
           };
         });
+        //console.log("formattedData", formattedData);
         setParticipantsList(formattedData);
         verifyVatNumbers(formattedData);
       }
@@ -182,7 +209,7 @@ const Participant = () => {
       return (
         participant.name.toLowerCase().includes(lowerCaseQuery) ||
         participant.address.toLowerCase().includes(lowerCaseQuery) ||
-        participant.vatNumber.toLowerCase().includes(lowerCaseQuery) ||
+        participant.lrnCode.toLowerCase().includes(lowerCaseQuery) ||
         participant.description.toLowerCase().includes(lowerCaseQuery)
       );
     });
@@ -194,16 +221,23 @@ const Participant = () => {
   const verifyVatNumbers = async (participants: ParticipantsList[]) => {
     const updatedParticipants = await Promise.all(
       participants.map(async (participant) => {
-        if (!participant.vatNumber) return participant;
-
+        if (!participant.lrnCode) return participant;
+        
         try {
-          const response = await axios.get(participant.vatNumber);
+          //const response = await axios.get(participant.lrnCode);
+          const status = "invalid";
+          // TODO: Redesign the interface to asynchronously request the compliance for every item
+          // if (process.env.NEXT_PUBLIC_GAIAX_COMPLIANCE_URL) {
+          //   const response = await axios.post(process.env.NEXT_PUBLIC_GAIAX_COMPLIANCE_URL, participant.vp);
+          //   status = response.status == 201 ? "valid" : "invalid";
+          // }
           return {
             ...participant,
-            vatStatus: response.data ? "valid" : "invalid",
+            //complianceStatus: response.data ? "valid" : "invalid",
+            complianceStatus: status,
           };
         } catch {
-          return { ...participant, vatStatus: "invalid" };
+          return { ...participant, complianceStatus: "invalid" };
         }
       })
     );
@@ -254,10 +288,11 @@ const Participant = () => {
                   <LeftCard
                     id={participant.id}
                     name={participant.name}
-                    vatNumber={participant.vatNumber}
-                    vatStatus={participant.vatStatus}
+                    lrnCode={participant.lrnCode}
+                    complianceStatus={participant.complianceStatus}
                     address={participant.address}
-                    // logoUrl={participant.logo}
+                    lrnType={participant.lrnType}
+                  // logoUrl={participant.logo}
                   />
                 </CardContainer>
               ))}
@@ -276,13 +311,14 @@ const Participant = () => {
                     id={selectedCard.id}
                     name={selectedCard.name}
                     address={selectedCard.address}
-                    vatNumber={selectedCard.vatNumber}
-                    vatStatus={selectedCard.vatStatus}
+                    lrnCode={selectedCard.lrnCode}
+                    complianceStatus={selectedCard.complianceStatus}
                     description={selectedCard.description}
                     headquartersAddress={selectedCard.headquartersAddress}
                     legalAddress={selectedCard.legalAddress}
                     parentOrganization={selectedCard.parentOrganization}
                     subOrganization={selectedCard.parentOrganization}
+                    lrnType={selectedCard.lrnType}
                   />
                 </Paper>
               </DetailsPane>
