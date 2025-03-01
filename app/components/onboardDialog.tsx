@@ -114,7 +114,7 @@ export default function OnboardParticipant(props: ResponsiveDialogProps) {
           reader.onload = (e) => {
             try {
               const parsedData = JSON.parse(e.target?.result as string);
-              setJsonContent(parsedData); // Store parsed JSON in state
+              setJsonContent(parsedData);
             } catch (err) {
               console.error(err);
               setError("Error parsing JSON file.");
@@ -146,14 +146,13 @@ export default function OnboardParticipant(props: ResponsiveDialogProps) {
     const selfDescription = jsonContent || JSON.parse(textInput);
     try {
       isParticipant ? await apiService.createParticipant(JSON.stringify(selfDescription)) : await apiService.createServiceOffering(JSON.stringify(selfDescription));
-      handleApiResponse("Participant created successfully!", "success");
+    handleApiResponse(`${isParticipant ? "Participant" : "Data offer"} created successfully!`, "success");
     } catch (error) {
       handleApiResponse(
-        "Failed to create participant. Please try again.",
+        `Failed to create ${isParticipant ? "Participant" : "Data offer"}. Please try again.`,
         "error"
       );
-      console.error("Failed to create participant", error);
-      // setError("Failed to create participant. Please try again.");
+      console.error(`Failed to create ${isParticipant ? "Participant" : "Data offer"}.`, error);
     }
     // Refresh participants list
     refreshList();
@@ -194,7 +193,7 @@ export default function OnboardParticipant(props: ResponsiveDialogProps) {
         open={open}
         onClose={handleClose}
         aria-labelledby="responsive-dialog-title"
-        maxWidth="lg" // Make the dialog wider
+        maxWidth="md" // The dialog size
         fullWidth={true} // Ensure it takes the full available width
       >
         <DialogTitle id="responsive-dialog-title">
