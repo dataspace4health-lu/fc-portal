@@ -112,7 +112,6 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
           statusDatetime={issuanceDate}
           uploadDatetime={statusDatetime}
           issuerName={issuerName}
-          disableTooltip
         />
         {/* <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
           <Button variant="contained" color="primary">

@@ -11,12 +11,18 @@ interface SdLeftCardProps {
   uploadDatetime: string;
   displayButtons?: boolean;
   issuerName: string;
-  disableTooltip?: boolean;
 }
 
 export default function LeftCard(sdLeftCardProps: SdLeftCardProps) {
-  const { sdName, issuer, status, uploadDatetime, displayButtons, issuerName, disableTooltip } =
+  const { sdName, issuer, status, uploadDatetime, displayButtons, issuerName } =
     sdLeftCardProps;
+
+    const truncateText = (text: string, maxLength: number) => {
+      return text.length > maxLength
+        ? text.substring(0, maxLength) + "..."
+        : text;
+    };
+  
 
   return (
     <Box
@@ -41,7 +47,8 @@ export default function LeftCard(sdLeftCardProps: SdLeftCardProps) {
       </Box>
 
       {/* Data Provider with Truncation */}
-      <Tooltip title={issuerName || issuer} arrow disableInteractive disableHoverListener={disableTooltip}>
+      <Tooltip title={issuerName || issuer} arrow disableInteractive disableHoverListener={!!issuerName || issuer?.length <= 30}>
+        <Box>
         <Typography
           // variant="h6"
           variant="body1"
@@ -55,8 +62,9 @@ export default function LeftCard(sdLeftCardProps: SdLeftCardProps) {
             cursor: "pointer",
           }}
         >
-          Data provider: {issuerName || issuer}
+          Data provider: {issuerName || truncateText(issuer, 30)}
         </Typography>
+        </Box>
       </Tooltip>
 
       {/* Status & Creation Date */}
