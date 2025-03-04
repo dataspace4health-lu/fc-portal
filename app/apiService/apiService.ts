@@ -62,10 +62,10 @@ class ApiService {
     }
   }
 
-  async getServiceOfferings() {
+  async getServiceOfferings(withContent: boolean) {
     await this.fetchTokenIfNeeded();
     try {
-      return await this.selfDescriptionsApi.readSelfDescriptions();
+      return await this.selfDescriptionsApi.readSelfDescriptions(undefined, undefined, undefined, undefined, undefined, undefined, undefined,undefined, withContent, undefined, undefined, undefined);
     } catch (error: unknown) {
       const apiError = error as ApiError;
       if (apiError.response && apiError.response.status === 401) {

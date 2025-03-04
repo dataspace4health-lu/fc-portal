@@ -145,8 +145,12 @@ export default function OnboardParticipant(props: ResponsiveDialogProps) {
     setUploading(true);
     const selfDescription = jsonContent || JSON.parse(textInput);
     try {
-      isParticipant ? await apiService.createParticipant(JSON.stringify(selfDescription)) : await apiService.createServiceOffering(JSON.stringify(selfDescription));
-    handleApiResponse(`${isParticipant ? "Participant" : "Data offer"} created successfully!`, "success");
+      if (isParticipant) {
+        await apiService.createParticipant(JSON.stringify(selfDescription));
+      } else {
+        await apiService.createServiceOffering(JSON.stringify(selfDescription));
+      }
+      handleApiResponse(`${isParticipant ? "Participant" : "Data offer"} created successfully!`, "success");
     } catch (error) {
       handleApiResponse(
         `Failed to create ${isParticipant ? "Participant" : "Data offer"}. Please try again.`,

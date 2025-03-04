@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import * as React from "react";
 import { Box, Typography, Paper, Button } from "@mui/material";
@@ -28,8 +29,20 @@ interface Meta {
   content: string | undefined;
 }
 interface SelfDescription {
-  content?: string | undefined;
+  content: string;
   meta: Meta;
+  sdName: string;
+  sdDescription: string;
+  dataProtectionRegime: string;
+  policy: string;
+  accessType: string;
+  formatType: string;
+  requestType: string;
+  termsAndConditionsUrl: string;
+  issuerName: string;
+  issuerDescription: string;
+  issuerLegalAddress: string;
+  issuerHeadquarterAddress: string;
 }
 
 const Sidebar = styled(Box)(({ theme }) => ({
@@ -93,11 +106,80 @@ const ServiceOffering = () => {
 
   async function fetchData() {
     try {
-      const response = await selfDescriptionApiService.getServiceOfferings();
+      const response =
+        await selfDescriptionApiService.getServiceOfferings(true);
       if (response?.data?.items) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const sd: any = response?.data?.items;
-        setSelfDescriptionsList(sd);
+        const selfDescriptions: any = response?.data?.items;
+        const serviceOfferingVp = selfDescriptions.filter((ele: any) => {
+          const content = JSON.parse(ele.content || "");
+          const serviceOfferingVc = content.verifiableCredential.find(
+            (c: any) => c.type.indexOf("gx:ServiceOffering") !== -1
+          );
+          return serviceOfferingVc;
+        });
+        const modifiedSd = serviceOfferingVp.map((sd: any) => {
+          const content = JSON.parse(sd.content || "");
+          const serviceOfferingVc = content.verifiableCredential.find(
+            (c: any) => c.type.indexOf("gx:ServiceOffering") !== -1
+          )?.credentialSubject;
+          const sdName = serviceOfferingVc ? serviceOfferingVc["gx:name"] : "";
+          const sdDescription = serviceOfferingVc
+            ? serviceOfferingVc["gx:description"]
+            : "";
+          const dataProtectionRegime = serviceOfferingVc
+            ? serviceOfferingVc["gx:dataProtectionRegime"]
+            : "";
+          const policy = serviceOfferingVc
+            ? serviceOfferingVc["gx:policy"]
+            : "";
+          const accessType = serviceOfferingVc
+            ? serviceOfferingVc["gx:dataAccountExport"]["gx:accessType"]
+            : "";
+          const formatType = serviceOfferingVc
+            ? serviceOfferingVc["gx:dataAccountExport"]["gx:formatType"]
+            : "";
+          const requestType = serviceOfferingVc
+            ? serviceOfferingVc["gx:dataAccountExport"]["gx:requestType"]
+            : "";
+          const termsAndConditionsUrl = serviceOfferingVc
+            ? serviceOfferingVc["gx:termsAndConditions"]["gx:URL"]
+            : "";
+
+          const legalParticipantVc = content.verifiableCredential.find(
+            (c: any) => c.type.indexOf("gx:LegalParticipant") !== -1
+          );
+          console.log("legalParticipantVc", legalParticipantVc);
+          const issuerName =
+            legalParticipantVc?.credentialSubject["gx:legalName"];
+          const issuerDescription =
+            legalParticipantVc?.credentialSubject["gx:description"];
+          const issuerHeadquarterAddress =
+            legalParticipantVc?.credentialSubject["gx:headquarterAddress"][
+              "gx:countrySubdivisionCode"
+            ];
+          const issuerLegalAddress =
+            legalParticipantVc?.credentialSubject["gx:legalAddress"][
+              "gx:countrySubdivisionCode"
+            ];
+
+          return {
+            ...sd,
+            sdName,
+            sdDescription,
+            content,
+            dataProtectionRegime,
+            policy,
+            accessType,
+            formatType,
+            requestType,
+            termsAndConditionsUrl,
+            issuerName,
+            issuerDescription,
+            issuerHeadquarterAddress,
+            issuerLegalAddress,
+          };
+        });
+        setSelfDescriptionsList(modifiedSd);
       }
     } catch (err: unknown) {
       const apiError = err as ApiError;
@@ -113,8 +195,6 @@ const ServiceOffering = () => {
       setFilteredSelfDescriptions(selfDescriptionsList); // Initialize with the full list
     }
   }, [selfDescriptionsList]);
-
-  console.log("selfDescriptionsList", selfDescriptionsList);
 
   const handleValueChange = (value: { id: string; label: string } | null) => {
     setSelectedOption(value);
@@ -132,17 +212,10 @@ const ServiceOffering = () => {
 
   const handleCardClick = async (card: SelfDescription) => {
     setSelectedCard(card);
-    console.log("card", card);
-    const response = await selfDescriptionApiService.getServiceOfferingDetails(
-      card.meta.sdHash
-    );
-    console.log("response", response);
-    if (response) {
-      // setSelfDescriptionsData(response);
-    }
   };
 
   const handleSearch = (query: string | null) => {
+    setSelectedCard(undefined);
     if (!query) {
       setFilteredSelfDescriptions(selfDescriptionsList || []); // Reset to the full list
       return;
@@ -150,12 +223,18 @@ const ServiceOffering = () => {
 
     const lowerCaseQuery = query.toLowerCase();
     const filtered = (selfDescriptionsList || []).filter((sd) => {
-      console.log("sd", sd);
       return (
         sd.meta.issuer.toLowerCase().includes(lowerCaseQuery) ||
         sd.meta.status.toLowerCase().includes(lowerCaseQuery) ||
         sd.meta.statusDatetime.toLowerCase().includes(lowerCaseQuery) ||
-        sd.meta.uploadDatetime.toLowerCase().includes(lowerCaseQuery)
+        sd.meta.uploadDatetime.toLowerCase().includes(lowerCaseQuery) ||
+        sd?.sdName?.toLowerCase().includes(lowerCaseQuery) ||
+        sd?.sdDescription?.toLowerCase().includes(lowerCaseQuery) ||
+        sd?.dataProtectionRegime?.toLowerCase().includes(lowerCaseQuery) ||
+        sd?.policy?.toLowerCase().includes(lowerCaseQuery) ||
+        sd?.accessType?.toLowerCase().includes(lowerCaseQuery) ||
+        sd?.formatType?.toLowerCase().includes(lowerCaseQuery) ||
+        sd?.requestType?.toLowerCase().includes(lowerCaseQuery)
       );
     });
 
@@ -192,6 +271,11 @@ const ServiceOffering = () => {
       </Box>
 
       <Grid container sx={{ height: "100vh" }}>
+        {filteredSelfDescriptions?.length === 0 && (
+          <Typography variant="h6" sx={{ m: 2 }}>
+            No results found
+          </Typography>
+        )}
         {/* Left Pane: Vertical Cards */}
         <Grid size={{ xs: 4 }}>
           <Sidebar>
@@ -202,11 +286,12 @@ const ServiceOffering = () => {
                 onClick={() => handleCardClick(sd)}
               >
                 <SdLeftCard
-                  content={sd.content}
+                  sdName={sd.sdName}
                   issuer={sd.meta.issuer}
                   status={sd.meta.status}
                   statusDatetime={sd.meta.statusDatetime}
                   uploadDatetime={sd.meta.uploadDatetime}
+                  issuerName={sd.issuerName}
                 />
               </CardContainer>
             ))}
@@ -217,28 +302,26 @@ const ServiceOffering = () => {
         {selectedCard && (
           <Grid size={{ xs: 8 }}>
             <DetailsPane>
-              <Typography variant="h4" gutterBottom>
-                {selectedCard.content}
-              </Typography>
               <Paper elevation={3}>
                 <ServiceOfferingDetailsData
-                  content={selectedCard.content}
+                  sdName={selectedCard.sdName}
+                  sdDescription={selectedCard.sdDescription}
                   status={selectedCard.meta.status}
-                  projectTitle={selectedCard.content}
+                  dataProtectionRegime={selectedCard.dataProtectionRegime}
+                  policy={selectedCard.policy}
+                  accessType={selectedCard.accessType}
+                  formatType={selectedCard.formatType}
+                  requestType={selectedCard.requestType}
                   issuer={selectedCard.meta.issuer}
-                  projectWebsite={""}
-                  studyTitle={""}
-                  version={""}
                   issuanceDate={selectedCard.meta.uploadDatetime}
                   statusDatetime={selectedCard.meta.statusDatetime}
-                  experimentTypes={""}
-                  typeOfSamplesCollected={""}
-                  numberOfSamplesCollected={""}
-                  diseasesInSamples={""}
-                  dataManager={""}
-                  email={""}
-                  affiliation={""}
-                  // Add other required props here
+                  termsAndConditionsUrl={selectedCard.termsAndConditionsUrl}
+                  issuerName={selectedCard.issuerName}
+                  issuerDescription={selectedCard.issuerDescription}
+                  issuerLegalAddress={selectedCard.issuerLegalAddress}
+                  issuerHeadquarterAddress={
+                    selectedCard.issuerHeadquarterAddress
+                  }
                 />
               </Paper>
             </DetailsPane>

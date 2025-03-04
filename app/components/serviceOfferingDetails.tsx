@@ -5,84 +5,82 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import KeyValueCard from "./keyValueCard";
-import { Box, Button, Divider } from "@mui/material";
+import { Box, Divider, Link } from "@mui/material";
 import { formatDate } from "../utils/functions";
-import Grid from "@mui/material/Grid2";
-
+import LeftCard from "./sdLeftCard";
 
 interface DetailsProps {
-  content: string | undefined;
+  sdName: string;
+  sdDescription: string;
+  dataProtectionRegime: string;
+  policy: string;
+  accessType: string;
+  formatType: string;
+  requestType: string;
+  termsAndConditionsUrl: string;
   status: string;
-  projectTitle: string | undefined;
-  projectWebsite: string;
-  studyTitle: string;
-  version: string;
   issuanceDate: string;
   statusDatetime: string;
-  experimentTypes: string;
-  typeOfSamplesCollected: string;
-  numberOfSamplesCollected: string;
-  diseasesInSamples: string;
   issuer: string;
-  dataManager: string;
-  email: string;
-  affiliation: string;
+  issuerName: string;
+  issuerDescription: string;
+  issuerLegalAddress: string;
+  issuerHeadquarterAddress: string;
 }
 export default function ServiceOfferingDetailsData(props: DetailsProps) {
   const {
-    content,
+    sdName,
+    sdDescription,
     status,
-    projectTitle,
-    projectWebsite,
-    studyTitle,
-    version,
+    accessType,
+    formatType,
+    requestType,
+    policy,
     issuanceDate,
     statusDatetime,
-    experimentTypes,
-    typeOfSamplesCollected,
-    numberOfSamplesCollected,
-    diseasesInSamples,
     issuer,
-    dataManager,
-    email,
-    affiliation,
+    termsAndConditionsUrl,
+    issuerName,
+    issuerDescription,
+    issuerLegalAddress,
+    issuerHeadquarterAddress,
   } = props;
-  const projectList = [
-    {
-      key: "Project title",
-      value: projectTitle || "-",
-    },
-    { key: "Project website", value: projectWebsite || "-" },
-  ];
+  // const projectList = [
+  //   {
+  //     key: "Project title",
+  //     value: projectTitle || "-",
+  //   },
+  //   { key: "Project website", value: projectWebsite || "-" },
+  // ];
 
-  const studiesList = [
-    {
-      key: "Study title",
-      value: studyTitle || "-",
-    },
-  ];
+  // const studiesList = [
+  //   {
+  //     key: "Study title",
+  //     value: studyTitle || "-",
+  //   },
+  // ];
 
   const generalDatasetInfoList = [
-    { key: "Version", value: version || "-" },
+    { key: "Description", value: sdDescription || "-" },
     { key: "Date of creation of the dataset", value: formatDate(issuanceDate) },
     {
       key: "Date of the last update of the dataset",
       value: formatDate(statusDatetime),
     },
-    { key: "Experiment types", value: experimentTypes || "-" },
-    { key: "Type of Samples Collected", value: typeOfSamplesCollected || "-" },
+    { key: "Request Type", value: requestType || "-" },
     {
-      key: "Number of Samples Collected",
-      value: numberOfSamplesCollected || "-",
+      key: "Access Type",
+      value: accessType || "-",
     },
-    { key: "Diseases in samples", value: diseasesInSamples || "-" },
+    { key: "Format Type", value: formatType || "-" },
+    { key: "Policy", value: policy || "-" },
   ];
 
   const DatasetContactsList = [
-    { key: "Data owner", value: issuer || "-" },
-    { key: "Data manager", value: dataManager || "-" },
-    { key: "email", value: email || "-" },
-    { key: "affiliation", value: affiliation || "-" },
+    { key: "Data Owner", value: issuerName || issuer || "-" },
+    { key: "Owner Description", value: issuerDescription || "-" },
+    { key: "Legal Address", value: issuerLegalAddress || "-" },
+    { key: "Headquarter Address", value: issuerHeadquarterAddress || "-" },
   ];
 
   return (
@@ -107,69 +105,29 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
           gap: 2,
         }}
       >
-        <Box>
-          <Grid
-            container
-            spacing={2}
-            direction="row"
-            sx={{
-              justifyContent: "space-between",
-              alignItems: "flex-start",
-            }}
-          >
-            <Grid sx={{ mb: 6 }}>
-              <Typography variant="h6" fontWeight="bold">
-                {content}
-              </Typography>
-              <Typography
-                variant="body1"
-                color="text.secondary"
-                fontWeight="bold"
-              >
-                Data provider: {issuer}
-              </Typography>
-            </Grid>
-              <span
-                  style={{
-                    // backgroundColor: vatStatus === "valid" ? "green" : "red",
-                    color: "white",
-                    padding: "5px",
-                    borderRadius: "5px",
-                  }}
-                >
-                  {status === "active" ? "✅" : "❌"}
-                </span>
-          </Grid>
-          <Grid
-            container
-            spacing={2}
-            direction="row"
-            sx={{
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <Grid>
-              <Typography variant="body1" color="text.secondary">
-                Creation date: {formatDate(issuanceDate)}
-              </Typography>
-            </Grid>
-          </Grid>
-        </Box>
-        <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
+        <LeftCard
+          sdName={sdName}
+          issuer={issuer}
+          status={status}
+          statusDatetime={issuanceDate}
+          uploadDatetime={statusDatetime}
+          issuerName={issuerName}
+          disableTooltip
+        />
+        {/* <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
           <Button variant="contained" color="primary">
             Request access to the dataset
           </Button>
           <Button variant="contained" color="secondary">
             Download metadata
           </Button>
-        </Box>
+        </Box> */}
       </Box>
 
       {/* Accordion Section */}
       {[
-        { title: "Project", data: projectList },
-        { title: "Studies", data: studiesList },
+        // { title: "Project", data: projectList },
+        // { title: "Studies", data: studiesList },
         { title: "General Dataset Information", data: generalDatasetInfoList },
         { title: "Dataset contacts", data: DatasetContactsList },
         { title: "Data Sharing Agreement (DSA)", data: null },
@@ -203,7 +161,9 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
             {section.data ? (
               <KeyValueCard keyValueList={section.data} />
             ) : (
-              <Typography>Download document</Typography>
+              <Link href={termsAndConditionsUrl} target="_blank">
+                Download document
+              </Link>
             )}
           </AccordionDetails>
         </Accordion>
