@@ -5,9 +5,14 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import KeyValueCard from "./keyValueCard";
-import { Box, Divider, Link } from "@mui/material";
+import { Box, Button, Divider, Link } from "@mui/material";
 import { formatDate } from "../utils/functions";
 import LeftCard from "./sdLeftCard";
+import SimpleDialog from "./simpleDialog";
+import { useMemo, useState } from "react";
+import ApiService from "../apiService/apiService";
+import { useRouter } from "next/navigation";
+import SnackbarComponent from "./snackbar";
 
 interface DetailsProps {
   sdName: string;
@@ -26,6 +31,8 @@ interface DetailsProps {
   issuerDescription: string;
   issuerLegalAddress: string;
   issuerHeadquarterAddress: string;
+  selfDescriptionHash: string;
+  refreshList: () => void;
 }
 export default function ServiceOfferingDetailsData(props: DetailsProps) {
   const {
@@ -44,7 +51,32 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
     issuerDescription,
     issuerLegalAddress,
     issuerHeadquarterAddress,
+    selfDescriptionHash,
+    refreshList,
   } = props;
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = React.useState(false);
+  const [snackbarMessage, setSnackbarMessage] = React.useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = React.useState<
+      "success" | "error"
+    >("success");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  const selfDescriptionApiService = useMemo(
+    () => new ApiService(() => router.push("/")),
+    []
+  );
+
+  const handleApiResponse = (
+    message: string,
+    severity: "success" | "error"
+  ) => {
+    setSnackbarMessage(message);
+    setSnackbarSeverity(severity);
+    setSnackbarOpen(true);
+  };
+
   // const projectList = [
   //   {
   //     key: "Project title",
@@ -83,6 +115,25 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
     { key: "Headquarter Address", value: issuerHeadquarterAddress || "-" },
   ];
 
+  const handleConfirmDelete = async () => {
+    setLoading(true);
+    try {
+      await selfDescriptionApiService.deleteServiceOffering(
+        selfDescriptionHash
+      );
+      handleApiResponse("Data offer deleted successfully!", "success");
+    } catch (error) {
+      handleApiResponse(
+        `Failed to create Data offer. Please try again.`,
+        "error"
+      );
+      console.error("error", error);
+    }
+    refreshList();
+    setOpenDeleteDialog(false);
+    setLoading(false);
+  };
+
   return (
     <Box
       sx={{
@@ -92,6 +143,16 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
         boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
       }}
     >
+      <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+        <Button
+          variant="contained"
+          color="error"
+          sx={{ mb: 4 }}
+          onClick={() => setOpenDeleteDialog(true)}
+        >
+          Delete
+        </Button>
+      </Box>
       {/* Header Section */}
       <Box
         sx={{
@@ -173,6 +234,23 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
       <Typography variant="body2" color="text.secondary" align="center">
         Last updated: {formatDate(statusDatetime)}
       </Typography>
+
+      <SimpleDialog
+        open={openDeleteDialog}
+        setOpen={setOpenDeleteDialog}
+        title={"Delete Data Offer"}
+        description={
+          "Are you sure you want to delete this data offer? This action cannot be undone."
+        }
+        handleConfirmDelete={handleConfirmDelete}
+        loading={loading}
+      />
+      <SnackbarComponent
+        open={snackbarOpen}
+        message={snackbarMessage}
+        severity={snackbarSeverity}
+        onClose={() => setSnackbarOpen(false)}
+      />
     </Box>
   );
 }

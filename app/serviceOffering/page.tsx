@@ -322,6 +322,8 @@ const ServiceOffering = () => {
                   issuerHeadquarterAddress={
                     selectedCard.issuerHeadquarterAddress
                   }
+                  selfDescriptionHash={selectedCard.meta.sdHash}
+                  refreshList={fetchData}
                 />
               </Paper>
             </DetailsPane>
