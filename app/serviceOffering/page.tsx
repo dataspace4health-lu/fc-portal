@@ -43,6 +43,7 @@ interface SelfDescription {
   issuerDescription: string;
   issuerLegalAddress: string;
   issuerHeadquarterAddress: string;
+  complianceCheck: boolean;
 }
 
 const Sidebar = styled(Box)(({ theme }) => ({
@@ -117,68 +118,73 @@ const ServiceOffering = () => {
           );
           return serviceOfferingVc;
         });
-        const modifiedSd = serviceOfferingVp.map((sd: any) => {
-          const content = JSON.parse(sd.content || "");
-          const serviceOfferingVc = content.verifiableCredential.find(
-            (c: any) => c.type.indexOf("gx:ServiceOffering") !== -1
-          )?.credentialSubject;
-          const sdName = serviceOfferingVc ? serviceOfferingVc["gx:name"] : "";
-          const sdDescription = serviceOfferingVc
-            ? serviceOfferingVc["gx:description"]
-            : "";
-          const dataProtectionRegime = serviceOfferingVc
-            ? serviceOfferingVc["gx:dataProtectionRegime"]
-            : "";
-          const policy = serviceOfferingVc
-            ? serviceOfferingVc["gx:policy"]
-            : "";
-          const accessType = serviceOfferingVc
-            ? serviceOfferingVc["gx:dataAccountExport"]["gx:accessType"]
-            : "";
-          const formatType = serviceOfferingVc
-            ? serviceOfferingVc["gx:dataAccountExport"]["gx:formatType"]
-            : "";
-          const requestType = serviceOfferingVc
-            ? serviceOfferingVc["gx:dataAccountExport"]["gx:requestType"]
-            : "";
-          const termsAndConditionsUrl = serviceOfferingVc
-            ? serviceOfferingVc["gx:termsAndConditions"]["gx:URL"]
-            : "";
-
-          const legalParticipantVc = content.verifiableCredential.find(
-            (c: any) => c.type.indexOf("gx:LegalParticipant") !== -1
-          );
-          console.log("legalParticipantVc", legalParticipantVc);
-          const issuerName =
-            legalParticipantVc?.credentialSubject["gx:legalName"];
-          const issuerDescription =
-            legalParticipantVc?.credentialSubject["gx:description"];
-          const issuerHeadquarterAddress =
-            legalParticipantVc?.credentialSubject["gx:headquarterAddress"][
-              "gx:countrySubdivisionCode"
-            ];
-          const issuerLegalAddress =
-            legalParticipantVc?.credentialSubject["gx:legalAddress"][
-              "gx:countrySubdivisionCode"
-            ];
-
-          return {
-            ...sd,
-            sdName,
-            sdDescription,
-            content,
-            dataProtectionRegime,
-            policy,
-            accessType,
-            formatType,
-            requestType,
-            termsAndConditionsUrl,
-            issuerName,
-            issuerDescription,
-            issuerHeadquarterAddress,
-            issuerLegalAddress,
-          };
-        });
+        const modifiedSd = await Promise.all(
+          serviceOfferingVp.map(async (sd: any) => {
+            const content = JSON.parse(sd.content || "");
+            const serviceOfferingVc = content.verifiableCredential.find(
+              (c: any) => c.type.indexOf("gx:ServiceOffering") !== -1
+            )?.credentialSubject;
+            const sdName = serviceOfferingVc ? serviceOfferingVc["gx:name"] : "";
+            const sdDescription = serviceOfferingVc
+              ? serviceOfferingVc["gx:description"]
+              : "";
+            const dataProtectionRegime = serviceOfferingVc
+              ? serviceOfferingVc["gx:dataProtectionRegime"]
+              : "";
+            const policy = serviceOfferingVc ? serviceOfferingVc["gx:policy"] : "";
+            const accessType = serviceOfferingVc
+              ? serviceOfferingVc["gx:dataAccountExport"]["gx:accessType"]
+              : "";
+            const formatType = serviceOfferingVc
+              ? serviceOfferingVc["gx:dataAccountExport"]["gx:formatType"]
+              : "";
+            const requestType = serviceOfferingVc
+              ? serviceOfferingVc["gx:dataAccountExport"]["gx:requestType"]
+              : "";
+            const termsAndConditionsUrl = serviceOfferingVc
+              ? serviceOfferingVc["gx:termsAndConditions"]["gx:URL"]
+              : "";
+        
+            const legalParticipantVc = content.verifiableCredential.find(
+              (c: any) => c.type.indexOf("gx:LegalParticipant") !== -1
+            );
+        
+            console.log("legalParticipantVc", legalParticipantVc);
+            const issuerName = legalParticipantVc?.credentialSubject["gx:legalName"];
+            const issuerDescription =
+              legalParticipantVc?.credentialSubject["gx:description"];
+            const issuerHeadquarterAddress =
+              legalParticipantVc?.credentialSubject["gx:headquarterAddress"][
+                "gx:countrySubdivisionCode"
+              ];
+            const issuerLegalAddress =
+              legalParticipantVc?.credentialSubject["gx:legalAddress"][
+                "gx:countrySubdivisionCode"
+              ];
+        
+            
+            const complianceCheck = (await selfDescriptionApiService.checkServiceOfferingCompliance(content));
+        
+            return {
+              ...sd,
+              sdName,
+              sdDescription,
+              content,
+              dataProtectionRegime,
+              policy,
+              accessType,
+              formatType,
+              requestType,
+              termsAndConditionsUrl,
+              issuerName,
+              issuerDescription,
+              issuerHeadquarterAddress,
+              issuerLegalAddress,
+              complianceCheck,
+            };
+          })
+        );
+        
         setSelfDescriptionsList(modifiedSd);
       }
     } catch (err: unknown) {
@@ -292,6 +298,7 @@ const ServiceOffering = () => {
                   statusDatetime={sd.meta.statusDatetime}
                   uploadDatetime={sd.meta.uploadDatetime}
                   issuerName={sd.issuerName}
+                  complianceCheck={sd.complianceCheck}
                 />
               </CardContainer>
             ))}
@@ -324,6 +331,7 @@ const ServiceOffering = () => {
                   }
                   selfDescriptionHash={selectedCard.meta.sdHash}
                   refreshList={fetchData}
+                  complianceCheck={selectedCard.complianceCheck}
                 />
               </Paper>
             </DetailsPane>

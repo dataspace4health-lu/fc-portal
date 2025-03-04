@@ -33,6 +33,7 @@ interface DetailsProps {
   issuerHeadquarterAddress: string;
   selfDescriptionHash: string;
   refreshList: () => void;
+  complianceCheck: boolean;
 }
 export default function ServiceOfferingDetailsData(props: DetailsProps) {
   const {
@@ -53,6 +54,7 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
     issuerHeadquarterAddress,
     selfDescriptionHash,
     refreshList,
+    complianceCheck,
   } = props;
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = React.useState(false);
@@ -173,6 +175,7 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
           statusDatetime={issuanceDate}
           uploadDatetime={statusDatetime}
           issuerName={issuerName}
+          complianceCheck={complianceCheck}
         />
         {/* <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
           <Button variant="contained" color="primary">

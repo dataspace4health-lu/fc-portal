@@ -121,6 +121,41 @@ class ApiService {
       throw apiError;
     }
   }
+
+  async checkServiceOfferingCompliance(serviceOfferingVp: any) {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_COMPLIANCE_URL}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(serviceOfferingVp),
+      });
+  
+      let responseData: any = null;
+      
+      try {
+        responseData = await response.json();
+      } catch (jsonError) {
+        console.warn("Failed to parse response JSON:", jsonError);
+      }
+  
+      if (!response.ok) {
+        return { 
+          success: false, 
+          status: response.status, 
+          message: responseData?.message || response.statusText || "Unknown error from server", 
+          details: responseData || null
+        };
+      }
+  
+      return { success: true, data: responseData };
+    } catch (error: unknown) {
+      return { success: false, status: 500, message: (error as Error).message || "Unknown error" };
+    }
+  }
+  
+  
 }
 
 export default ApiService;

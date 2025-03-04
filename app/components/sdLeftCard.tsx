@@ -2,6 +2,8 @@
 import * as React from "react";
 import { Typography, Box, Button, Tooltip } from "@mui/material";
 import { formatDate } from "../utils/functions";
+import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
+import GppMaybeIcon from '@mui/icons-material/GppMaybe';
 
 interface SdLeftCardProps {
   sdName: string | undefined;
@@ -11,11 +13,14 @@ interface SdLeftCardProps {
   uploadDatetime: string;
   displayButtons?: boolean;
   issuerName: string;
+  complianceCheck: any;
 }
 
 export default function LeftCard(sdLeftCardProps: SdLeftCardProps) {
-  const { sdName, issuer, status, uploadDatetime, displayButtons, issuerName } =
+  const { sdName, issuer, status, uploadDatetime, displayButtons, issuerName, complianceCheck } =
     sdLeftCardProps;
+
+    console.log("complianceCheck in left card", complianceCheck);
 
     const truncateText = (text: string, maxLength: number) => {
       return text.length > maxLength
@@ -44,6 +49,9 @@ export default function LeftCard(sdLeftCardProps: SdLeftCardProps) {
         <Typography variant="h6" fontWeight="bold">
           {sdName || "N/A"}
         </Typography>
+        <Tooltip title={complianceCheck.message } arrow>
+          {complianceCheck.success ? <VerifiedUserIcon sx={{ color: "green" }} /> : <GppMaybeIcon sx={{ color: "red" }} />}
+        </Tooltip>
       </Box>
 
       {/* Data Provider with Truncation */}
