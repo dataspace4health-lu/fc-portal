@@ -55,7 +55,7 @@ export default function LeftCard(sdLeftCardProps: SdLeftCardProps) {
           color="text.secondary"
           fontWeight="bold"
           sx={{
-            whiteSpace: "nowrap",
+            // whiteSpace: "nowrap",
             overflow: "hidden",
             textOverflow: "ellipsis",
             display: "inline-block",
