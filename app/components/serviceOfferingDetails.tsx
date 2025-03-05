@@ -43,7 +43,7 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
     accessType,
     formatType,
     requestType,
-    policy,
+    // policy,
     issuanceDate,
     statusDatetime,
     issuer,
@@ -60,8 +60,8 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
   const [snackbarOpen, setSnackbarOpen] = React.useState(false);
   const [snackbarMessage, setSnackbarMessage] = React.useState("");
   const [snackbarSeverity, setSnackbarSeverity] = React.useState<
-      "success" | "error"
-    >("success");
+    "success" | "error"
+  >("success");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -107,7 +107,7 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
       value: accessType || "-",
     },
     { key: "Format Type", value: formatType || "-" },
-    { key: "Policy", value: policy || "-" },
+    // { key: "Policy", value: policy || "-" },
   ];
 
   const DatasetContactsList = [
@@ -231,6 +231,79 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
           </AccordionDetails>
         </Accordion>
       ))}
+
+      {/* Policies section it will be commented for now */}
+      {/* <Accordion
+        sx={{
+          mb: 2,
+          "&:before": { display: "none" },
+          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+          border: "1px solid",
+          borderColor: "grey.300",
+          borderRadius: 2,
+          overflow: "hidden",
+        }}
+      >
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="use-restrictions-content"
+          id="use-restrictions-header"
+          sx={{
+            bgcolor: "grey.100",
+            "&:hover": { bgcolor: "grey.200" },
+            transition: "background-color 0.3s ease",
+          }}
+        >
+          <Typography fontWeight="bold">Use Restrictions</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          {[
+            {
+              title: "Permissions",
+              text: "Content for Permissions will go here.",
+            },
+            {
+              title: "Constrained Permissions",
+              text: "Content for Constrained Permissions will go here.",
+            },
+            {
+              title: "Obligations",
+              text: "Content for Obligations will go here.",
+            },
+          ].map((sectionTitle, index) => (
+            <Accordion
+              key={index}
+              sx={{
+                mb: 2,
+                "&:before": { display: "none" },
+                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+                border: "1px solid",
+                borderColor: "grey.300",
+                borderRadius: 2,
+                overflow: "hidden",
+              }}
+            >
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                aria-controls={`${sectionTitle.title.toLowerCase()}-content`}
+                id={`${sectionTitle.title.toLowerCase()}-header`}
+                sx={{
+                  bgcolor: "grey.100",
+                  "&:hover": { bgcolor: "grey.200" },
+                  transition: "background-color 0.3s ease",
+                }}
+              >
+                <Typography fontWeight="bold">{sectionTitle.title}</Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Typography variant="body2" color="text.secondary">
+                  {sectionTitle.text}
+                </Typography>
+              </AccordionDetails>
+            </Accordion>
+          ))}
+        </AccordionDetails>
+      </Accordion> */}
 
       <Divider sx={{ my: 3 }} />
 
