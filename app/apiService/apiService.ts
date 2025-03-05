@@ -122,6 +122,7 @@ class ApiService {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async checkServiceOfferingCompliance(serviceOfferingVp: any) {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_COMPLIANCE_URL}`, {
@@ -132,7 +133,7 @@ class ApiService {
         body: JSON.stringify(serviceOfferingVp),
       });
   
-      let responseData: any = null;
+      let responseData = null;
       
       try {
         responseData = await response.json();

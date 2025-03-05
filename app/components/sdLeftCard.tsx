@@ -13,14 +13,13 @@ interface SdLeftCardProps {
   uploadDatetime: string;
   displayButtons?: boolean;
   issuerName: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   complianceCheck: any;
 }
 
 export default function LeftCard(sdLeftCardProps: SdLeftCardProps) {
   const { sdName, issuer, status, uploadDatetime, displayButtons, issuerName, complianceCheck } =
     sdLeftCardProps;
-
-    console.log("complianceCheck in left card", complianceCheck);
 
     const truncateText = (text: string, maxLength: number) => {
       return text.length > maxLength

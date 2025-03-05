@@ -18,10 +18,6 @@ export default function SimpleDialog(props: DialogInterface) {
   const { open, setOpen, title, description, handleConfirmDelete, loading } = props;
   //   const [open, setOpen] = React.useState(false);
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
   const handleClose = () => {
     setOpen(false);
   };

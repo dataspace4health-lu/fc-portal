@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
@@ -6,13 +7,14 @@ import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import KeyValueCard from "./keyValueCard";
 import { Box, Button, Divider, Link } from "@mui/material";
-import { formatDate } from "../utils/functions";
+import { formatDate, formatLabel } from "../utils/functions";
 import LeftCard from "./sdLeftCard";
 import SimpleDialog from "./simpleDialog";
 import { useMemo, useState } from "react";
 import ApiService from "../apiService/apiService";
 import { useRouter } from "next/navigation";
 import SnackbarComponent from "./snackbar";
+import CriteriaSection from "./criteriaSection";
 
 interface DetailsProps {
   sdName: string;
@@ -34,6 +36,7 @@ interface DetailsProps {
   selfDescriptionHash: string;
   refreshList: () => void;
   complianceCheck: boolean;
+  labelLevelsVcs: any;
 }
 export default function ServiceOfferingDetailsData(props: DetailsProps) {
   const {
@@ -55,6 +58,7 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
     selfDescriptionHash,
     refreshList,
     complianceCheck,
+    labelLevelsVcs,
   } = props;
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = React.useState(false);
@@ -110,12 +114,35 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
     // { key: "Policy", value: policy || "-" },
   ];
 
-  const DatasetContactsList = [
+  const datasetContactsList = [
     { key: "Data Owner", value: issuerName || issuer || "-" },
     { key: "Owner Description", value: issuerDescription || "-" },
     { key: "Legal Address", value: issuerLegalAddress || "-" },
     { key: "Headquarter Address", value: issuerHeadquarterAddress || "-" },
   ];
+
+  const criteriaType = formatLabel(labelLevelsVcs.credentialSubject.type);
+  const criteria = labelLevelsVcs.credentialSubject["gx:criteria"];
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const {type, ...cleanedCriteria} = criteria
+
+
+  const dataCriteriaList = Object.entries(cleanedCriteria).map(([key, value]) => ({
+    name: key.substring(3),
+    ...(typeof value === 'object' && value !== null ? value : {})
+}));
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const finalCriteriaList = dataCriteriaList.map((ele: any) => {
+  return ({
+    description: ele["gx:description"],
+    response: ele["gx:response"],
+    name: ele.name,
+  })
+})
+
+
+  console.log("finalCriteriaList", finalCriteriaList);
 
   const handleConfirmDelete = async () => {
     setLoading(true);
@@ -192,8 +219,9 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
         // { title: "Project", data: projectList },
         // { title: "Studies", data: studiesList },
         { title: "General Dataset Information", data: generalDatasetInfoList },
-        { title: "Dataset contacts", data: DatasetContactsList },
+        { title: "Dataset contacts", data: datasetContactsList },
         { title: "Data Sharing Agreement (DSA)", data: null },
+        // { title: "Data Criteria", data: finalCriteriaList },
       ].map((section, index) => (
         <Accordion
           key={index}
@@ -233,7 +261,7 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
       ))}
 
       {/* Policies section it will be commented for now */}
-      {/* <Accordion
+      <Accordion
         sx={{
           mb: 2,
           "&:before": { display: "none" },
@@ -303,7 +331,47 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
             </Accordion>
           ))}
         </AccordionDetails>
-      </Accordion> */}
+      </Accordion>
+
+      {/* criteria section*/}
+
+      <Accordion
+      sx={{
+        mb: 2,
+        "&:before": { display: "none" },
+        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+        border: "1px solid",
+        borderColor: "grey.300",
+        borderRadius: 2,
+        overflow: "hidden",
+      }}
+    >
+      <AccordionSummary
+        expandIcon={<ExpandMoreIcon />}
+        aria-controls="criteria-content"
+        id="criteria-header"
+        sx={{
+          bgcolor: "grey.100",
+          "&:hover": { bgcolor: "grey.200" },
+          transition: "background-color 0.3s ease",
+        }}
+      >
+        <Typography fontWeight="bold">{criteriaType}</Typography>
+      </AccordionSummary>
+      <AccordionDetails>
+        {finalCriteriaList.length > 0 ? (
+          <CriteriaSection list={finalCriteriaList} />
+        ) : (
+          <Typography variant="body2" color="text.secondary">
+            No criteria available.
+          </Typography>
+        )}
+      </AccordionDetails>
+    </Accordion>
+      
+
+
+
 
       <Divider sx={{ my: 3 }} />
 

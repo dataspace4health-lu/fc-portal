@@ -44,6 +44,7 @@ interface SelfDescription {
   issuerLegalAddress: string;
   issuerHeadquarterAddress: string;
   complianceCheck: boolean;
+  labelLevelsVcs: any;
 }
 
 const Sidebar = styled(Box)(({ theme }) => ({
@@ -148,8 +149,6 @@ const ServiceOffering = () => {
             const legalParticipantVc = content.verifiableCredential.find(
               (c: any) => c.type.indexOf("gx:LegalParticipant") !== -1
             );
-        
-            console.log("legalParticipantVc", legalParticipantVc);
             const issuerName = legalParticipantVc?.credentialSubject["gx:legalName"];
             const issuerDescription =
               legalParticipantVc?.credentialSubject["gx:description"];
@@ -161,6 +160,12 @@ const ServiceOffering = () => {
               legalParticipantVc?.credentialSubject["gx:legalAddress"][
                 "gx:countrySubdivisionCode"
               ];
+            
+            const labelLevelsVcs = content.verifiableCredential.find((vc: any) => 
+              vc.type.some((type: string) => type.startsWith("gx:ServiceOfferingLabelLevel"))
+            );
+
+            console.log("labelLevelsVcs", labelLevelsVcs);
         
             
             const complianceCheck = (await selfDescriptionApiService.checkServiceOfferingCompliance(content));
@@ -181,6 +186,7 @@ const ServiceOffering = () => {
               issuerHeadquarterAddress,
               issuerLegalAddress,
               complianceCheck,
+              labelLevelsVcs,
             };
           })
         );
@@ -332,6 +338,7 @@ const ServiceOffering = () => {
                   selfDescriptionHash={selectedCard.meta.sdHash}
                   refreshList={fetchData}
                   complianceCheck={selectedCard.complianceCheck}
+                  labelLevelsVcs={selectedCard.labelLevelsVcs}
                 />
               </Paper>
             </DetailsPane>
