@@ -3,19 +3,25 @@ import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid2";
 import Typography from "@mui/material/Typography";
 import { styled } from "@mui/material/styles";
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CancelIcon from '@mui/icons-material/Cancel';
-import ErrorIcon from '@mui/icons-material/Error';
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CancelIcon from "@mui/icons-material/Cancel";
+import ErrorIcon from "@mui/icons-material/Error";
+import { Link } from "@mui/material";
+
+interface Evidence {
+    "gx:website"?: string;
+    "gx:pdf"?: string;
+}
 
 interface KeyValueList {
-  name: string;
-  description: string;
-  response: string;
-  
+    name: string;
+    description: string;
+    response: string;
+    evidence?: Evidence;
 }
 
 interface KeyValueCardProps {
-    list: KeyValueList[];
+  list: KeyValueList[];
 }
 
 const KeyContainer = styled(Typography)(({ theme }) => ({
@@ -30,15 +36,15 @@ const ValueContainer = styled(Typography)(({ theme }) => ({
 }));
 
 const displayIcon = (response: string) => {
-    switch (response) {
-        case "Confirm":
-            return <CheckCircleIcon sx={{ color: "green" }} />;
-        case "Deny":
-            return <CancelIcon sx={{ color: "red" }}/>;
-        default:
-            return <ErrorIcon sx={{ color: "orange" }}/>;
-    }
-}
+  switch (response) {
+    case "Confirm":
+      return <CheckCircleIcon sx={{ color: "green" }} />;
+    case "Deny":
+      return <CancelIcon sx={{ color: "red" }} />;
+    default:
+      return <ErrorIcon sx={{ color: "orange" }} />;
+  }
+};
 
 export default function CriteriaSection(props: KeyValueCardProps) {
   const { list } = props;
@@ -58,7 +64,6 @@ export default function CriteriaSection(props: KeyValueCardProps) {
           container
           spacing={2}
           key={ele.name}
-          
           sx={{
             mb: 2,
             alignItems: "center",
@@ -71,18 +76,34 @@ export default function CriteriaSection(props: KeyValueCardProps) {
             },
           }}
         >
-          <Grid size={{ xs: 2, md: 2 }}>
+          <Grid size={{ xs: 1, md: 1 }}>
             <KeyContainer variant="body2">{ele.name}</KeyContainer>
           </Grid>
           <Grid size={{ xs: 8, md: 8 }}>
             <ValueContainer variant="body2">{ele.description}</ValueContainer>
           </Grid>
-          <Grid 
-            size={{ xs: 2, md: 2 }} 
-            display="flex" 
-            justifyContent="center"
-          >
-            <ValueContainer variant="body2">{displayIcon(ele.response)}</ValueContainer>
+          <Grid size={{ xs: 1, md: 1 }} display="flex" justifyContent="center">
+            <ValueContainer variant="body2">
+              {displayIcon(ele.response)}
+            </ValueContainer>
+          </Grid>
+          <Grid size={{ xs: 1, md: 1 }}>
+            {ele.evidence && ele.evidence["gx:website"] &&
+            <ValueContainer variant="body2">
+            <Link href={ele.evidence["gx:website"]} target="_blank">
+                Evidence Website
+              </Link>
+              {/* {ele.evidence && ele.evidence["gx:website"]} */}
+            </ValueContainer>}
+          </Grid>
+          <Grid size={{ xs: 1, md: 1 }}>
+          {ele.evidence && ele.evidence["gx:website"] &&
+            <ValueContainer variant="body2">
+            <Link href={ele.evidence && ele.evidence["gx:pdf"]} target="_blank">
+                Evidence PDF
+              </Link>
+              {/* {ele.evidence && ele.evidence["gx:pdf"]} */}
+            </ValueContainer>}
           </Grid>
         </Grid>
       ))}

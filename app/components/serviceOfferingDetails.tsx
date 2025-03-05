@@ -125,22 +125,24 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
   const criteria = labelLevelsVcs.credentialSubject["gx:criteria"];
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const {type, ...cleanedCriteria} = criteria
+  const { type, ...cleanedCriteria } = criteria;
 
-
-  const dataCriteriaList = Object.entries(cleanedCriteria).map(([key, value]) => ({
-    name: key.substring(3),
-    ...(typeof value === 'object' && value !== null ? value : {})
-}));
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const finalCriteriaList = dataCriteriaList.map((ele: any) => {
-  return ({
-    description: ele["gx:description"],
-    response: ele["gx:response"],
-    name: ele.name,
-  })
-})
-
+  const dataCriteriaList = Object.entries(cleanedCriteria).map(
+    ([key, value]) => ({
+      name: key.substring(3),
+      ...(typeof value === "object" && value !== null ? value : {}),
+    })
+  );
+  console.log("dataCriteriaList", dataCriteriaList);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const finalCriteriaList = dataCriteriaList.map((ele: any) => {
+    return {
+      description: ele["gx:description"],
+      response: ele["gx:response"],
+      name: ele.name,
+      evidence: ele["gx:evidence"]
+    };
+  });
 
   console.log("finalCriteriaList", finalCriteriaList);
 
@@ -335,43 +337,39 @@ const finalCriteriaList = dataCriteriaList.map((ele: any) => {
 
       {/* criteria section*/}
 
-      <Accordion
-      sx={{
-        mb: 2,
-        "&:before": { display: "none" },
-        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-        border: "1px solid",
-        borderColor: "grey.300",
-        borderRadius: 2,
-        overflow: "hidden",
-      }}
-    >
-      <AccordionSummary
-        expandIcon={<ExpandMoreIcon />}
-        aria-controls="criteria-content"
-        id="criteria-header"
+      {finalCriteriaList && finalCriteriaList.length > 0 && <Accordion
         sx={{
-          bgcolor: "grey.100",
-          "&:hover": { bgcolor: "grey.200" },
-          transition: "background-color 0.3s ease",
+          mb: 2,
+          "&:before": { display: "none" },
+          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+          border: "1px solid",
+          borderColor: "grey.300",
+          borderRadius: 2,
+          overflow: "hidden",
         }}
       >
-        <Typography fontWeight="bold">{criteriaType}</Typography>
-      </AccordionSummary>
-      <AccordionDetails>
-        {finalCriteriaList.length > 0 ? (
-          <CriteriaSection list={finalCriteriaList} />
-        ) : (
-          <Typography variant="body2" color="text.secondary">
-            No criteria available.
-          </Typography>
-        )}
-      </AccordionDetails>
-    </Accordion>
-      
-
-
-
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="criteria-content"
+          id="criteria-header"
+          sx={{
+            bgcolor: "grey.100",
+            "&:hover": { bgcolor: "grey.200" },
+            transition: "background-color 0.3s ease",
+          }}
+        >
+          <Typography fontWeight="bold">{criteriaType}</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          {finalCriteriaList.length > 0 ? (
+            <CriteriaSection list={finalCriteriaList} />
+          ) : (
+            <Typography variant="body2" color="text.secondary">
+              No criteria available.
+            </Typography>
+          )}
+        </AccordionDetails>
+      </Accordion>}
 
       <Divider sx={{ my: 3 }} />
 
