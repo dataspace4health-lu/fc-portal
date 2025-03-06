@@ -15,6 +15,7 @@ import ApiService from "../apiService/apiService";
 import { useRouter } from "next/navigation";
 import SnackbarComponent from "./snackbar";
 import CriteriaSection from "./criteriaSection";
+import { SelfDescription } from "../serviceOffering/page";
 
 interface DetailsProps {
   sdName: string;
@@ -35,6 +36,7 @@ interface DetailsProps {
   issuerHeadquarterAddress: string;
   selfDescriptionHash: string;
   refreshList: () => void;
+  setSelectedCard: (val: SelfDescription | undefined) => void;
   complianceCheck: boolean;
   labelLevelsVcs: any;
 }
@@ -57,6 +59,7 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
     issuerHeadquarterAddress,
     selfDescriptionHash,
     refreshList,
+    setSelectedCard,
     complianceCheck,
     labelLevelsVcs,
   } = props;
@@ -121,11 +124,11 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
     { key: "Headquarter Address", value: issuerHeadquarterAddress || "-" },
   ];
 
-  const criteriaType = formatLabel(labelLevelsVcs.credentialSubject.type);
-  const criteria = labelLevelsVcs.credentialSubject["gx:criteria"];
+  const criteriaType = formatLabel(labelLevelsVcs?.credentialSubject?.type || "");
+  const criteria = labelLevelsVcs?.credentialSubject["gx:criteria"];
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { type, ...cleanedCriteria } = criteria;
+  const { type, ...cleanedCriteria } = criteria || {};
 
   const dataCriteriaList = Object.entries(cleanedCriteria).map(
     ([key, value]) => ({
@@ -133,7 +136,6 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
       ...(typeof value === "object" && value !== null ? value : {}),
     })
   );
-  console.log("dataCriteriaList", dataCriteriaList);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const finalCriteriaList = dataCriteriaList.map((ele: any) => {
     return {
@@ -163,6 +165,7 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
     refreshList();
     setOpenDeleteDialog(false);
     setLoading(false);
+    setSelectedCard(undefined);
   };
 
   return (
@@ -223,7 +226,6 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
         { title: "General Dataset Information", data: generalDatasetInfoList },
         { title: "Dataset contacts", data: datasetContactsList },
         { title: "Data Sharing Agreement (DSA)", data: null },
-        // { title: "Data Criteria", data: finalCriteriaList },
       ].map((section, index) => (
         <Accordion
           key={index}

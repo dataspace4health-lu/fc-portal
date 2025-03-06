@@ -69,6 +69,10 @@ export default function OnboardParticipant(props: ResponsiveDialogProps) {
 
   const handleClose = () => {
     setOpen(false);
+    setFiles([]);
+    setTextInput("");
+    setError(null);
+    setJsonContent(null);
   };
 
   const handleModeChange = (

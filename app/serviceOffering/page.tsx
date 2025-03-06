@@ -28,7 +28,7 @@ interface Meta {
   validators: string;
   content: string | undefined;
 }
-interface SelfDescription {
+export interface SelfDescription {
   content: string;
   meta: Meta;
   sdName: string;
@@ -337,6 +337,7 @@ const ServiceOffering = () => {
                   }
                   selfDescriptionHash={selectedCard.meta.sdHash}
                   refreshList={fetchData}
+                  setSelectedCard={setSelectedCard}
                   complianceCheck={selectedCard.complianceCheck}
                   labelLevelsVcs={selectedCard.labelLevelsVcs}
                 />
