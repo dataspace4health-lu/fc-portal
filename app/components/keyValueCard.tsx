@@ -3,6 +3,7 @@ import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid2";
 import Typography from "@mui/material/Typography";
 import { styled } from "@mui/material/styles";
+import ReactMarkdown from "react-markdown";
 
 interface KeyValueList {
   key: string;
@@ -58,7 +59,11 @@ export default function KeyValueCard(props: KeyValueCardProps) {
             <KeyContainer variant="body2">{ele.key}</KeyContainer>
           </Grid>
           <Grid size={{ xs: 6, md: 8 }}>
-            <ValueContainer variant="body2">{ele.value}</ValueContainer>
+            {ele.key === "Description" ? (
+              <ReactMarkdown>{ele.value}</ReactMarkdown>
+            ) : (
+              <ValueContainer variant="body2">{ele.value}</ValueContainer>
+            )}
           </Grid>
         </Grid>
       ))}
