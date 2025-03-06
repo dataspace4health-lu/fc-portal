@@ -125,7 +125,7 @@ class ApiService {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async checkServiceOfferingCompliance(serviceOfferingVp: any) {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_COMPLIANCE_URL}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_GAIAX_COMPLIANCE_URL}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
