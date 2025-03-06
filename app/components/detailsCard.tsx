@@ -5,19 +5,20 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import KeyValueCard from "./keyValueCard";
-import { Avatar, Box, Button } from "@mui/material";
+import { Box, Button, Tooltip } from "@mui/material";
 import Grid from "@mui/material/Grid2";
-import participants from "./participants.json";
 import { useRouter } from "next/navigation";
-
+import { complianceResponse } from "../utils/interfaces";
+import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
+import GppMaybeIcon from '@mui/icons-material/GppMaybe';
 interface detailsProps {
   name: string;
   id: string;
   logoUrl?: string; // Optional logo URL
   address: string;
-  lrnType:string | undefined;
+  lrnType: string | undefined;
   lrnCode: string;
-  complianceStatus: string;
+  complianceCheck: complianceResponse;
   description: string;
   legalAddress: string;
   headquartersAddress: string;
@@ -36,7 +37,7 @@ export default function DetailsData(detailsProps: detailsProps) {
     headquartersAddress,
     parentOrganization,
     subOrganization,
-    complianceStatus,
+    complianceCheck,
     lrnType,
   } = detailsProps;
   const router = useRouter();
@@ -93,12 +94,13 @@ export default function DetailsData(detailsProps: detailsProps) {
                 DS4H ID: {id}
               </Typography>
             </Grid>
-            <Avatar
-              alt={name}
-              sx={{ width: 56, height: 56, bgcolor: "primary.main" }}
-            >
-              {participants.find((ele) => ele.name === name)?.abbreviation}
-            </Avatar>
+            <Tooltip title={complianceCheck.message} arrow>
+              {complianceCheck.success ? (
+                <VerifiedUserIcon sx={{ color: "green" }} />
+              ) : (
+                <GppMaybeIcon sx={{ color: "red" }} />
+              )}
+            </Tooltip>
           </Grid>
           <Grid
             container
@@ -114,8 +116,8 @@ export default function DetailsData(detailsProps: detailsProps) {
                 Address: {address}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-              {lrnType} : {lrnCode}
-                <span
+                {lrnType} : {lrnCode}
+                {/* <span
                   style={{
                     // backgroundColor: complianceStatus === "valid" ? "green" : "red",
                     color: "white",
@@ -123,8 +125,8 @@ export default function DetailsData(detailsProps: detailsProps) {
                     borderRadius: "5px",
                   }}
                 >
-                  {complianceStatus === "valid" ? "✅" : "❌"}
-                </span>
+                  {complianceCheck.success ? "✅" : "❌"}
+                </span> */}
               </Typography>
             </Grid>
             <Grid>

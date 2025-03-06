@@ -146,7 +146,6 @@ class ApiService {
           success: false, 
           status: response.status, 
           message: responseData?.message || response.statusText || "Unknown error from server", 
-          details: responseData || null
         };
       }
   
