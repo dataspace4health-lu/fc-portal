@@ -142,7 +142,8 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
       description: ele["gx:description"],
       response: ele["gx:response"],
       name: ele.name,
-      evidence: ele["gx:evidence"]
+      evidence: ele["gx:evidence"],
+      reason: ele["gx:reason"],
     };
   });
 
