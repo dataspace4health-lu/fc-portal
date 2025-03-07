@@ -1,5 +1,5 @@
 "use client";
-import { Box, Typography, Paper, Button } from "@mui/material";
+import { Box, Paper, Button } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import { styled } from "@mui/material/styles";
 import LeftCard from "../components/leftCard";
