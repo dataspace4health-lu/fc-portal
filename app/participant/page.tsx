@@ -82,7 +82,7 @@ const Participant = () => {
   const [selectedOption, setSelectedOption] = useState<{
     id: string;
     label: string;
-  } | null>(options[0]);
+  } | null>(null);
   const [filteredParticipants, setFilteredParticipants] = useState<
     ParticipantsList[]
   >([]);

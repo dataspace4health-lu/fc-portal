@@ -15,6 +15,8 @@ import { useMemo, useState } from "react";
 import SimpleDialog from "./simpleDialog";
 import SnackbarComponent from "./snackbar";
 import ApiService from "../apiService/apiService";
+import ReactMarkdown from "react-markdown";
+
 interface detailsProps {
   name: string;
   id: string;
@@ -241,8 +243,8 @@ export default function DetailsData(detailsProps: detailsProps) {
             </Typography>
           </AccordionSummary>
           <AccordionDetails sx={{ bgcolor: "grey.50" }}>
-            {typeof section.content === "string" ? (
-              <Typography variant="body1">{section.content}</Typography>
+            {section.title === "Description" ? (
+              <ReactMarkdown>{section.content as string}</ReactMarkdown>
             ) : (
               section.content
             )}
