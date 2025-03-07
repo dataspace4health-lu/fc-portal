@@ -9,8 +9,12 @@ import { Box, Button, Tooltip } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import { useRouter } from "next/navigation";
 import { complianceResponse } from "../utils/interfaces";
-import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
-import GppMaybeIcon from '@mui/icons-material/GppMaybe';
+import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
+import GppMaybeIcon from "@mui/icons-material/GppMaybe";
+import { useMemo, useState } from "react";
+import SimpleDialog from "./simpleDialog";
+import SnackbarComponent from "./snackbar";
+import ApiService from "../apiService/apiService";
 interface detailsProps {
   name: string;
   id: string;
@@ -24,6 +28,8 @@ interface detailsProps {
   headquartersAddress: string;
   parentOrganization: string;
   subOrganization: string;
+  refreshList: () => void;
+  setSelectedCard: (val: undefined) => void;
 }
 
 export default function DetailsData(detailsProps: detailsProps) {
@@ -39,8 +45,18 @@ export default function DetailsData(detailsProps: detailsProps) {
     subOrganization,
     complianceCheck,
     lrnType,
+    refreshList,
+    setSelectedCard,
   } = detailsProps;
   const router = useRouter();
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = React.useState(false);
+  const [snackbarMessage, setSnackbarMessage] = React.useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = React.useState<
+    "success" | "error"
+  >("success");
+  const [loading, setLoading] = useState(false);
+
   const addressList = [
     { key: "Legal Address", value: legalAddress },
     { key: "Headquarters Address", value: headquartersAddress },
@@ -51,6 +67,38 @@ export default function DetailsData(detailsProps: detailsProps) {
     { key: "Sub organization", value: subOrganization },
   ];
 
+  const participantApiService = useMemo(
+    () => new ApiService(() => router.push("/")),
+    []
+  );
+
+  const handleApiResponse = (
+    message: string,
+    severity: "success" | "error"
+  ) => {
+    setSnackbarMessage(message);
+    setSnackbarSeverity(severity);
+    setSnackbarOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    setLoading(true);
+    try {
+      await participantApiService.deleteParticipant(id);
+      handleApiResponse("Data offer deleted successfully!", "success");
+    } catch (error) {
+      handleApiResponse(
+        `Failed to create Data offer. Please try again.`,
+        "error"
+      );
+      console.error("error", error);
+    }
+    refreshList();
+    setOpenDeleteDialog(false);
+    setLoading(false);
+    setSelectedCard(undefined);
+  };
+
   return (
     <Box
       sx={{
@@ -60,6 +108,16 @@ export default function DetailsData(detailsProps: detailsProps) {
         boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
       }}
     >
+      <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+        <Button
+          variant="contained"
+          color="error"
+          sx={{ mb: 4 }}
+          onClick={() => setOpenDeleteDialog(true)}
+        >
+          Delete
+        </Button>
+      </Box>
       <Box
         sx={{
           mb: 3,
@@ -191,6 +249,22 @@ export default function DetailsData(detailsProps: detailsProps) {
           </AccordionDetails>
         </Accordion>
       ))}
+      <SimpleDialog
+        open={openDeleteDialog}
+        setOpen={setOpenDeleteDialog}
+        title={"Delete Participant"}
+        description={
+          "Are you sure you want to delete this participant? This action cannot be undone."
+        }
+        handleConfirmDelete={handleConfirmDelete}
+        loading={loading}
+      />
+      <SnackbarComponent
+        open={snackbarOpen}
+        message={snackbarMessage}
+        severity={snackbarSeverity}
+        onClose={() => setSnackbarOpen(false)}
+      />
     </Box>
   );
 }

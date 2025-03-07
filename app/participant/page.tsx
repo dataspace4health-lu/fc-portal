@@ -123,7 +123,6 @@ const Participant = () => {
           };
 
           const complianceCheck = (await apiService.checkServiceOfferingCompliance(description)) as complianceResponse;
-          console.log("complianceCheck", complianceCheck);
           return {
             vp: JSON.stringify(item),
             id: item?.id || "",
@@ -219,35 +218,6 @@ const Participant = () => {
     setFilteredParticipants(filtered);
   };
 
-  // Function to verify VAT numbers
-  // const verifyVatNumbers = async (participants: ParticipantsList[]) => {
-  //   const updatedParticipants = await Promise.all(
-  //     participants.map(async (participant) => {
-  //       if (!participant.lrnCode) return participant;
-  //       console.log("participant", participant);
-  //       const participant
-
-  //         //const response = await axios.get(participant.lrnCode);
-  //         // const status = "invalid";
-  //         // TODO: Redesign the interface to asynchronously request the compliance for every item
-  //         const complianceCheck = (await apiService.checkServiceOfferingCompliance(JSON.parse(participant.vp || "").selfDescription));
-  //         console.log("compliance check", complianceCheck);
-  //         // if (process.env.NEXT_PUBLIC_GAIAX_COMPLIANCE_URL) {
-
-  //         //   const response = await axios.post(process.env.NEXT_PUBLIC_GAIAX_COMPLIANCE_URL, participant.vp);
-  //         //   status = response.status == 201 ? "valid" : "invalid";
-  //         // }
-  //         return {
-  //           ...participant,
-  //           //complianceStatus: response.data ? "valid" : "invalid",
-  //           complianceCheck: complianceCheck,
-  //         };
-  //     })
-  //   );
-
-  //   setParticipantsList(updatedParticipants);
-  // };
-
   const openOnboardingDialog = () => {
     setOpenModal(true);
   };
@@ -318,6 +288,8 @@ const Participant = () => {
                     parentOrganization={selectedCard.parentOrganization}
                     subOrganization={selectedCard.parentOrganization}
                     lrnType={selectedCard.lrnType}
+                    refreshList={fetchData}
+                    setSelectedCard={setSelectedCard}
                   />
                 </Paper>
               </DetailsPane>
