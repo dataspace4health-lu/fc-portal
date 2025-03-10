@@ -164,10 +164,7 @@ const ServiceOffering = () => {
             const labelLevelsVcs = content.verifiableCredential.find((vc: any) => 
               vc.type.some((type: string) => type.startsWith("gx:ServiceOfferingLabelLevel"))
             );
-
-            console.log("labelLevelsVcs", labelLevelsVcs);
         
-            
             const complianceCheck = (await selfDescriptionApiService.checkServiceOfferingCompliance(content));
         
             return {
@@ -227,7 +224,6 @@ const ServiceOffering = () => {
   };
 
   const handleSearch = (query: string | null) => {
-    setSelectedCard(undefined);
     if (!query) {
       setFilteredSelfDescriptions(selfDescriptionsList || []); // Reset to the full list
       return;
@@ -246,9 +242,18 @@ const ServiceOffering = () => {
         sd?.policy?.toLowerCase().includes(lowerCaseQuery) ||
         sd?.accessType?.toLowerCase().includes(lowerCaseQuery) ||
         sd?.formatType?.toLowerCase().includes(lowerCaseQuery) ||
-        sd?.requestType?.toLowerCase().includes(lowerCaseQuery)
+        sd?.requestType?.toLowerCase().includes(lowerCaseQuery) ||
+        sd?.issuerName?.toLowerCase().includes(lowerCaseQuery) ||
+        sd?.issuerDescription?.toLowerCase().includes(lowerCaseQuery) ||
+        sd?.issuerLegalAddress?.toLowerCase().includes(lowerCaseQuery) ||
+        sd?.issuerHeadquarterAddress?.toLowerCase().includes(lowerCaseQuery)
       );
     });
+
+    const foundSelectedSo = filtered.find((ele) => ele.meta.id === selectedCard?.meta?.id)
+    if(!foundSelectedSo) {
+      setSelectedCard(undefined);
+    }
 
     setFilteredSelfDescriptions(filtered);
   };

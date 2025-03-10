@@ -210,9 +210,17 @@ const Participant = () => {
         participant.name.toLowerCase().includes(lowerCaseQuery) ||
         participant.address.toLowerCase().includes(lowerCaseQuery) ||
         participant.lrnCode.toLowerCase().includes(lowerCaseQuery) ||
-        participant.description.toLowerCase().includes(lowerCaseQuery)
+        participant.description.toLowerCase().includes(lowerCaseQuery) ||
+        participant.subOrganization.toLowerCase().includes(lowerCaseQuery) ||
+        participant.parentOrganization.toLowerCase().includes(lowerCaseQuery) ||
+        participant.id.toLowerCase().includes(lowerCaseQuery)
       );
     });
+
+    const foundSelectedParticipant = filtered.find((ele) => ele.id === selectedCard?.id)
+    if(!foundSelectedParticipant) {
+      setSelectedCard(undefined);
+    }
 
     setFilteredParticipants(filtered);
   };

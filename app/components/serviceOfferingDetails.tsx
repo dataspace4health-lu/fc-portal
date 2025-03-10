@@ -147,8 +147,6 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
     };
   });
 
-  console.log("finalCriteriaList", finalCriteriaList);
-
   const handleConfirmDelete = async () => {
     setLoading(true);
     try {
