@@ -62,10 +62,10 @@ const DetailsPane = styled(Box)(({ theme }) => ({
 }));
 
 const options = [
-  { label: "content", id: "content" },
-  { label: "date", id: "date" },
-  { label: "issuer", id: "issuer" },
-  { label: "status", id: "status" },
+  { label: "Data Provider", id: "provider" },
+  { label: "Creation Date", id: "date" },
+  { label: "Status", id: "status" },
+  { label: "Compliance", id: "compliance" },
 ];
 
 const CardContainer = styled(Grid, {
@@ -207,17 +207,27 @@ const ServiceOffering = () => {
 
   const handleValueChange = (value: { id: string; label: string } | null) => {
     setSelectedOption(value);
-    if (value && selfDescriptionsList) {
-      const sortedList = [...selfDescriptionsList].sort((a, b) => {
-        const key = value.id as keyof SelfDescription;
-        if (typeof a[key] === "string" && typeof b[key] === "string") {
-          return (a[key] as string).localeCompare(b[key] as string);
-        }
-        return 0;
-      });
-      setSelfDescriptionsList(sortedList);
-    }
+    if (!value || !selfDescriptionsList) return;
+  
+    const key = value.id as keyof SelfDescription;
+  
+    const sortedList = [...selfDescriptionsList].sort((a, b) => {
+      switch (key as "date" | "provider" | "status" | "compliance") {
+        case "date":
+          return new Date(a.meta.statusDatetime).getTime() - new Date(b.meta.statusDatetime).getTime();
+        case "provider":
+          return a.issuerName.localeCompare(b.issuerName);
+        case "status":
+          return a.meta.status.localeCompare(b.meta.status);
+        // case "compliance":
+        //   return (a.complianceCheck.success ?? "").localeCompare(b.complianceCheck.success ?? "");
+        default:
+          return 0; // Ensures a valid return type
+      }
+    });
+    setSelfDescriptionsList(sortedList);
   };
+  
 
   const handleCardClick = async (card: SelfDescription) => {
     setSelectedCard(card);

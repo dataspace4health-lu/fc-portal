@@ -69,10 +69,10 @@ const CardContainer = styled(Grid, {
 }));
 
 const options = [
-  { id: "name", label: "name" },
-  { id: "id", label: "id" },
-  { id: "address", label: "address" },
-  { id: "Vat number", label: "Vat number" },
+  { id: "name", label: "Provider Name" },
+  { id: "id", label: "DS4H ID" },
+  { id: "address", label: "Address" },
+  { id: "number", label: "Lei Code-vatID-EORI-taxID-EUID" },
 ];
 
 const Participant = () => {
@@ -187,12 +187,23 @@ const Participant = () => {
   const handleValueChange = (value: { id: string; label: string } | null) => {
     setSelectedOption(value);
     if (value && participantsList) {
+      const key = value.id as keyof ParticipantsList;
+      
       const sortedList = [...participantsList].sort((a, b) => {
-        const key = value.id as keyof ParticipantsList;
-        if (typeof a[key] === "string" && typeof b[key] === "string") {
-          return (a[key] as string).localeCompare(b[key] as string);
+        switch (key as "name" | "id" | "address" | "number") {
+          case "name":
+            return a.name.localeCompare(b.name);
+          case "id":
+            return a.id.localeCompare(b.id);
+          case "address":
+            return a.address.localeCompare(b.address);
+          case "number":
+            return a.lrnCode.localeCompare(b.lrnCode);
+          // case "compliance":
+          //   return (a.complianceCheck.success ?? "").localeCompare(b.complianceCheck.success ?? "");
+          default:
+            return 0; // Ensures a valid return type
         }
-        return 0;
       });
       setParticipantsList(sortedList);
     }
