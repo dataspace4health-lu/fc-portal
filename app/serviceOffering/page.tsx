@@ -216,9 +216,9 @@ const ServiceOffering = () => {
         case "date":
           return new Date(a.meta.statusDatetime).getTime() - new Date(b.meta.statusDatetime).getTime();
         case "provider":
-          return a.issuerName.localeCompare(b.issuerName);
+          return a.issuerName.toLocaleUpperCase().localeCompare(b.issuerName.toLocaleUpperCase());
         case "status":
-          return a.meta.status.localeCompare(b.meta.status);
+          return a.meta.status.toLocaleUpperCase().localeCompare(b.meta.status.toLocaleUpperCase());
         // case "compliance":
         //   return (a.complianceCheck.success ?? "").localeCompare(b.complianceCheck.success ?? "");
         default:

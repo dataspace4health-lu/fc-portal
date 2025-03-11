@@ -192,13 +192,13 @@ const Participant = () => {
       const sortedList = [...participantsList].sort((a, b) => {
         switch (key as "name" | "id" | "address" | "number") {
           case "name":
-            return a.name.localeCompare(b.name);
+            return a.name.toLocaleUpperCase().localeCompare(b.name.toLocaleUpperCase());
           case "id":
-            return a.id.localeCompare(b.id);
+            return a.id.toLocaleUpperCase().localeCompare(b.id.toLocaleUpperCase());
           case "address":
-            return a.address.localeCompare(b.address);
+            return a.address.toLocaleUpperCase().localeCompare(b.address.toLocaleUpperCase());
           case "number":
-            return a.lrnCode.localeCompare(b.lrnCode);
+            return a.lrnCode.toLocaleUpperCase().localeCompare(b.lrnCode.toLocaleUpperCase());
           // case "compliance":
           //   return (a.complianceCheck.success ?? "").localeCompare(b.complianceCheck.success ?? "");
           default:
