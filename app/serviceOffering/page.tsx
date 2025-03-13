@@ -15,7 +15,7 @@ import ApiService from "../apiService/apiService";
 import { useRouter } from "next/navigation";
 import { ApiError } from "next/dist/server/api-utils";
 import SdLeftCard from "../components/sdLeftCard";
-import OnboardParticipant from "../components/onboardDialog";
+import OnboardDialog from "../components/onboardDialog";
 interface Meta {
   id: string;
   expirationTime: string | undefined;
@@ -165,7 +165,6 @@ const ServiceOffering = () => {
               vc.type.some((type: string) => type.startsWith("gx:ServiceOfferingLabelLevel"))
             );
 
-            console.log("labelLevelsVcs", labelLevelsVcs);
         
             
             const complianceCheck = (await selfDescriptionApiService.checkServiceOfferingCompliance(content));
@@ -340,17 +339,19 @@ const ServiceOffering = () => {
                   setSelectedCard={setSelectedCard}
                   complianceCheck={selectedCard.complianceCheck}
                   labelLevelsVcs={selectedCard.labelLevelsVcs}
+                  content={selectedCard.content}
                 />
               </Paper>
             </DetailsPane>
           </Grid>
         )}
       </Grid>
-      <OnboardParticipant
+      <OnboardDialog
         open={openModal}
         setOpen={setOpenModal}
         refreshList={fetchData}
         dialogTitle="Onboard New Data offer"
+        selfDescriptionType="dataOffering"
       />
     </div>
   );
