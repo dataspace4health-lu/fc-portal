@@ -350,14 +350,13 @@ export default function UsersManagement() {
                     <Select
                       labelId="participant-label"
                       name="participantId"
-                      value={selectedUser.participantId}
+                      value={selectedUser?.participantId || ""}
                       onChange={handleEditUserChange}
                       disabled={!isEditing}
                     >
                       {participants.map((participant) => (
                         <MenuItem key={participant.id} value={participant.id}>
                           {participant.name}{" "}
-                          {/* Assuming participants have 'id' and 'name' */}
                         </MenuItem>
                       ))}
                     </Select>
