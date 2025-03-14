@@ -7,11 +7,9 @@ import AccountCircle from "@mui/icons-material/AccountCircle";
 import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
 import { logout } from "./oidcIntegration";
-import { useRouter } from "next/navigation";
 
 export default function MenuAppBar() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const router = useRouter();
 
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -27,7 +25,7 @@ export default function MenuAppBar() {
   };
 
   const handleOpenSettings = () => {
-    router.push("settings")
+    setAnchorEl(null);
   }
 
   return (
