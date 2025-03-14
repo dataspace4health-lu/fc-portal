@@ -82,43 +82,10 @@ class ApiService {
     }
   }
 
-  /**
-   * User management api services
-   */
-  async getUsers() {
-    await this.fetchTokenIfNeeded();
-    try {
-      return await this.usersApi.getUsers();
-    } catch (error: unknown) {
-      const apiError = error as ApiError;
-      if (apiError.response && apiError.response.status === 401) {
-        console.log("redirect to login");
-        this.redirectToLogin(); // Handle redirection here
-        return;
-      }
-      throw apiError;
-    }
-  }
-
   async getServiceOfferingDetails(selfDescriptionHash: string) {
     await this.fetchTokenIfNeeded();
     try {
       return await this.selfDescriptionsApi.readSelfDescriptionByHash(selfDescriptionHash);
-    } catch (error: unknown) {
-      const apiError = error as ApiError;
-      if (apiError.response && apiError.response.status === 401) {
-        console.log("redirect to login");
-        this.redirectToLogin(); // Handle redirection here
-        return;
-      }
-      throw apiError;
-    }
-  }
-  
-  async createUser(body: User) {
-    await this.fetchTokenIfNeeded();
-    try {
-      return await this.usersApi.addUser(body);
     } catch (error: unknown) {
       const apiError = error as ApiError;
       if (apiError.response && apiError.response.status === 401) {
@@ -145,40 +112,10 @@ class ApiService {
     }
   }
 
-  async updateUser(userId: string, body: User) {
-    await this.fetchTokenIfNeeded();
-    try {
-      return await this.usersApi.updateUser(userId, body);
-    } catch (error: unknown) {
-      const apiError = error as ApiError;
-      if (apiError.response && apiError.response.status === 401) {
-        console.log("redirect to login");
-        this.redirectToLogin(); // Handle redirection here
-        return;
-      }
-      throw apiError;
-    }
-  }
-
   async deleteServiceOffering(selfDescriptionHash: string) {
     await this.fetchTokenIfNeeded();
     try {
       return await this.selfDescriptionsApi.deleteSelfDescription(selfDescriptionHash);
-    } catch (error: unknown) {
-      const apiError = error as ApiError;
-      if (apiError.response && apiError.response.status === 401) {
-        console.log("redirect to login");
-        this.redirectToLogin(); // Handle redirection here
-        return;
-      }
-      throw apiError;
-    }
-  }
-  
-  async deleteUser(userId: string) {
-    await this.fetchTokenIfNeeded();
-    try {
-      return await this.usersApi.deleteUser(userId);
     } catch (error: unknown) {
       const apiError = error as ApiError;
       if (apiError.response && apiError.response.status === 401) {
@@ -223,15 +160,15 @@ class ApiService {
       return { success: false, status: 500, message: (error as Error).message || "Unknown error" };
     }
   }
-  
-  // Api call of register contract and needs to be changed later on when it it defined in the backend
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async registerContract(contractVp: any) {
+
+  /**
+ * User management api services
+ */
+  async getUsers() {
+    await this.fetchTokenIfNeeded();
     try {
-      await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/register-contract`, {
-        ...contractVp
-      });
-    } catch (error) {
+      return await this.usersApi.getUsers();
+    } catch (error: unknown) {
       const apiError = error as ApiError;
       if (apiError.response && apiError.response.status === 401) {
         console.log("redirect to login");
@@ -241,12 +178,75 @@ class ApiService {
       throw apiError;
     }
   }
-  
+
+  async createUser(body: User) {
+    await this.fetchTokenIfNeeded();
+    try {
+      return await this.usersApi.addUser(body);
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      if (apiError.response && apiError.response.status === 401) {
+        console.log("redirect to login");
+        this.redirectToLogin(); // Handle redirection here
+        return;
+      }
+      throw apiError;
+    }
+  }
+
+  async updateUser(userId: string, body: User) {
+    await this.fetchTokenIfNeeded();
+    try {
+      return await this.usersApi.updateUser(userId, body);
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      if (apiError.response && apiError.response.status === 401) {
+        console.log("redirect to login");
+        this.redirectToLogin(); // Handle redirection here
+        return;
+      }
+      throw apiError;
+    }
+  }
+
+  async deleteUser(userId: string) {
+    await this.fetchTokenIfNeeded();
+    try {
+      return await this.usersApi.deleteUser(userId);
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      if (apiError.response && apiError.response.status === 401) {
+        console.log("redirect to login");
+        this.redirectToLogin(); // Handle redirection here
+        return;
+      }
+      throw apiError;
+    }
+  }
+
   async getRoles() {
     await this.fetchTokenIfNeeded();
     try {
       return await this.rolesApi.getAllRoles();
     } catch (error: unknown) {
+      const apiError = error as ApiError;
+      if (apiError.response && apiError.response.status === 401) {
+        console.log("redirect to login");
+        this.redirectToLogin(); // Handle redirection here
+        return;
+      }
+      throw apiError;
+    }
+  }
+
+  // Api call of register contract and needs to be changed later on when it it defined in the backend
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async registerContract(contractVp: any) {
+    try {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/register-contract`, {
+        ...contractVp
+      });
+    } catch (error) {
       const apiError = error as ApiError;
       if (apiError.response && apiError.response.status === 401) {
         console.log("redirect to login");
