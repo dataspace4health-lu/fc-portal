@@ -158,6 +158,7 @@ class ApiService {
   }
   
   // Api call of register contract and needs to be changed later on when it it defined in the backend
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async registerContract(contractVp: any) {
     try {
       await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/register-contract`, {
@@ -175,6 +176,7 @@ class ApiService {
   }
 
   // Api call of make contract and needs to be changed later on when it it defined in the backend
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async makeContract(signedContractVp: any) {
     try {
       await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/make-contract`, {
@@ -191,7 +193,14 @@ class ApiService {
     }
   }
 
-
+  // Api call for accessing data and needs to be checked later on when it it defined in the backend
+  async accessData(dataLink: string) {
+    try {
+      await axios.get(dataLink);
+    } catch (error) {
+      console.error(error, "Data cannot be accessed");
+    }
+  }
 }
 
 export default ApiService;

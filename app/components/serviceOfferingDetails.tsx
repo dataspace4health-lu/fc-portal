@@ -10,13 +10,14 @@ import { Box, Button, Divider, Link } from "@mui/material";
 import { formatDate, formatLabel } from "../utils/functions";
 import LeftCard from "./sdLeftCard";
 import SimpleDialog from "./simpleDialog";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ApiService from "../apiService/apiService";
 import { useRouter } from "next/navigation";
 import SnackbarComponent from "./snackbar";
 import CriteriaSection from "./criteriaSection";
 import { SelfDescription } from "../serviceOffering/page";
 import OnboardDialog from "./onboardDialog";
+import { getUserInfo } from "./oidcIntegration";
 
 interface DetailsProps {
   sdName: string;
@@ -74,7 +75,9 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
   >("success");
   const [loading, setLoading] = useState(false);
   const [openUploadContractModal, setOpenUploadContractModal] = useState(false);
-  const [isContractSubmitted, setIsContractSubmitted] = useState(false);
+  const [isContractSignedSubmitted, setIsContractSignedSubmitted] =
+    useState(false);
+  const [userId, setUserId] = useState("");
   const router = useRouter();
 
   const selfDescriptionApiService = useMemo(
@@ -90,21 +93,6 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
     setSnackbarSeverity(severity);
     setSnackbarOpen(true);
   };
-
-  // const projectList = [
-  //   {
-  //     key: "Project title",
-  //     value: projectTitle || "-",
-  //   },
-  //   { key: "Project website", value: projectWebsite || "-" },
-  // ];
-
-  // const studiesList = [
-  //   {
-  //     key: "Study title",
-  //     value: studyTitle || "-",
-  //   },
-  // ];
 
   const generalDatasetInfoList = [
     { key: "Description", value: sdDescription || "-" },
@@ -188,6 +176,46 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
     URL.revokeObjectURL(url);
   };
 
+  const handleAccessData = async () => {
+    const dataLink = content.verifiableCredential.find(
+      (vc: any) => vc.type.indexOf("gx:ServiceAccessPoint") !== -1
+    )?.credentialSubject["gx:openAPI"];
+    try {
+      await selfDescriptionApiService.accessData(dataLink);
+    } catch (error) {
+      console.error("error", error);
+    }
+  };
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      const userInfo = await getUserInfo();
+      const userId = userInfo?.profile.sub || "";
+      setUserId(userId);
+    };
+    fetchUserInfo();
+  }, []);
+
+  useEffect(() => {
+    if (userId && content) {
+      checkSignedContract();
+    }
+  }, [userId, content.id]);
+
+  const checkSignedContract = () => {
+    const existingDescriptions = JSON.parse(
+      sessionStorage.getItem("selfDescriptions") || "[]"
+    );
+    const signedContractFound = existingDescriptions.find(
+      (ele: { userId: string; selfDescriptionId: string }) =>
+        ele.userId === userId && ele.selfDescriptionId === content.id
+    );
+    if (signedContractFound) {
+      setIsContractSignedSubmitted(true);
+    }
+    else setIsContractSignedSubmitted(false);
+  };
+
   return (
     <Box
       sx={{
@@ -206,11 +234,11 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
           >
             Download contract template
           </Button>
-          {isContractSubmitted ? (
+          {isContractSignedSubmitted ? (
             <Button
               variant="contained"
               color="success"
-              onClick={() => setOpenUploadContractModal(true)}
+              onClick={handleAccessData}
             >
               Access data
             </Button>
@@ -255,20 +283,10 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
           issuerName={issuerName}
           complianceCheck={complianceCheck}
         />
-        {/* <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
-          <Button variant="contained" color="primary">
-            Request access to the dataset
-          </Button>
-          <Button variant="contained" color="secondary">
-            Download metadata
-          </Button>
-        </Box> */}
       </Box>
 
       {/* Accordion Section */}
       {[
-        // { title: "Project", data: projectList },
-        // { title: "Studies", data: studiesList },
         { title: "General Dataset Information", data: generalDatasetInfoList },
         { title: "Dataset contacts", data: datasetContactsList },
         { title: "Data Sharing Agreement (DSA)", data: null },
@@ -440,9 +458,10 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
       <OnboardDialog
         open={openUploadContractModal}
         setOpen={setOpenUploadContractModal}
-        refreshList={() => setIsContractSubmitted(true)}
+        refreshList={() => setIsContractSignedSubmitted(true)}
         dialogTitle="Upload the signed contract"
         selfDescriptionType="makeContract"
+        selfDescriptionId={content.id}
       />
       <SnackbarComponent
         open={snackbarOpen}

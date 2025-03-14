@@ -44,3 +44,9 @@ export const getToken = async () => {
   const user = await userManager.getUser();
   return user?.access_token;
 };
+
+// Get User Info
+export const getUserInfo = async () => {
+  const user = await userManager.getUser();
+  return user;
+};

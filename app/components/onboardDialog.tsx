@@ -23,6 +23,7 @@ import UploadFileIcon from "@mui/icons-material/UploadFile";
 import ApiService from "../apiService/apiService";
 import { useRouter } from "next/navigation";
 import SnackbarComponent from "./snackbar";
+import { getUserInfo } from "./oidcIntegration";
 
 type SelfDescriptionType = "participant" | "dataOffering" | "makeContract";
 
@@ -32,13 +33,7 @@ interface ResponsiveDialogProps {
   refreshList: () => void;
   dialogTitle: string;
   selfDescriptionType: SelfDescriptionType;
-}
-interface ResponsiveDialogProps {
-  open: boolean;
-  setOpen: (val: boolean) => void;
-  refreshList: () => void;
-  dialogTitle: string;
-  isParticipant?: boolean;
+  selfDescriptionId?: string;
 }
 
 const VisuallyHiddenInput = styled("input")({
@@ -54,7 +49,8 @@ const VisuallyHiddenInput = styled("input")({
 });
 
 export default function OnboardDialog(props: ResponsiveDialogProps) {
-  const { open, setOpen, refreshList, dialogTitle, selfDescriptionType } = props;
+  const { open, setOpen, refreshList, dialogTitle, selfDescriptionType, selfDescriptionId } =
+    props;
   const router = useRouter();
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
@@ -165,21 +161,34 @@ export default function OnboardDialog(props: ResponsiveDialogProps) {
         /**
          * Api call of the register contract
          */
-        await apiService.registerContract(selfDescription);
-      }
-      else {
+        try {
+          await apiService.registerContract(selfDescription);
+        } catch (error) {
+          console.log("error", error);
+        }
+      } else {
+        const userInfo = await getUserInfo();
+        const userId = userInfo?.profile.sub;
+        const existingDescriptions = JSON.parse(sessionStorage.getItem("selfDescriptions") || "[]");
+        const newDescription = { userId, selfDescriptionId };
+        sessionStorage.setItem("selfDescriptions", JSON.stringify([...existingDescriptions, newDescription]));
         await apiService.makeContract(selfDescription);
       }
-      handleApiResponse(`${selfDescriptionType === "participant" ? "Participant" : selfDescriptionType === "dataOffering" ? "Data offer" : "Contract"} created successfully!`, "success");
+      handleApiResponse(
+        `${selfDescriptionType === "participant" ? "Participant" : selfDescriptionType === "dataOffering" ? "Data offer" : "Contract"} created successfully!`,
+        "success"
+      );
       // Refresh participants/service/contract-button
       refreshList();
-      
     } catch (error) {
       handleApiResponse(
         `Failed to create ${selfDescriptionType === "participant" ? "Participant" : selfDescriptionType === "dataOffering" ? "Data offer" : "Contract"}. Please try again.`,
         "error"
       );
-      console.error(`Failed to create ${selfDescriptionType === "participant" ? "Participant" : selfDescriptionType === "dataOffering" ? "Data offer" : "Contract"}.`, error);
+      console.error(
+        `Failed to create ${selfDescriptionType === "participant" ? "Participant" : selfDescriptionType === "dataOffering" ? "Data offer" : "Contract"}.`,
+        error
+      );
     }
     setUploading(false);
     setFiles([]);
@@ -221,9 +230,7 @@ export default function OnboardDialog(props: ResponsiveDialogProps) {
         maxWidth="md" // The dialog size
         fullWidth={true} // Ensure it takes the full available width
       >
-        <DialogTitle id="responsive-dialog-title">
-          {dialogTitle}
-        </DialogTitle>
+        <DialogTitle id="responsive-dialog-title">{dialogTitle}</DialogTitle>
         <DialogContent sx={{ minWidth: 700, minHeight: 500 }}>
           {" "}
           {/* Adjust size */}
