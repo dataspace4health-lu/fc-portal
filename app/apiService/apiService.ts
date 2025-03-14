@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Configuration, ParticipantsApi, SelfDescriptionsApi } from "../../services/api-client";
+import { Configuration, ParticipantsApi, RolesApi, SelfDescriptionsApi, User, UsersApi } from "../../services/api-client";
 import { getToken } from "../components/oidcIntegration";
 
 interface ApiError extends Error {
@@ -11,6 +11,8 @@ class ApiService {
   private configuration: Configuration;
   private participantsApi: ParticipantsApi;
   private selfDescriptionsApi: SelfDescriptionsApi;
+  private usersApi: UsersApi;
+  private rolesApi: RolesApi;
   private redirectToLogin: () => void;
 
   constructor(redirectToLogin: () => void) {
@@ -19,6 +21,8 @@ class ApiService {
     });
     this.participantsApi = new ParticipantsApi(this.configuration);
     this.selfDescriptionsApi = new SelfDescriptionsApi(this.configuration);
+    this.usersApi = new UsersApi(this.configuration);
+    this.rolesApi = new RolesApi(this.configuration);
     this.redirectToLogin = redirectToLogin;
   }
 
@@ -78,10 +82,43 @@ class ApiService {
     }
   }
 
+  /**
+   * User management api services
+   */
+  async getUsers() {
+    await this.fetchTokenIfNeeded();
+    try {
+      return await this.usersApi.getUsers();
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      if (apiError.response && apiError.response.status === 401) {
+        console.log("redirect to login");
+        this.redirectToLogin(); // Handle redirection here
+        return;
+      }
+      throw apiError;
+    }
+  }
+
   async getServiceOfferingDetails(selfDescriptionHash: string) {
     await this.fetchTokenIfNeeded();
     try {
       return await this.selfDescriptionsApi.readSelfDescriptionByHash(selfDescriptionHash);
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      if (apiError.response && apiError.response.status === 401) {
+        console.log("redirect to login");
+        this.redirectToLogin(); // Handle redirection here
+        return;
+      }
+      throw apiError;
+    }
+  }
+  
+  async createUser(body: User) {
+    await this.fetchTokenIfNeeded();
+    try {
+      return await this.usersApi.addUser(body);
     } catch (error: unknown) {
       const apiError = error as ApiError;
       if (apiError.response && apiError.response.status === 401) {
@@ -108,10 +145,40 @@ class ApiService {
     }
   }
 
+  async updateUser(userId: string, body: User) {
+    await this.fetchTokenIfNeeded();
+    try {
+      return await this.usersApi.updateUser(userId, body);
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      if (apiError.response && apiError.response.status === 401) {
+        console.log("redirect to login");
+        this.redirectToLogin(); // Handle redirection here
+        return;
+      }
+      throw apiError;
+    }
+  }
+
   async deleteServiceOffering(selfDescriptionHash: string) {
     await this.fetchTokenIfNeeded();
     try {
       return await this.selfDescriptionsApi.deleteSelfDescription(selfDescriptionHash);
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      if (apiError.response && apiError.response.status === 401) {
+        console.log("redirect to login");
+        this.redirectToLogin(); // Handle redirection here
+        return;
+      }
+      throw apiError;
+    }
+  }
+  
+  async deleteUser(userId: string) {
+    await this.fetchTokenIfNeeded();
+    try {
+      return await this.usersApi.deleteUser(userId);
     } catch (error: unknown) {
       const apiError = error as ApiError;
       if (apiError.response && apiError.response.status === 401) {
@@ -165,6 +232,21 @@ class ApiService {
         ...contractVp
       });
     } catch (error) {
+      const apiError = error as ApiError;
+      if (apiError.response && apiError.response.status === 401) {
+        console.log("redirect to login");
+        this.redirectToLogin(); // Handle redirection here
+        return;
+      }
+      throw apiError;
+    }
+  }
+  
+  async getRoles() {
+    await this.fetchTokenIfNeeded();
+    try {
+      return await this.rolesApi.getAllRoles();
+    } catch (error: unknown) {
       const apiError = error as ApiError;
       if (apiError.response && apiError.response.status === 401) {
         console.log("redirect to login");

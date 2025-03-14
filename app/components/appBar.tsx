@@ -24,6 +24,10 @@ export default function MenuAppBar() {
     logout();
   };
 
+  const handleOpenSettings = () => {
+    setAnchorEl(null);
+  }
+
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
@@ -64,7 +68,7 @@ export default function MenuAppBar() {
               onClose={handleClose}
             >
               <MenuItem onClick={handleClose}>Profile</MenuItem>
-              <MenuItem onClick={handleClose}>Settings</MenuItem>
+              <MenuItem onClick={handleOpenSettings}>Settings</MenuItem>
               <MenuItem onClick={handleLogout}>Logout</MenuItem>
             </Menu>
           </div>
