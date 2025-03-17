@@ -69,7 +69,7 @@ class ApiService {
   async getServiceOfferings(withContent: boolean) {
     await this.fetchTokenIfNeeded();
     try {
-      return await this.selfDescriptionsApi.readSelfDescriptions(undefined, undefined, undefined, undefined, undefined, undefined, undefined,undefined, withContent, undefined, undefined, undefined);
+      return await this.selfDescriptionsApi.readSelfDescriptions(undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, withContent, undefined, undefined, undefined);
     } catch (error: unknown) {
       const apiError = error as ApiError;
       if (apiError.response && apiError.response.status === 401) {
@@ -126,8 +126,8 @@ class ApiService {
     }
   }
 
-   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-   async checkServiceOfferingCompliance(serviceOfferingVp: any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async checkServiceOfferingCompliance(serviceOfferingVp: any) {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_GAIAX_COMPLIANCE_URL}`, {
         method: "POST",
@@ -136,24 +136,24 @@ class ApiService {
         },
         body: JSON.stringify(serviceOfferingVp),
       });
-  
+
       let responseData = null;
-      
+
       try {
         responseData = await response.json();
       } catch (jsonError) {
         console.warn("Failed to parse response JSON:", jsonError);
       }
-  
+
       if (!response.ok) {
-        return { 
-          success: false, 
-          status: response.status, 
-          message: responseData?.message || response.statusText || "Unknown error from server", 
+        return {
+          success: false,
+          status: response.status,
+          message: responseData?.message || response.statusText || "Unknown error from server",
           details: responseData || null
         };
       }
-  
+
       return { success: true, data: responseData };
     } catch (error: unknown) {
       return { success: false, status: 500, message: (error as Error).message || "Unknown error" };
@@ -222,7 +222,7 @@ class ApiService {
       throw apiError;
     }
   }
-  
+
   async getRoles() {
     await this.fetchTokenIfNeeded();
     try {
