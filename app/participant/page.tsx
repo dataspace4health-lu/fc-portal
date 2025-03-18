@@ -72,7 +72,7 @@ const options = [
   { id: "name", label: "Provider Name" },
   { id: "id", label: "DS4H ID" },
   { id: "address", label: "Address" },
-  { id: "number", label: "Lei Code-vatID-EORI-taxID-EUID" },
+  { id: "number", label: "Registration Number" },
 ];
 
 const Participant = () => {
