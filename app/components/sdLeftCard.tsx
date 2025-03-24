@@ -4,6 +4,7 @@ import { Typography, Box, Button, Tooltip } from "@mui/material";
 import { formatDate } from "../utils/functions";
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import GppMaybeIcon from '@mui/icons-material/GppMaybe';
+import { complianceResponse } from "../utils/interfaces";
 
 interface SdLeftCardProps {
   sdName: string | undefined;
@@ -13,8 +14,7 @@ interface SdLeftCardProps {
   uploadDatetime: string;
   displayButtons?: boolean;
   issuerName: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  complianceCheck: any;
+  complianceCheck: complianceResponse;
 }
 
 export default function LeftCard(sdLeftCardProps: SdLeftCardProps) {
