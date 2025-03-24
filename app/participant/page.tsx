@@ -12,8 +12,8 @@ import { useEffect, useMemo, useState } from "react";
 import ProtectedRoute from "../components/protectedRoute";
 import { useRouter } from "next/navigation";
 import ApiService from "../apiService/apiService";
+import OnboardParticipant from "../components/onboardDialog";
 //import axios from "axios";
-import OnboardParticipant from "../components/onboardParticipantDialog";
 
 interface ParticipantsList {
   vp: string,
@@ -326,7 +326,13 @@ const Participant = () => {
           )}
         </Grid>
       )}
-      <OnboardParticipant open={openModal} setOpen={setOpenModal} refreshParticipants={fetchData} />
+      <OnboardParticipant
+        open={openModal}
+        setOpen={setOpenModal}
+        refreshList={fetchData}
+        dialogTitle="Onboard New Participant"
+        isParticipant
+      />
     </div>
   );
 };

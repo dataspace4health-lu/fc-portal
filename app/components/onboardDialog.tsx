@@ -27,7 +27,9 @@ import SnackbarComponent from "./snackbar";
 interface ResponsiveDialogProps {
   open: boolean;
   setOpen: (val: boolean) => void;
-  refreshParticipants: () => void;
+  refreshList: () => void;
+  dialogTitle: string;
+  isParticipant?: boolean;
 }
 
 const VisuallyHiddenInput = styled("input")({
@@ -43,7 +45,7 @@ const VisuallyHiddenInput = styled("input")({
 });
 
 export default function OnboardParticipant(props: ResponsiveDialogProps) {
-  const { open, setOpen, refreshParticipants } = props;
+  const { open, setOpen, refreshList, dialogTitle, isParticipant } = props;
   const router = useRouter();
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
@@ -67,6 +69,10 @@ export default function OnboardParticipant(props: ResponsiveDialogProps) {
 
   const handleClose = () => {
     setOpen(false);
+    setFiles([]);
+    setTextInput("");
+    setError(null);
+    setJsonContent(null);
   };
 
   const handleModeChange = (
@@ -112,7 +118,7 @@ export default function OnboardParticipant(props: ResponsiveDialogProps) {
           reader.onload = (e) => {
             try {
               const parsedData = JSON.parse(e.target?.result as string);
-              setJsonContent(parsedData); // Store parsed JSON in state
+              setJsonContent(parsedData);
             } catch (err) {
               console.error(err);
               setError("Error parsing JSON file.");
@@ -143,18 +149,21 @@ export default function OnboardParticipant(props: ResponsiveDialogProps) {
     setUploading(true);
     const selfDescription = jsonContent || JSON.parse(textInput);
     try {
-      await apiService.createParticipant(JSON.stringify(selfDescription));
-      handleApiResponse("Participant created successfully!", "success");
+      if (isParticipant) {
+        await apiService.createParticipant(JSON.stringify(selfDescription));
+      } else {
+        await apiService.createServiceOffering(JSON.stringify(selfDescription));
+      }
+      handleApiResponse(`${isParticipant ? "Participant" : "Data offer"} created successfully!`, "success");
     } catch (error) {
       handleApiResponse(
-        "Failed to create participant. Please try again.",
+        `Failed to create ${isParticipant ? "Participant" : "Data offer"}. Please try again.`,
         "error"
       );
-      console.error("Failed to create participant", error);
-      // setError("Failed to create participant. Please try again.");
+      console.error(`Failed to create ${isParticipant ? "Participant" : "Data offer"}.`, error);
     }
     // Refresh participants list
-    refreshParticipants();
+    refreshList();
     setUploading(false);
     setFiles([]);
     setTextInput("");
@@ -192,11 +201,11 @@ export default function OnboardParticipant(props: ResponsiveDialogProps) {
         open={open}
         onClose={handleClose}
         aria-labelledby="responsive-dialog-title"
-        maxWidth="lg" // Make the dialog wider
+        maxWidth="md" // The dialog size
         fullWidth={true} // Ensure it takes the full available width
       >
         <DialogTitle id="responsive-dialog-title">
-          Onboard New Participant
+          {dialogTitle}
         </DialogTitle>
         <DialogContent sx={{ minWidth: 700, minHeight: 500 }}>
           {" "}
@@ -275,7 +284,7 @@ export default function OnboardParticipant(props: ResponsiveDialogProps) {
                 fullWidth
                 id="vc"
                 name="Verifiable Credential"
-                label="Participant Verifiable Credential"
+                label="Verifiable Credential"
                 multiline
                 rows={12} // More space for text input
                 value={textInput}

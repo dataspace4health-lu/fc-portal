@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
@@ -5,44 +6,168 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import KeyValueCard from "./keyValueCard";
-import { Avatar, Box, Divider } from "@mui/material";
+import { Box, Button, Divider, Link } from "@mui/material";
+import { formatDate, formatLabel } from "../utils/functions";
+import LeftCard from "./sdLeftCard";
+import SimpleDialog from "./simpleDialog";
+import { useMemo, useState } from "react";
+import ApiService from "../apiService/apiService";
+import { useRouter } from "next/navigation";
+import SnackbarComponent from "./snackbar";
+import CriteriaSection from "./criteriaSection";
+import { SelfDescription } from "../serviceOffering/page";
 
-export default function ServiceOfferingDetailsData() {
-  const projectList = [
-    {
-      key: "Project title",
-      value:
-        "A global trascriptome analyses of keratinocytes upon suppression of endogenous",
-    },
-    { key: "Project website", value: "https://www.google.com/" },
-  ];
+interface DetailsProps {
+  sdName: string;
+  sdDescription: string;
+  dataProtectionRegime: string;
+  policy: string;
+  accessType: string;
+  formatType: string;
+  requestType: string;
+  termsAndConditionsUrl: string;
+  status: string;
+  issuanceDate: string;
+  statusDatetime: string;
+  issuer: string;
+  issuerName: string;
+  issuerDescription: string;
+  issuerLegalAddress: string;
+  issuerHeadquarterAddress: string;
+  selfDescriptionHash: string;
+  refreshList: () => void;
+  setSelectedCard: (val: SelfDescription | undefined) => void;
+  complianceCheck: boolean;
+  labelLevelsVcs: any;
+}
+export default function ServiceOfferingDetailsData(props: DetailsProps) {
+  const {
+    sdName,
+    sdDescription,
+    status,
+    accessType,
+    formatType,
+    requestType,
+    // policy,
+    issuanceDate,
+    statusDatetime,
+    issuer,
+    termsAndConditionsUrl,
+    issuerName,
+    issuerDescription,
+    issuerLegalAddress,
+    issuerHeadquarterAddress,
+    selfDescriptionHash,
+    refreshList,
+    setSelectedCard,
+    complianceCheck,
+    labelLevelsVcs,
+  } = props;
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = React.useState(false);
+  const [snackbarMessage, setSnackbarMessage] = React.useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = React.useState<
+    "success" | "error"
+  >("success");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
-  const studiesList = [
-    {
-      key: "Study title",
-      value: "A global transcriptome analysis of keratinocytes upon",
-    },
-  ];
+  const selfDescriptionApiService = useMemo(
+    () => new ApiService(() => router.push("/")),
+    []
+  );
+
+  const handleApiResponse = (
+    message: string,
+    severity: "success" | "error"
+  ) => {
+    setSnackbarMessage(message);
+    setSnackbarSeverity(severity);
+    setSnackbarOpen(true);
+  };
+
+  // const projectList = [
+  //   {
+  //     key: "Project title",
+  //     value: projectTitle || "-",
+  //   },
+  //   { key: "Project website", value: projectWebsite || "-" },
+  // ];
+
+  // const studiesList = [
+  //   {
+  //     key: "Study title",
+  //     value: studyTitle || "-",
+  //   },
+  // ];
 
   const generalDatasetInfoList = [
-    { key: "Version", value: "-" },
-    { key: "Date of creation of the dataset", value: "2024-10-29" },
+    { key: "Description", value: sdDescription || "-" },
+    { key: "Date of creation of the dataset", value: formatDate(issuanceDate) },
     {
-      key: "Date of creation of the last update of the dataset",
-      value: "2024-10-29",
+      key: "Date of the last update of the dataset",
+      value: formatDate(statusDatetime),
     },
-    { key: "Experiment types", value: "expression profiling by array" },
-    { key: "Type of Samples Collected", value: "-" },
-    { key: "Number of Samples Collected", value: "6" },
-    { key: "Diseases in samples", value: "psoriasis" },
+    { key: "Request Type", value: requestType || "-" },
+    {
+      key: "Access Type",
+      value: accessType || "-",
+    },
+    { key: "Format Type", value: formatType || "-" },
+    // { key: "Policy", value: policy || "-" },
   ];
 
-  const DatasetContactsList = [
-    { key: "Data owner", value: "Person A" },
-    { key: "Data manager", value: "Manager A" },
-    { key: "email", value: "email@gmail.com" },
-    { key: "affiliation", value: "-" },
+  const datasetContactsList = [
+    { key: "Data Owner", value: issuerName || issuer || "-" },
+    { key: "Owner Description", value: issuerDescription || "-" },
+    { key: "Legal Address", value: issuerLegalAddress || "-" },
+    { key: "Headquarter Address", value: issuerHeadquarterAddress || "-" },
   ];
+
+  const criteriaType = formatLabel(labelLevelsVcs?.credentialSubject?.type || "");
+  const criteria = labelLevelsVcs?.credentialSubject["gx:criteria"];
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { type, ...cleanedCriteria } = criteria || {};
+
+  const dataCriteriaList = Object.entries(cleanedCriteria).map(
+    ([key, value]) => ({
+      name: key.substring(3),
+      ...(typeof value === "object" && value !== null ? value : {}),
+    })
+  );
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const finalCriteriaList = dataCriteriaList.map((ele: any) => {
+    return {
+      description: ele["gx:description"],
+      response: ele["gx:response"],
+      name: ele.name,
+      evidence: ele["gx:evidence"],
+      reason: ele["gx:reason"],
+    };
+  });
+
+  console.log("finalCriteriaList", finalCriteriaList);
+
+  const handleConfirmDelete = async () => {
+    setLoading(true);
+    try {
+      await selfDescriptionApiService.deleteServiceOffering(
+        selfDescriptionHash
+      );
+      handleApiResponse("Data offer deleted successfully!", "success");
+    } catch (error) {
+      handleApiResponse(
+        `Failed to create Data offer. Please try again.`,
+        "error"
+      );
+      console.error("error", error);
+    }
+    refreshList();
+    setOpenDeleteDialog(false);
+    setLoading(false);
+    setSelectedCard(undefined);
+  };
 
   return (
     <Box
@@ -53,6 +178,16 @@ export default function ServiceOfferingDetailsData() {
         boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
       }}
     >
+      <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+        <Button
+          variant="contained"
+          color="error"
+          sx={{ mb: 4 }}
+          onClick={() => setOpenDeleteDialog(true)}
+        >
+          Delete
+        </Button>
+      </Box>
       {/* Header Section */}
       <Box
         sx={{
@@ -62,37 +197,35 @@ export default function ServiceOfferingDetailsData() {
           borderColor: "grey.300",
           borderRadius: 2,
           boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-          display: "flex",
           alignItems: "center",
           gap: 2,
         }}
       >
-        <Avatar
-          alt="NTT Logo"
-          src="sds" // Replace with the actual logo URL
-          sx={{ width: 56, height: 56, bgcolor: "primary.main" }}
-        >
-          NTT
-        </Avatar>
-        <Box>
-          <Typography variant="h6" fontWeight="bold">
-            NTT LUXEMBOURG PSF S.A
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Luxembourg - Capellen
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            VAT Number: LU20769255
-          </Typography>
-        </Box>
+        <LeftCard
+          sdName={sdName}
+          issuer={issuer}
+          status={status}
+          statusDatetime={issuanceDate}
+          uploadDatetime={statusDatetime}
+          issuerName={issuerName}
+          complianceCheck={complianceCheck}
+        />
+        {/* <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
+          <Button variant="contained" color="primary">
+            Request access to the dataset
+          </Button>
+          <Button variant="contained" color="secondary">
+            Download metadata
+          </Button>
+        </Box> */}
       </Box>
 
       {/* Accordion Section */}
       {[
-        { title: "Project", data: projectList },
-        { title: "Studies", data: studiesList },
+        // { title: "Project", data: projectList },
+        // { title: "Studies", data: studiesList },
         { title: "General Dataset Information", data: generalDatasetInfoList },
-        { title: "Dataset contacts", data: DatasetContactsList },
+        { title: "Dataset contacts", data: datasetContactsList },
         { title: "Data Sharing Agreement (DSA)", data: null },
       ].map((section, index) => (
         <Accordion
@@ -124,17 +257,145 @@ export default function ServiceOfferingDetailsData() {
             {section.data ? (
               <KeyValueCard keyValueList={section.data} />
             ) : (
-              <Typography>Download document</Typography>
+              <Link href={termsAndConditionsUrl} target="_blank">
+                Download document
+              </Link>
             )}
           </AccordionDetails>
         </Accordion>
       ))}
 
+      {/* Policies section it will be commented for now */}
+      <Accordion
+        sx={{
+          mb: 2,
+          "&:before": { display: "none" },
+          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+          border: "1px solid",
+          borderColor: "grey.300",
+          borderRadius: 2,
+          overflow: "hidden",
+        }}
+      >
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="use-restrictions-content"
+          id="use-restrictions-header"
+          sx={{
+            bgcolor: "grey.100",
+            "&:hover": { bgcolor: "grey.200" },
+            transition: "background-color 0.3s ease",
+          }}
+        >
+          <Typography fontWeight="bold">Use Restrictions</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          {[
+            {
+              title: "Permissions",
+              text: "Content for Permissions will go here.",
+            },
+            {
+              title: "Constrained Permissions",
+              text: "Content for Constrained Permissions will go here.",
+            },
+            {
+              title: "Obligations",
+              text: "Content for Obligations will go here.",
+            },
+          ].map((sectionTitle, index) => (
+            <Accordion
+              key={index}
+              sx={{
+                mb: 2,
+                "&:before": { display: "none" },
+                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+                border: "1px solid",
+                borderColor: "grey.300",
+                borderRadius: 2,
+                overflow: "hidden",
+              }}
+            >
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                aria-controls={`${sectionTitle.title.toLowerCase()}-content`}
+                id={`${sectionTitle.title.toLowerCase()}-header`}
+                sx={{
+                  bgcolor: "grey.100",
+                  "&:hover": { bgcolor: "grey.200" },
+                  transition: "background-color 0.3s ease",
+                }}
+              >
+                <Typography fontWeight="bold">{sectionTitle.title}</Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Typography variant="body2" color="text.secondary">
+                  {sectionTitle.text}
+                </Typography>
+              </AccordionDetails>
+            </Accordion>
+          ))}
+        </AccordionDetails>
+      </Accordion>
+
+      {/* criteria section*/}
+
+      {finalCriteriaList && finalCriteriaList.length > 0 && <Accordion
+        sx={{
+          mb: 2,
+          "&:before": { display: "none" },
+          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+          border: "1px solid",
+          borderColor: "grey.300",
+          borderRadius: 2,
+          overflow: "hidden",
+        }}
+      >
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="criteria-content"
+          id="criteria-header"
+          sx={{
+            bgcolor: "grey.100",
+            "&:hover": { bgcolor: "grey.200" },
+            transition: "background-color 0.3s ease",
+          }}
+        >
+          <Typography fontWeight="bold">{criteriaType}</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          {finalCriteriaList.length > 0 ? (
+            <CriteriaSection list={finalCriteriaList} />
+          ) : (
+            <Typography variant="body2" color="text.secondary">
+              No criteria available.
+            </Typography>
+          )}
+        </AccordionDetails>
+      </Accordion>}
+
       <Divider sx={{ my: 3 }} />
 
       <Typography variant="body2" color="text.secondary" align="center">
-        Last updated: 2024-12-01
+        Last updated: {formatDate(statusDatetime)}
       </Typography>
+
+      <SimpleDialog
+        open={openDeleteDialog}
+        setOpen={setOpenDeleteDialog}
+        title={"Delete Data Offer"}
+        description={
+          "Are you sure you want to delete this data offer? This action cannot be undone."
+        }
+        handleConfirmDelete={handleConfirmDelete}
+        loading={loading}
+      />
+      <SnackbarComponent
+        open={snackbarOpen}
+        message={snackbarMessage}
+        severity={snackbarSeverity}
+        onClose={() => setSnackbarOpen(false)}
+      />
     </Box>
   );
 }
