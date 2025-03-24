@@ -10,13 +10,9 @@ interface SearchBarProps {
 export default function SearchBar(props: SearchBarProps) {
   const { handleSearch } = props;
   const [query, setQuery] = React.useState("");
-
-  const handleKeyPress = (event: React.KeyboardEvent) => {
-    if (event.key === 'Enter') {
-      handleSearch(query);
-    }
-  };
-
+  React.useEffect(() => {
+    handleSearch(query);
+  }, [query]);
   return (
     <TextField
       size="medium"
@@ -24,7 +20,6 @@ export default function SearchBar(props: SearchBarProps) {
       placeholder="Type key words..."
       value={query}
       onChange={(e) => setQuery(e.target.value)}
-      onKeyUp={handleKeyPress}
       slotProps={{
         input: {
           endAdornment: (

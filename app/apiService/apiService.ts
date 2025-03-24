@@ -84,7 +84,7 @@ class ApiService {
   async getServiceOfferings(withContent: boolean) {
     await this.fetchTokenIfNeeded();
     try {
-      return await this.selfDescriptionsApi.readSelfDescriptions(undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, withContent, undefined, undefined, undefined);
+      return await this.selfDescriptionsApi.readSelfDescriptions(undefined, undefined, undefined, undefined, undefined, undefined, undefined,undefined, withContent, undefined, undefined, undefined);
     } catch (error: unknown) {
       const apiError = error as ApiError;
       if (apiError.response && apiError.response.status === 401) {
@@ -141,8 +141,8 @@ class ApiService {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async checkServiceOfferingCompliance(serviceOfferingVp: any) {
+   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   async checkServiceOfferingCompliance(serviceOfferingVp: any) {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_GAIAX_COMPLIANCE_URL}`, {
         method: "POST",
@@ -237,7 +237,7 @@ class ApiService {
       throw apiError;
     }
   }
-
+  
   async getRoles() {
     await this.fetchTokenIfNeeded();
     try {
