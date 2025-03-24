@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import SnackbarComponent from "./snackbar";
 import CriteriaSection from "./criteriaSection";
 import { SelfDescription } from "../serviceOffering/page";
+import { complianceResponse } from "../utils/interfaces";
 
 interface DetailsProps {
   sdName: string;
@@ -37,7 +38,7 @@ interface DetailsProps {
   selfDescriptionHash: string;
   refreshList: () => void;
   setSelectedCard: (val: SelfDescription | undefined) => void;
-  complianceCheck: boolean;
+  complianceCheck: complianceResponse;
   labelLevelsVcs: any;
 }
 export default function ServiceOfferingDetailsData(props: DetailsProps) {
