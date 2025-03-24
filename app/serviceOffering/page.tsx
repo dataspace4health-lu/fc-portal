@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import { ApiError } from "next/dist/server/api-utils";
 import SdLeftCard from "../components/sdLeftCard";
 import OnboardParticipant from "../components/onboardDialog";
+import { complianceResponse } from "../utils/interfaces";
 interface Meta {
   id: string;
   expirationTime: string | undefined;
@@ -43,7 +44,7 @@ export interface SelfDescription {
   issuerDescription: string;
   issuerLegalAddress: string;
   issuerHeadquarterAddress: string;
-  complianceCheck: boolean;
+  complianceCheck: complianceResponse;
   labelLevelsVcs: any;
 }
 

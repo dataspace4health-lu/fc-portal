@@ -1,8 +1,9 @@
 "use client";
 import * as React from "react";
-import { Typography, Box } from "@mui/material";
-import Image from "next/image";
-
+import { Typography, Box, Tooltip } from "@mui/material";
+import { complianceResponse } from "../utils/interfaces";
+import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
+import GppMaybeIcon from '@mui/icons-material/GppMaybe';
 interface LeftCardProps {
   name: string;
   id: string;
@@ -10,11 +11,11 @@ interface LeftCardProps {
   address: string;
   lrnType: string | undefined;
   lrnCode: string;
-  complianceStatus: string;
+  complianceCheck: complianceResponse;
 }
 
 export default function LeftCard(leftCardProps: LeftCardProps) {
-  const { name, id, logoUrl, address, complianceStatus, lrnCode, lrnType } = leftCardProps;
+  const { name, id, address, complianceCheck, lrnCode, lrnType } = leftCardProps;
 
   return (
     <Box
@@ -36,7 +37,10 @@ export default function LeftCard(leftCardProps: LeftCardProps) {
         <Typography variant="h6" fontWeight="bold">
           {name}
         </Typography>
-        {logoUrl ? (
+        <Tooltip title={complianceCheck.message } arrow>
+          {complianceCheck.success ? <VerifiedUserIcon sx={{ color: "green" }} /> : <GppMaybeIcon sx={{ color: "red" }} />}
+        </Tooltip>
+        {/* {logoUrl ? (
           <Image alt={`${name} logo`} src={logoUrl} width={50} height={50} />
         ) : (
           <Box
@@ -54,7 +58,7 @@ export default function LeftCard(leftCardProps: LeftCardProps) {
           >
             N/A
           </Box>
-        )}
+        )} */}
       </Box>
 
       <Typography
@@ -66,20 +70,20 @@ export default function LeftCard(leftCardProps: LeftCardProps) {
       </Typography>
 
       <Box >
-        <Typography variant="body2" sx={{ color: "text.primary", whiteSpace: "nowrap" }}>
+        <Typography variant="body1" sx={{ color: "text.secondary", whiteSpace: "nowrap" }}>
           Address: {address}
         </Typography>
-        <Typography variant="body1" sx={{ color: "text.secondary" }}>
+        <Typography variant="body2" sx={{ color: "text.secondary" }}>
           {lrnType}: {lrnCode}
-          <span
+          {/* <span
             style={{
               color: "white",
               padding: "5px",
               borderRadius: "5px",
             }}
           >
-            {complianceStatus === "valid" ? "✅" : "❌"}
-          </span>
+            {complianceCheck.success  ? "✅" : "❌"}
+          </span> */}
         </Typography>
       </Box>
     </Box>

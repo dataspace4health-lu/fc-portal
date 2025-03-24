@@ -66,6 +66,21 @@ class ApiService {
     }
   }
 
+  async deleteParticipant(participantId: string) {
+    await this.fetchTokenIfNeeded();
+    try {
+      return await this.participantsApi.deleteParticipant(participantId);
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      if (apiError.response && apiError.response.status === 401) {
+        console.log("redirect to login");
+        this.redirectToLogin(); // Handle redirection here
+        return;
+      }
+      throw apiError;
+    }
+  }
+
   async getServiceOfferings(withContent: boolean) {
     await this.fetchTokenIfNeeded();
     try {
@@ -136,24 +151,24 @@ class ApiService {
         },
         body: JSON.stringify(serviceOfferingVp),
       });
-  
+
       let responseData = null;
-      
+
       try {
         responseData = await response.json();
       } catch (jsonError) {
         console.warn("Failed to parse response JSON:", jsonError);
       }
-  
+
       if (!response.ok) {
-        return { 
-          success: false, 
-          status: response.status, 
-          message: responseData?.message || response.statusText || "Unknown error from server", 
+        return {
+          success: false,
+          status: response.status,
+          message: responseData?.message || response.statusText || "Unknown error from server",
           details: responseData || null
         };
       }
-  
+
       return { success: true, data: responseData };
     } catch (error: unknown) {
       return { success: false, status: 500, message: (error as Error).message || "Unknown error" };
