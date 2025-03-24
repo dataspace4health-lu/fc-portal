@@ -1,5 +1,4 @@
 import { Configuration, ParticipantsApi, SelfDescriptionsApi, RolesApi, User, UsersApi } from "../../services/api-client";
-import { Configuration, ParticipantsApi, SelfDescriptionsApi, RolesApi, User, UsersApi } from "../../services/api-client";
 import { getToken } from "../components/oidcIntegration";
 
 interface ApiError extends Error {
