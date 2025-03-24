@@ -15,7 +15,7 @@ import ApiService from "../apiService/apiService";
 import { useRouter } from "next/navigation";
 import { ApiError } from "next/dist/server/api-utils";
 import SdLeftCard from "../components/sdLeftCard";
-import OnboardParticipant from "../components/onboardDialog";
+import OnboardDialog from "../components/onboardDialog";
 import { complianceResponse } from "../utils/interfaces";
 interface Meta {
   id: string;
@@ -356,17 +356,19 @@ const ServiceOffering = () => {
                   setSelectedCard={setSelectedCard}
                   complianceCheck={selectedCard.complianceCheck}
                   labelLevelsVcs={selectedCard.labelLevelsVcs}
+                  content={selectedCard.content}
                 />
               </Paper>
             </DetailsPane>
           </Grid>
         )}
       </Grid>
-      <OnboardParticipant
+      <OnboardDialog
         open={openModal}
         setOpen={setOpenModal}
         refreshList={fetchData}
         dialogTitle="Onboard New Data offer"
+        selfDescriptionType="dataOffering"
       />
     </div>
   );

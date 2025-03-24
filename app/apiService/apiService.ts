@@ -1,4 +1,5 @@
-import { Configuration, ParticipantsApi, SelfDescriptionsApi, RolesApi, User, UsersApi } from "../../services/api-client";
+import axios from "axios";
+import { Configuration, ParticipantsApi, RolesApi, SelfDescriptionsApi, User, UsersApi } from "../../services/api-client";
 import { getToken } from "../components/oidcIntegration";
 
 interface ApiError extends Error {
@@ -84,7 +85,7 @@ class ApiService {
   async getServiceOfferings(withContent: boolean) {
     await this.fetchTokenIfNeeded();
     try {
-      return await this.selfDescriptionsApi.readSelfDescriptions(undefined, undefined, undefined, undefined, undefined, undefined, undefined,undefined, withContent, undefined, undefined, undefined);
+      return await this.selfDescriptionsApi.readSelfDescriptions(undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, withContent, undefined, undefined, undefined);
     } catch (error: unknown) {
       const apiError = error as ApiError;
       if (apiError.response && apiError.response.status === 401) {
@@ -141,8 +142,8 @@ class ApiService {
     }
   }
 
-   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-   async checkServiceOfferingCompliance(serviceOfferingVp: any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async checkServiceOfferingCompliance(serviceOfferingVp: any) {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_GAIAX_COMPLIANCE_URL}`, {
         method: "POST",
@@ -176,8 +177,8 @@ class ApiService {
   }
 
   /**
-   * User management api services
-   */
+ * User management api services
+ */
   async getUsers() {
     await this.fetchTokenIfNeeded();
     try {
@@ -237,7 +238,7 @@ class ApiService {
       throw apiError;
     }
   }
-  
+
   async getRoles() {
     await this.fetchTokenIfNeeded();
     try {
@@ -250,6 +251,51 @@ class ApiService {
         return;
       }
       throw apiError;
+    }
+  }
+
+  // Api call of register contract and needs to be changed later on when it it defined in the backend
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async registerContract(contractVp: any) {
+    try {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/register-contract`, {
+        ...contractVp
+      });
+    } catch (error) {
+      const apiError = error as ApiError;
+      if (apiError.response && apiError.response.status === 401) {
+        console.log("redirect to login");
+        this.redirectToLogin(); // Handle redirection here
+        return;
+      }
+      throw apiError;
+    }
+  }
+
+  // Api call of make contract and needs to be changed later on when it it defined in the backend
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async makeContract(signedContractVp: any) {
+    try {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/make-contract`, {
+        ...signedContractVp
+      });
+    } catch (error) {
+      const apiError = error as ApiError;
+      if (apiError.response && apiError.response.status === 401) {
+        console.log("redirect to login");
+        this.redirectToLogin(); // Handle redirection here
+        return;
+      }
+      throw apiError;
+    }
+  }
+
+  // Api call for accessing data and needs to be checked later on when it it defined in the backend
+  async accessData(dataLink: string) {
+    try {
+      await axios.get(dataLink);
+    } catch (error) {
+      console.error(error, "Data cannot be accessed");
     }
   }
 }

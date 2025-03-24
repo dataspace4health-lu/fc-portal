@@ -12,7 +12,7 @@ import { useEffect, useMemo, useState } from "react";
 import ProtectedRoute from "../components/protectedRoute";
 import { useRouter } from "next/navigation";
 import ApiService from "../apiService/apiService";
-import OnboardParticipant from "../components/onboardDialog";
+import OnboardDialog from "../components/onboardDialog";
 import { complianceResponse } from "../utils/interfaces";
 
 interface ParticipantsList {
@@ -316,12 +316,12 @@ const Participant = () => {
           )}
         </Grid>
       )}
-      <OnboardParticipant
+      <OnboardDialog
         open={openModal}
         setOpen={setOpenModal}
         refreshList={fetchData}
         dialogTitle="Onboard New Participant"
-        isParticipant
+        selfDescriptionType="participant"
       />
     </div>
   );

@@ -23,13 +23,17 @@ import UploadFileIcon from "@mui/icons-material/UploadFile";
 import ApiService from "../apiService/apiService";
 import { useRouter } from "next/navigation";
 import SnackbarComponent from "./snackbar";
+import { getUserInfo } from "./oidcIntegration";
+
+type SelfDescriptionType = "participant" | "dataOffering" | "makeContract";
 
 interface ResponsiveDialogProps {
   open: boolean;
   setOpen: (val: boolean) => void;
   refreshList: () => void;
   dialogTitle: string;
-  isParticipant?: boolean;
+  selfDescriptionType: SelfDescriptionType;
+  selfDescriptionId?: string;
 }
 
 const VisuallyHiddenInput = styled("input")({
@@ -44,8 +48,9 @@ const VisuallyHiddenInput = styled("input")({
   width: 1,
 });
 
-export default function OnboardParticipant(props: ResponsiveDialogProps) {
-  const { open, setOpen, refreshList, dialogTitle, isParticipant } = props;
+export default function OnboardDialog(props: ResponsiveDialogProps) {
+  const { open, setOpen, refreshList, dialogTitle, selfDescriptionType, selfDescriptionId } =
+    props;
   const router = useRouter();
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
@@ -149,21 +154,42 @@ export default function OnboardParticipant(props: ResponsiveDialogProps) {
     setUploading(true);
     const selfDescription = jsonContent || JSON.parse(textInput);
     try {
-      if (isParticipant) {
+      if (selfDescriptionType === "participant") {
         await apiService.createParticipant(JSON.stringify(selfDescription));
-      } else {
+      } else if (selfDescriptionType === "dataOffering") {
         await apiService.createServiceOffering(JSON.stringify(selfDescription));
+        /**
+         * Api call of the register contract
+         */
+        try {
+          await apiService.registerContract(selfDescription);
+        } catch (error) {
+          console.log("error", error);
+        }
+      } else {
+        const userInfo = await getUserInfo();
+        const userId = userInfo?.profile.sub;
+        const existingDescriptions = JSON.parse(sessionStorage.getItem("selfDescriptions") || "[]");
+        const newDescription = { userId, selfDescriptionId };
+        sessionStorage.setItem("selfDescriptions", JSON.stringify([...existingDescriptions, newDescription]));
+        await apiService.makeContract(selfDescription);
       }
-      handleApiResponse(`${isParticipant ? "Participant" : "Data offer"} created successfully!`, "success");
+      handleApiResponse(
+        `${selfDescriptionType === "participant" ? "Participant" : selfDescriptionType === "dataOffering" ? "Data offer" : "Contract"} created successfully!`,
+        "success"
+      );
+      // Refresh participants/service/contract-button
+      refreshList();
     } catch (error) {
       handleApiResponse(
-        `Failed to create ${isParticipant ? "Participant" : "Data offer"}. Please try again.`,
+        `Failed to create ${selfDescriptionType === "participant" ? "Participant" : selfDescriptionType === "dataOffering" ? "Data offer" : "Contract"}. Please try again.`,
         "error"
       );
-      console.error(`Failed to create ${isParticipant ? "Participant" : "Data offer"}.`, error);
+      console.error(
+        `Failed to create ${selfDescriptionType === "participant" ? "Participant" : selfDescriptionType === "dataOffering" ? "Data offer" : "Contract"}.`,
+        error
+      );
     }
-    // Refresh participants list
-    refreshList();
     setUploading(false);
     setFiles([]);
     setTextInput("");
@@ -204,9 +230,7 @@ export default function OnboardParticipant(props: ResponsiveDialogProps) {
         maxWidth="md" // The dialog size
         fullWidth={true} // Ensure it takes the full available width
       >
-        <DialogTitle id="responsive-dialog-title">
-          {dialogTitle}
-        </DialogTitle>
+        <DialogTitle id="responsive-dialog-title">{dialogTitle}</DialogTitle>
         <DialogContent sx={{ minWidth: 700, minHeight: 500 }}>
           {" "}
           {/* Adjust size */}

@@ -10,12 +10,14 @@ import { Box, Button, Divider, Link } from "@mui/material";
 import { formatDate, formatLabel } from "../utils/functions";
 import LeftCard from "./sdLeftCard";
 import SimpleDialog from "./simpleDialog";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ApiService from "../apiService/apiService";
 import { useRouter } from "next/navigation";
 import SnackbarComponent from "./snackbar";
 import CriteriaSection from "./criteriaSection";
 import { SelfDescription } from "../serviceOffering/page";
+import OnboardDialog from "./onboardDialog";
+import { getUserInfo } from "./oidcIntegration";
 import { complianceResponse } from "../utils/interfaces";
 
 interface DetailsProps {
@@ -40,6 +42,7 @@ interface DetailsProps {
   setSelectedCard: (val: SelfDescription | undefined) => void;
   complianceCheck: complianceResponse;
   labelLevelsVcs: any;
+  content: any;
 }
 export default function ServiceOfferingDetailsData(props: DetailsProps) {
   const {
@@ -63,6 +66,7 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
     setSelectedCard,
     complianceCheck,
     labelLevelsVcs,
+    content,
   } = props;
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = React.useState(false);
@@ -71,6 +75,10 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
     "success" | "error"
   >("success");
   const [loading, setLoading] = useState(false);
+  const [openUploadContractModal, setOpenUploadContractModal] = useState(false);
+  const [isContractSignedSubmitted, setIsContractSignedSubmitted] =
+    useState(false);
+  const [userId, setUserId] = useState("");
   const router = useRouter();
 
   const selfDescriptionApiService = useMemo(
@@ -86,21 +94,6 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
     setSnackbarSeverity(severity);
     setSnackbarOpen(true);
   };
-
-  // const projectList = [
-  //   {
-  //     key: "Project title",
-  //     value: projectTitle || "-",
-  //   },
-  //   { key: "Project website", value: projectWebsite || "-" },
-  // ];
-
-  // const studiesList = [
-  //   {
-  //     key: "Study title",
-  //     value: studyTitle || "-",
-  //   },
-  // ];
 
   const generalDatasetInfoList = [
     { key: "Description", value: sdDescription || "-" },
@@ -125,7 +118,9 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
     { key: "Headquarter Address", value: issuerHeadquarterAddress || "-" },
   ];
 
-  const criteriaType = formatLabel(labelLevelsVcs?.credentialSubject?.type || "");
+  const criteriaType = formatLabel(
+    labelLevelsVcs?.credentialSubject?.type || ""
+  );
   const criteria = labelLevelsVcs?.credentialSubject["gx:criteria"];
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -168,6 +163,60 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
     setSelectedCard(undefined);
   };
 
+  const handleDownloadContract = () => {
+    const blob = new Blob([JSON.stringify(content, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${sdName}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleAccessData = async () => {
+    const dataLink = content.verifiableCredential.find(
+      (vc: any) => vc.type.indexOf("gx:ServiceAccessPoint") !== -1
+    )?.credentialSubject["gx:openAPI"];
+    try {
+      await selfDescriptionApiService.accessData(dataLink);
+    } catch (error) {
+      console.error("error", error);
+    }
+  };
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      const userInfo = await getUserInfo();
+      const userId = userInfo?.profile.sub || "";
+      setUserId(userId);
+    };
+    fetchUserInfo();
+  }, []);
+
+  useEffect(() => {
+    if (userId && content) {
+      checkSignedContract();
+    }
+  }, [userId, content.id]);
+
+  const checkSignedContract = () => {
+    const existingDescriptions = JSON.parse(
+      sessionStorage.getItem("selfDescriptions") || "[]"
+    );
+    const signedContractFound = existingDescriptions.find(
+      (ele: { userId: string; selfDescriptionId: string }) =>
+        ele.userId === userId && ele.selfDescriptionId === content.id
+    );
+    if (signedContractFound) {
+      setIsContractSignedSubmitted(true);
+    }
+    else setIsContractSignedSubmitted(false);
+  };
+
   return (
     <Box
       sx={{
@@ -177,11 +226,37 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
         boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
       }}
     >
-      <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 4 }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2 }}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleDownloadContract}
+          >
+            Download contract template
+          </Button>
+          {isContractSignedSubmitted ? (
+            <Button
+              variant="contained"
+              color="success"
+              onClick={handleAccessData}
+            >
+              Access data
+            </Button>
+          ) : (
+            <Button
+              variant="contained"
+              color="success"
+              onClick={() => setOpenUploadContractModal(true)}
+            >
+              Request dataset access
+            </Button>
+          )}
+        </Box>
         <Button
           variant="contained"
           color="error"
-          sx={{ mb: 4 }}
+          sx={{visibility: "hidden"}}
           onClick={() => setOpenDeleteDialog(true)}
         >
           Delete
@@ -209,20 +284,10 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
           issuerName={issuerName}
           complianceCheck={complianceCheck}
         />
-        {/* <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
-          <Button variant="contained" color="primary">
-            Request access to the dataset
-          </Button>
-          <Button variant="contained" color="secondary">
-            Download metadata
-          </Button>
-        </Box> */}
       </Box>
 
       {/* Accordion Section */}
       {[
-        // { title: "Project", data: projectList },
-        // { title: "Studies", data: studiesList },
         { title: "General Dataset Information", data: generalDatasetInfoList },
         { title: "Dataset contacts", data: datasetContactsList },
         { title: "Data Sharing Agreement (DSA)", data: null },
@@ -339,39 +404,41 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
 
       {/* criteria section*/}
 
-      {finalCriteriaList && finalCriteriaList.length > 0 && <Accordion
-        sx={{
-          mb: 2,
-          "&:before": { display: "none" },
-          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-          border: "1px solid",
-          borderColor: "grey.300",
-          borderRadius: 2,
-          overflow: "hidden",
-        }}
-      >
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon />}
-          aria-controls="criteria-content"
-          id="criteria-header"
+      {finalCriteriaList && finalCriteriaList.length > 0 && (
+        <Accordion
           sx={{
-            bgcolor: "grey.100",
-            "&:hover": { bgcolor: "grey.200" },
-            transition: "background-color 0.3s ease",
+            mb: 2,
+            "&:before": { display: "none" },
+            boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+            border: "1px solid",
+            borderColor: "grey.300",
+            borderRadius: 2,
+            overflow: "hidden",
           }}
         >
-          <Typography fontWeight="bold">{criteriaType}</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          {finalCriteriaList.length > 0 ? (
-            <CriteriaSection list={finalCriteriaList} />
-          ) : (
-            <Typography variant="body2" color="text.secondary">
-              No criteria available.
-            </Typography>
-          )}
-        </AccordionDetails>
-      </Accordion>}
+          <AccordionSummary
+            expandIcon={<ExpandMoreIcon />}
+            aria-controls="criteria-content"
+            id="criteria-header"
+            sx={{
+              bgcolor: "grey.100",
+              "&:hover": { bgcolor: "grey.200" },
+              transition: "background-color 0.3s ease",
+            }}
+          >
+            <Typography fontWeight="bold">{criteriaType}</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            {finalCriteriaList.length > 0 ? (
+              <CriteriaSection list={finalCriteriaList} />
+            ) : (
+              <Typography variant="body2" color="text.secondary">
+                No criteria available.
+              </Typography>
+            )}
+          </AccordionDetails>
+        </Accordion>
+      )}
 
       <Divider sx={{ my: 3 }} />
 
@@ -388,6 +455,14 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
         }
         handleConfirmDelete={handleConfirmDelete}
         loading={loading}
+      />
+      <OnboardDialog
+        open={openUploadContractModal}
+        setOpen={setOpenUploadContractModal}
+        refreshList={() => setIsContractSignedSubmitted(true)}
+        dialogTitle="Upload the signed contract"
+        selfDescriptionType="makeContract"
+        selfDescriptionId={content.id}
       />
       <SnackbarComponent
         open={snackbarOpen}
