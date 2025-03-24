@@ -9,15 +9,16 @@ import ErrorIcon from "@mui/icons-material/Error";
 import { Link } from "@mui/material";
 
 interface Evidence {
-    "gx:website"?: string;
-    "gx:pdf"?: string;
+  "gx:website"?: string;
+  "gx:pdf"?: string;
 }
 
 interface KeyValueList {
-    name: string;
-    description: string;
-    response: string;
-    evidence?: Evidence;
+  name: string;
+  description: string;
+  response: string;
+  reason?: string;
+  evidence?: Evidence;
 }
 
 interface KeyValueCardProps {
@@ -59,6 +60,26 @@ export default function CriteriaSection(props: KeyValueCardProps) {
         boxShadow: 1,
       }}
     >
+      <Grid container spacing={2} sx={{ mb: 2, alignItems: "center" }}>
+        <Grid size={{ xs: 1, md: 1 }}>
+          <KeyContainer variant="body2">Name</KeyContainer>
+        </Grid>
+        <Grid size={{ xs: 5, md: 5 }}>
+          <KeyContainer variant="body2">Description</KeyContainer>
+        </Grid>
+        <Grid size={{ xs: 1, md: 1 }} display="flex" justifyContent="center">
+          <KeyContainer variant="body2">Response</KeyContainer>
+        </Grid>
+        <Grid size={{ xs: 3, md: 3 }} display="flex" justifyContent="center">
+          <KeyContainer variant="body2">Reason</KeyContainer>
+        </Grid>
+        <Grid size={{ xs: 1, md: 1 }}>
+          <KeyContainer variant="body2">Website</KeyContainer>
+        </Grid>
+        <Grid size={{ xs: 1, md: 1 }}>
+          <KeyContainer variant="body2">PDF</KeyContainer>
+        </Grid>
+      </Grid>
       {list.map((ele) => (
         <Grid
           container
@@ -79,7 +100,7 @@ export default function CriteriaSection(props: KeyValueCardProps) {
           <Grid size={{ xs: 1, md: 1 }}>
             <KeyContainer variant="body2">{ele.name}</KeyContainer>
           </Grid>
-          <Grid size={{ xs: 8, md: 8 }}>
+          <Grid size={{ xs: 5, md: 5 }}>
             <ValueContainer variant="body2">{ele.description}</ValueContainer>
           </Grid>
           <Grid size={{ xs: 1, md: 1 }} display="flex" justifyContent="center">
@@ -87,23 +108,26 @@ export default function CriteriaSection(props: KeyValueCardProps) {
               {displayIcon(ele.response)}
             </ValueContainer>
           </Grid>
-          <Grid size={{ xs: 1, md: 1 }}>
-            {ele.evidence && ele.evidence["gx:website"] &&
-            <ValueContainer variant="body2">
-            <Link href={ele.evidence["gx:website"]} target="_blank">
-                Evidence Website
-              </Link>
-              {/* {ele.evidence && ele.evidence["gx:website"]} */}
-            </ValueContainer>}
+          <Grid size={{ xs: 3, md: 3 }} display="flex" justifyContent="center">
+            <ValueContainer variant="body2">{ele.reason}</ValueContainer>
           </Grid>
           <Grid size={{ xs: 1, md: 1 }}>
-          {ele.evidence && ele.evidence["gx:website"] &&
-            <ValueContainer variant="body2">
-            <Link href={ele.evidence && ele.evidence["gx:pdf"]} target="_blank">
-                Evidence PDF
-              </Link>
-              {/* {ele.evidence && ele.evidence["gx:pdf"]} */}
-            </ValueContainer>}
+            {ele.evidence && ele.evidence["gx:website"] && (
+              <ValueContainer variant="body2">
+                <Link href={ele.evidence["gx:website"]} target="_blank">
+                  Website
+                </Link>
+              </ValueContainer>
+            )}
+          </Grid>
+          <Grid size={{ xs: 1, md: 1 }}>
+            {ele.evidence && ele.evidence["gx:pdf"] && (
+              <ValueContainer variant="body2">
+                <Link href={ele.evidence["gx:pdf"]} target="_blank">
+                  PDF
+                </Link>
+              </ValueContainer>
+            )}
           </Grid>
         </Grid>
       ))}
