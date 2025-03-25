@@ -114,7 +114,7 @@ export default function DetailsData(detailsProps: detailsProps) {
         <Button
           variant="contained"
           color="error"
-          sx={{ mb: 4 }}
+          sx={{visibility: "hidden"}}
           onClick={() => setOpenDeleteDialog(true)}
         >
           Delete
