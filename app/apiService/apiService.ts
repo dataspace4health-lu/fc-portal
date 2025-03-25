@@ -276,7 +276,7 @@ class ApiService {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async makeContract(signedContractVp: any) {
     try {
-      await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/make-contract`, {
+      await axios.post(`https://jsonplaceholder.typicode.com/posts`, {
         ...signedContractVp
       });
     } catch (error) {

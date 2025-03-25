@@ -123,29 +123,31 @@ const ServiceOffering = () => {
         const modifiedSd = await Promise.all(
           serviceOfferingVp.map(async (sd: any) => {
             const content = JSON.parse(sd.content || "");
-            const serviceOfferingVc = content.verifiableCredential.find(
+            const serviceOfferingVcSubjects = content.verifiableCredential.find(
               (c: any) => c.type.indexOf("gx:ServiceOffering") !== -1
             )?.credentialSubject;
-            const sdName = serviceOfferingVc ? serviceOfferingVc["gx:name"] : "";
-            const sdDescription = serviceOfferingVc
-              ? serviceOfferingVc["gx:description"]
+            const dataResource = serviceOfferingVcSubjects.find((c: any) => c.type.indexOf("gx:DataResource") !== -1);
+            const serviceOfferingSubject = serviceOfferingVcSubjects.find((c: any) => c.type.indexOf("gx:ServiceOffering") !== -1);
+            const sdName = dataResource ? dataResource["gx:name"] : "";
+            const sdDescription = dataResource
+              ? dataResource["gx:description"]
               : "";
-            const dataProtectionRegime = serviceOfferingVc
-              ? serviceOfferingVc["gx:dataProtectionRegime"]
+            const dataProtectionRegime = dataResource
+              ? dataResource["gx:dataProtectionRegime"]
               : "";
-            const policy = serviceOfferingVc ? serviceOfferingVc["gx:policy"] : "";
-            const accessType = serviceOfferingVc
-              ? serviceOfferingVc["gx:dataAccountExport"]["gx:accessType"]
-              : "";
-            const formatType = serviceOfferingVc
-              ? serviceOfferingVc["gx:dataAccountExport"]["gx:formatType"]
-              : "";
-            const requestType = serviceOfferingVc
-              ? serviceOfferingVc["gx:dataAccountExport"]["gx:requestType"]
-              : "";
-            const termsAndConditionsUrl = serviceOfferingVc
-              ? serviceOfferingVc["gx:termsAndConditions"]["gx:URL"]
-              : "";
+            const policy = dataResource ? dataResource["gx:policy"] : "";
+            const accessType = serviceOfferingSubject
+            ? serviceOfferingSubject["gx:dataAccountExport"]["gx:accessType"]
+            : "";
+          const formatType = serviceOfferingSubject
+            ? serviceOfferingSubject["gx:dataAccountExport"]["gx:formatType"]
+            : "";
+          const requestType = serviceOfferingSubject
+            ? serviceOfferingSubject["gx:dataAccountExport"]["gx:requestType"]
+            : "";
+          const termsAndConditionsUrl = serviceOfferingSubject
+            ? serviceOfferingSubject["gx:termsAndConditions"]["gx:URL"]
+            : "";
         
             const legalParticipantVc = content.verifiableCredential.find(
               (c: any) => c.type.indexOf("gx:LegalParticipant") !== -1
@@ -162,8 +164,8 @@ const ServiceOffering = () => {
                 "gx:countrySubdivisionCode"
               ];
             
-            const labelLevelsVcs = content.verifiableCredential.find((vc: any) => 
-              vc.type.some((type: string) => type.startsWith("gx:ServiceOfferingLabelLevel"))
+            const labelLevelsVcs = serviceOfferingVcSubjects.find((vc: any) => 
+              vc.type.startsWith("gx:ServiceOfferingLabelLevel")
             );
         
             const complianceCheck = (await selfDescriptionApiService.checkServiceOfferingCompliance(content));

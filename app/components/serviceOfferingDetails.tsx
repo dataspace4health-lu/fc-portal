@@ -118,10 +118,8 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
     { key: "Headquarter Address", value: issuerHeadquarterAddress || "-" },
   ];
 
-  const criteriaType = formatLabel(
-    labelLevelsVcs?.credentialSubject?.type || ""
-  );
-  const criteria = labelLevelsVcs?.credentialSubject["gx:criteria"];
+  const criteriaType = formatLabel(labelLevelsVcs?.type || "");
+  const criteria = labelLevelsVcs ? labelLevelsVcs["gx:criteria"] : {};
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { type, ...cleanedCriteria } = criteria || {};
@@ -177,10 +175,11 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
     URL.revokeObjectURL(url);
   };
 
+  console.log("content", content);
   const handleAccessData = async () => {
     const dataLink = content.verifiableCredential.find(
-      (vc: any) => vc.type.indexOf("gx:ServiceAccessPoint") !== -1
-    )?.credentialSubject["gx:openAPI"];
+      (vc: any) => vc.type.indexOf("gx:ServiceOffering") !== -1
+    )?.credentialSubject.find((ele: any) => ele.type === "gx:ServiceAccessPoint")?.id;
     try {
       await selfDescriptionApiService.accessData(dataLink);
     } catch (error) {

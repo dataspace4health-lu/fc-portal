@@ -6,7 +6,7 @@ import { styled } from "@mui/material/styles";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import ErrorIcon from "@mui/icons-material/Error";
-import { Link } from "@mui/material";
+import { Link, Tooltip } from "@mui/material";
 
 interface Evidence {
   "gx:website"?: string;
@@ -64,14 +64,11 @@ export default function CriteriaSection(props: KeyValueCardProps) {
         <Grid size={{ xs: 1, md: 1 }}>
           <KeyContainer variant="body2">Name</KeyContainer>
         </Grid>
-        <Grid size={{ xs: 5, md: 5 }}>
+        <Grid size={{ xs: 8, md: 8 }}>
           <KeyContainer variant="body2">Description</KeyContainer>
         </Grid>
         <Grid size={{ xs: 1, md: 1 }} display="flex" justifyContent="center">
           <KeyContainer variant="body2">Response</KeyContainer>
-        </Grid>
-        <Grid size={{ xs: 3, md: 3 }} display="flex" justifyContent="center">
-          <KeyContainer variant="body2">Reason</KeyContainer>
         </Grid>
         <Grid size={{ xs: 1, md: 1 }}>
           <KeyContainer variant="body2">Website</KeyContainer>
@@ -100,17 +97,19 @@ export default function CriteriaSection(props: KeyValueCardProps) {
           <Grid size={{ xs: 1, md: 1 }}>
             <KeyContainer variant="body2">{ele.name}</KeyContainer>
           </Grid>
-          <Grid size={{ xs: 5, md: 5 }}>
+          <Grid size={{ xs: 8, md: 8 }}>
             <ValueContainer variant="body2">{ele.description}</ValueContainer>
           </Grid>
           <Grid size={{ xs: 1, md: 1 }} display="flex" justifyContent="center">
             <ValueContainer variant="body2">
-              {displayIcon(ele.response)}
+              <Tooltip title={ele.reason} arrow>
+                {displayIcon(ele.response)}
+              </Tooltip>
             </ValueContainer>
           </Grid>
-          <Grid size={{ xs: 3, md: 3 }} display="flex" justifyContent="center">
+          {/* <Grid size={{ xs: 3, md: 3 }} display="flex" justifyContent="center">
             <ValueContainer variant="body2">{ele.reason}</ValueContainer>
-          </Grid>
+          </Grid> */}
           <Grid size={{ xs: 1, md: 1 }}>
             {ele.evidence && ele.evidence["gx:website"] && (
               <ValueContainer variant="body2">
