@@ -18,6 +18,7 @@ import CriteriaSection from "./criteriaSection";
 import { SelfDescription } from "../serviceOffering/page";
 import OnboardDialog from "./onboardDialog";
 import { getUserInfo } from "./oidcIntegration";
+import { complianceResponse } from "../utils/interfaces";
 
 interface DetailsProps {
   sdName: string;
@@ -39,7 +40,7 @@ interface DetailsProps {
   selfDescriptionHash: string;
   refreshList: () => void;
   setSelectedCard: (val: SelfDescription | undefined) => void;
-  complianceCheck: boolean;
+  complianceCheck: complianceResponse;
   labelLevelsVcs: any;
   content: any;
 }

@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import { ApiError } from "next/dist/server/api-utils";
 import SdLeftCard from "../components/sdLeftCard";
 import OnboardDialog from "../components/onboardDialog";
+import { complianceResponse } from "../utils/interfaces";
 interface Meta {
   id: string;
   expirationTime: string | undefined;
@@ -43,7 +44,7 @@ export interface SelfDescription {
   issuerDescription: string;
   issuerLegalAddress: string;
   issuerHeadquarterAddress: string;
-  complianceCheck: boolean;
+  complianceCheck: complianceResponse;
   labelLevelsVcs: any;
 }
 
@@ -62,10 +63,10 @@ const DetailsPane = styled(Box)(({ theme }) => ({
 }));
 
 const options = [
-  { label: "content", id: "content" },
-  { label: "date", id: "date" },
-  { label: "issuer", id: "issuer" },
-  { label: "status", id: "status" },
+  { label: "Data Provider", id: "provider" },
+  { label: "Creation Date", id: "date" },
+  { label: "Status", id: "status" },
+  { label: "Compliance", id: "compliance" },
 ];
 
 const CardContainer = styled(Grid, {
@@ -166,9 +167,7 @@ const ServiceOffering = () => {
             const labelLevelsVcs = serviceOfferingVcSubjects.find((vc: any) => 
               vc.type.startsWith("gx:ServiceOfferingLabelLevel")
             );
-
         
-            
             const complianceCheck = (await selfDescriptionApiService.checkServiceOfferingCompliance(content));
         
             return {
@@ -211,24 +210,33 @@ const ServiceOffering = () => {
 
   const handleValueChange = (value: { id: string; label: string } | null) => {
     setSelectedOption(value);
-    if (value && selfDescriptionsList) {
-      const sortedList = [...selfDescriptionsList].sort((a, b) => {
-        const key = value.id as keyof SelfDescription;
-        if (typeof a[key] === "string" && typeof b[key] === "string") {
-          return (a[key] as string).localeCompare(b[key] as string);
-        }
-        return 0;
-      });
-      setSelfDescriptionsList(sortedList);
-    }
+    if (!value || !selfDescriptionsList) return;
+  
+    const key = value.id as keyof SelfDescription;
+  
+    const sortedList = [...selfDescriptionsList].sort((a, b) => {
+      switch (key as "date" | "provider" | "status" | "compliance") {
+        case "date":
+          return new Date(a.meta.statusDatetime).getTime() - new Date(b.meta.statusDatetime).getTime();
+        case "provider":
+          return a.issuerName.toLocaleUpperCase().localeCompare(b.issuerName.toLocaleUpperCase());
+        case "status":
+          return a.meta.status.toLocaleUpperCase().localeCompare(b.meta.status.toLocaleUpperCase());
+        // case "compliance":
+        //   return (a.complianceCheck.success ?? "").localeCompare(b.complianceCheck.success ?? "");
+        default:
+          return 0; // Ensures a valid return type
+      }
+    });
+    setSelfDescriptionsList(sortedList);
   };
+  
 
   const handleCardClick = async (card: SelfDescription) => {
     setSelectedCard(card);
   };
 
   const handleSearch = (query: string | null) => {
-    setSelectedCard(undefined);
     if (!query) {
       setFilteredSelfDescriptions(selfDescriptionsList || []); // Reset to the full list
       return;
@@ -247,9 +255,18 @@ const ServiceOffering = () => {
         sd?.policy?.toLowerCase().includes(lowerCaseQuery) ||
         sd?.accessType?.toLowerCase().includes(lowerCaseQuery) ||
         sd?.formatType?.toLowerCase().includes(lowerCaseQuery) ||
-        sd?.requestType?.toLowerCase().includes(lowerCaseQuery)
+        sd?.requestType?.toLowerCase().includes(lowerCaseQuery) ||
+        sd?.issuerName?.toLowerCase().includes(lowerCaseQuery) ||
+        sd?.issuerDescription?.toLowerCase().includes(lowerCaseQuery) ||
+        sd?.issuerLegalAddress?.toLowerCase().includes(lowerCaseQuery) ||
+        sd?.issuerHeadquarterAddress?.toLowerCase().includes(lowerCaseQuery)
       );
     });
+
+    const foundSelectedSo = filtered.find((ele) => ele.meta.id === selectedCard?.meta?.id)
+    if(!foundSelectedSo) {
+      setSelectedCard(undefined);
+    }
 
     setFilteredSelfDescriptions(filtered);
   };

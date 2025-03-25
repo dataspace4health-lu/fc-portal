@@ -67,6 +67,21 @@ class ApiService {
     }
   }
 
+  async deleteParticipant(participantId: string) {
+    await this.fetchTokenIfNeeded();
+    try {
+      return await this.participantsApi.deleteParticipant(participantId);
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      if (apiError.response && apiError.response.status === 401) {
+        console.log("redirect to login");
+        this.redirectToLogin(); // Handle redirection here
+        return;
+      }
+      throw apiError;
+    }
+  }
+
   async getServiceOfferings(withContent: boolean) {
     await this.fetchTokenIfNeeded();
     try {

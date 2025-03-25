@@ -1,5 +1,5 @@
 "use client";
-import { Box, Typography, Paper, Button } from "@mui/material";
+import { Box, Paper, Button } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import { styled } from "@mui/material/styles";
 import LeftCard from "../components/leftCard";
@@ -13,7 +13,7 @@ import ProtectedRoute from "../components/protectedRoute";
 import { useRouter } from "next/navigation";
 import ApiService from "../apiService/apiService";
 import OnboardDialog from "../components/onboardDialog";
-//import axios from "axios";
+import { complianceResponse } from "../utils/interfaces";
 
 interface ParticipantsList {
   vp: string,
@@ -22,7 +22,7 @@ interface ParticipantsList {
   address: string;
   lrnType: string | undefined;
   lrnCode: string;
-  complianceStatus: string;
+  complianceCheck: complianceResponse;
   description: string;
   headquartersAddress: string;
   legalAddress: string;
@@ -69,10 +69,10 @@ const CardContainer = styled(Grid, {
 }));
 
 const options = [
-  { id: "name", label: "name" },
-  { id: "id", label: "id" },
-  { id: "address", label: "address" },
-  { id: "Vat number", label: "Vat number" },
+  { id: "name", label: "Provider Name" },
+  { id: "id", label: "DS4H ID" },
+  { id: "address", label: "Address" },
+  { id: "number", label: "Registration Number" },
 ];
 
 const Participant = () => {
@@ -82,7 +82,7 @@ const Participant = () => {
   const [selectedOption, setSelectedOption] = useState<{
     id: string;
     label: string;
-  } | null>(options[0]);
+  } | null>(null);
   const [filteredParticipants, setFilteredParticipants] = useState<
     ParticipantsList[]
   >([]);
@@ -98,7 +98,7 @@ const Participant = () => {
     try {
       const response = await apiService.getParticipants(); // Call the instance method
       if (response?.data?.items) {
-        const formattedData = response.data.items.map((item) => {
+        const formattedData = await Promise.all(response.data.items.map(async (item) => {
           const description = JSON.parse(item.selfDescription || "");
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -121,6 +121,8 @@ const Participant = () => {
               .replace(/([a-z])([A-Z])/g, '$1 $2') // Add space between camel case words
               .replace(/(^\w| \w)/g, match => match.toUpperCase()) // Capitalize the first letter of each word
           };
+
+          const complianceCheck = (await apiService.checkServiceOfferingCompliance(description)) as complianceResponse;
           return {
             vp: JSON.stringify(item),
             id: item?.id || "",
@@ -162,12 +164,11 @@ const Participant = () => {
               "gx:subOrganization",
               "gx:subOrganizationOf",
             ]),
-            complianceStatus: "",
+            complianceCheck: complianceCheck,
           };
-        });
-        //console.log("formattedData", formattedData);
+        })) 
+
         setParticipantsList(formattedData);
-        verifyVatNumbers(formattedData);
       }
     } catch (err: unknown) {
       const apiError = err as ApiError;
@@ -187,12 +188,23 @@ const Participant = () => {
   const handleValueChange = (value: { id: string; label: string } | null) => {
     setSelectedOption(value);
     if (value && participantsList) {
+      const key = value.id as keyof ParticipantsList;
+      
       const sortedList = [...participantsList].sort((a, b) => {
-        const key = value.id as keyof ParticipantsList;
-        if (typeof a[key] === "string" && typeof b[key] === "string") {
-          return (a[key] as string).localeCompare(b[key] as string);
+        switch (key as "name" | "id" | "address" | "number") {
+          case "name":
+            return a.name.toLocaleUpperCase().localeCompare(b.name.toLocaleUpperCase());
+          case "id":
+            return a.id.toLocaleUpperCase().localeCompare(b.id.toLocaleUpperCase());
+          case "address":
+            return a.address.toLocaleUpperCase().localeCompare(b.address.toLocaleUpperCase());
+          case "number":
+            return a.lrnCode.toLocaleUpperCase().localeCompare(b.lrnCode.toLocaleUpperCase());
+          // case "compliance":
+          //   return (a.complianceCheck.success ?? "").localeCompare(b.complianceCheck.success ?? "");
+          default:
+            return 0; // Ensures a valid return type
         }
-        return 0;
       });
       setParticipantsList(sortedList);
     }
@@ -210,39 +222,19 @@ const Participant = () => {
         participant.name.toLowerCase().includes(lowerCaseQuery) ||
         participant.address.toLowerCase().includes(lowerCaseQuery) ||
         participant.lrnCode.toLowerCase().includes(lowerCaseQuery) ||
-        participant.description.toLowerCase().includes(lowerCaseQuery)
+        participant.description.toLowerCase().includes(lowerCaseQuery) ||
+        participant.subOrganization.toLowerCase().includes(lowerCaseQuery) ||
+        participant.parentOrganization.toLowerCase().includes(lowerCaseQuery) ||
+        participant.id.toLowerCase().includes(lowerCaseQuery)
       );
     });
 
+    const foundSelectedParticipant = filtered.find((ele) => ele.id === selectedCard?.id)
+    if(!foundSelectedParticipant) {
+      setSelectedCard(undefined);
+    }
+
     setFilteredParticipants(filtered);
-  };
-
-  // Function to verify VAT numbers
-  const verifyVatNumbers = async (participants: ParticipantsList[]) => {
-    const updatedParticipants = await Promise.all(
-      participants.map(async (participant) => {
-        if (!participant.lrnCode) return participant;
-        
-        try {
-          //const response = await axios.get(participant.lrnCode);
-          const status = "invalid";
-          // TODO: Redesign the interface to asynchronously request the compliance for every item
-          // if (process.env.NEXT_PUBLIC_GAIAX_COMPLIANCE_URL) {
-          //   const response = await axios.post(process.env.NEXT_PUBLIC_GAIAX_COMPLIANCE_URL, participant.vp);
-          //   status = response.status == 201 ? "valid" : "invalid";
-          // }
-          return {
-            ...participant,
-            //complianceStatus: response.data ? "valid" : "invalid",
-            complianceStatus: status,
-          };
-        } catch {
-          return { ...participant, complianceStatus: "invalid" };
-        }
-      })
-    );
-
-    setParticipantsList(updatedParticipants);
   };
 
   const openOnboardingDialog = () => {
@@ -289,10 +281,9 @@ const Participant = () => {
                     id={participant.id}
                     name={participant.name}
                     lrnCode={participant.lrnCode}
-                    complianceStatus={participant.complianceStatus}
+                    complianceCheck={participant.complianceCheck}
                     address={participant.address}
                     lrnType={participant.lrnType}
-                  // logoUrl={participant.logo}
                   />
                 </CardContainer>
               ))}
@@ -303,22 +294,21 @@ const Participant = () => {
           {selectedCard && (
             <Grid size={{ xs: 8 }}>
               <DetailsPane>
-                <Typography variant="h4" gutterBottom>
-                  {selectedCard.name}
-                </Typography>
                 <Paper elevation={3}>
                   <DetailsData
                     id={selectedCard.id}
                     name={selectedCard.name}
                     address={selectedCard.address}
                     lrnCode={selectedCard.lrnCode}
-                    complianceStatus={selectedCard.complianceStatus}
+                    complianceCheck={selectedCard.complianceCheck}
                     description={selectedCard.description}
                     headquartersAddress={selectedCard.headquartersAddress}
                     legalAddress={selectedCard.legalAddress}
                     parentOrganization={selectedCard.parentOrganization}
                     subOrganization={selectedCard.parentOrganization}
                     lrnType={selectedCard.lrnType}
+                    refreshList={fetchData}
+                    setSelectedCard={setSelectedCard}
                   />
                 </Paper>
               </DetailsPane>
