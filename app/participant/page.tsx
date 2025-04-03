@@ -107,13 +107,12 @@ const Participant = () => {
             const description = JSON.parse(item.selfDescription || "");
 
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const participant = description.verifiableCredential.find(
-              (vc: any) => vc.type.indexOf("gx:LegalParticipant") !== -1
+            const participant = description.verifiableCredential.find((vc: any) => 
+              vc.type.indexOf("gx:LegalParticipant") !== -1
             );
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const lrn = description.verifiableCredential.find(
-              (vc: any) =>
-                vc.credentialSubject.type == "gx:legalRegistrationNumber"
+            const lrn = description.verifiableCredential.find((vc: any) =>
+              vc.credentialSubject.type == "gx:legalRegistrationNumber"
             );
 
             // Normalize attribute names

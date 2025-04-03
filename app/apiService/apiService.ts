@@ -176,6 +176,7 @@ class ApiService {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async checkServiceOfferingTrueCompliance(serviceOfferingVp: any) {
     try {
       const response = await fetch(`https://jsonplaceholder.typicode.com/posts`, {
