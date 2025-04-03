@@ -48,9 +48,9 @@ export default function LeftCard(sdLeftCardProps: SdLeftCardProps) {
         <Typography variant="h6" fontWeight="bold">
           {sdName || "N/A"}
         </Typography>
-        <Tooltip title={complianceCheck.message } arrow>
-          {complianceCheck.success ? <VerifiedUserIcon sx={{ color: "green" }} /> : <GppMaybeIcon sx={{ color: "red" }} />}
-        </Tooltip>
+        {complianceCheck && <Tooltip title={complianceCheck?.message } arrow>
+          {complianceCheck?.success ? <VerifiedUserIcon sx={{ color: "green" }} /> : <GppMaybeIcon sx={{ color: "red" }} />}
+        </Tooltip>}
       </Box>
 
       {/* Data Provider with Truncation */}

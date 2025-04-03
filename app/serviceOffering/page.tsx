@@ -39,6 +39,8 @@ export interface SelfDescription {
   accessType: string;
   formatType: string;
   requestType: string;
+  openApi: string;
+  serviceAccessPointId: string;
   termsAndConditionsUrl: string;
   issuerName: string;
   issuerDescription: string;
@@ -120,23 +122,29 @@ const ServiceOffering = () => {
           );
           return serviceOfferingVc;
         });
-        const modifiedSd = await Promise.all(
-          serviceOfferingVp.map(async (sd: any) => {
-            const content = JSON.parse(sd.content || "");
-            const serviceOfferingVcSubjects = content.verifiableCredential.find(
-              (c: any) => c.type.indexOf("gx:ServiceOffering") !== -1
-            )?.credentialSubject;
-            const dataResource = serviceOfferingVcSubjects.find((c: any) => c.type.indexOf("gx:DataResource") !== -1);
-            const serviceOfferingSubject = serviceOfferingVcSubjects.find((c: any) => c.type.indexOf("gx:ServiceOffering") !== -1);
-            const sdName = dataResource ? dataResource["gx:name"] : "";
-            const sdDescription = dataResource
-              ? dataResource["gx:description"]
-              : "";
-            const dataProtectionRegime = dataResource
-              ? dataResource["gx:dataProtectionRegime"]
-              : "";
-            const policy = dataResource ? dataResource["gx:policy"] : "";
-            const accessType = serviceOfferingSubject
+        const modifiedSd = serviceOfferingVp.map((sd: any) => {
+          const content = JSON.parse(sd.content || "");
+          const serviceOfferingVcSubjects = content.verifiableCredential.find(
+            (c: any) => c.type.indexOf("gx:ServiceOffering") !== -1
+          )?.credentialSubject;
+          const dataResource = serviceOfferingVcSubjects.find(
+            (c: any) => c.type.indexOf("gx:DataResource") !== -1
+          );
+          const serviceOfferingSubject = serviceOfferingVcSubjects.find(
+            (c: any) => c.type.indexOf("gx:ServiceOffering") !== -1
+          );
+          const serviceAccessPoint = serviceOfferingVcSubjects.find(
+            (c: any) => c.type.indexOf("gx:ServiceAccessPoint") !== -1
+          );
+          const sdName = dataResource ? dataResource["gx:name"] : "";
+          const sdDescription = dataResource
+            ? dataResource["gx:description"]
+            : "";
+          const dataProtectionRegime = dataResource
+            ? dataResource["gx:dataProtectionRegime"]
+            : "";
+          const policy = dataResource ? dataResource["gx:policy"] : "";
+          const accessType = serviceOfferingSubject
             ? serviceOfferingSubject["gx:dataAccountExport"]["gx:accessType"]
             : "";
           const formatType = serviceOfferingSubject
@@ -148,49 +156,55 @@ const ServiceOffering = () => {
           const termsAndConditionsUrl = serviceOfferingSubject
             ? serviceOfferingSubject["gx:termsAndConditions"]["gx:URL"]
             : "";
-        
-            const legalParticipantVc = content.verifiableCredential.find(
-              (c: any) => c.type.indexOf("gx:LegalParticipant") !== -1
-            );
-            const issuerName = legalParticipantVc?.credentialSubject["gx:legalName"];
-            const issuerDescription =
-              legalParticipantVc?.credentialSubject["gx:description"];
-            const issuerHeadquarterAddress =
-              legalParticipantVc?.credentialSubject["gx:headquarterAddress"][
-                "gx:countrySubdivisionCode"
-              ];
-            const issuerLegalAddress =
-              legalParticipantVc?.credentialSubject["gx:legalAddress"][
-                "gx:countrySubdivisionCode"
-              ];
-            
-            const labelLevelsVcs = serviceOfferingVcSubjects.find((vc: any) => 
-              vc.type.startsWith("gx:ServiceOfferingLabelLevel")
-            );
-        
-            const complianceCheck = (await selfDescriptionApiService.checkServiceOfferingCompliance(content));
-        
-            return {
-              ...sd,
-              sdName,
-              sdDescription,
-              content,
-              dataProtectionRegime,
-              policy,
-              accessType,
-              formatType,
-              requestType,
-              termsAndConditionsUrl,
-              issuerName,
-              issuerDescription,
-              issuerHeadquarterAddress,
-              issuerLegalAddress,
-              complianceCheck,
-              labelLevelsVcs,
-            };
-          })
-        );
-        
+          const openApi = serviceAccessPoint
+            ? serviceAccessPoint["gx:openAPI"]
+            : "";
+          const serviceAccessPointId = serviceAccessPoint
+            ? serviceAccessPoint.id
+            : "";
+          const legalParticipantVc = content.verifiableCredential.find(
+            (c: any) => c.type.indexOf("gx:LegalParticipant") !== -1
+          );
+          const issuerName =
+            legalParticipantVc?.credentialSubject["gx:legalName"];
+          const issuerDescription =
+            legalParticipantVc?.credentialSubject["gx:description"];
+          const issuerHeadquarterAddress =
+            legalParticipantVc?.credentialSubject["gx:headquarterAddress"][
+              "gx:countrySubdivisionCode"
+            ];
+          const issuerLegalAddress =
+            legalParticipantVc?.credentialSubject["gx:legalAddress"][
+              "gx:countrySubdivisionCode"
+            ];
+
+          const labelLevelsVcs = serviceOfferingVcSubjects.find((vc: any) =>
+            vc.type.startsWith("gx:ServiceOfferingLabelLevel")
+          );
+
+          // const complianceCheck = (await selfDescriptionApiService.checkServiceOfferingCompliance(content));
+
+          return {
+            ...sd,
+            sdName,
+            sdDescription,
+            content,
+            dataProtectionRegime,
+            policy,
+            accessType,
+            formatType,
+            requestType,
+            openApi,
+            serviceAccessPointId,
+            termsAndConditionsUrl,
+            issuerName,
+            issuerDescription,
+            issuerHeadquarterAddress,
+            issuerLegalAddress,
+            complianceCheck: null,
+            labelLevelsVcs,
+          };
+        });
         setSelfDescriptionsList(modifiedSd);
       }
     } catch (err: unknown) {
@@ -208,20 +222,49 @@ const ServiceOffering = () => {
     }
   }, [selfDescriptionsList]);
 
+  useEffect(() => {
+    if (selfDescriptionsList.length) {
+      selfDescriptionsList.forEach((sd) => {
+        selfDescriptionApiService
+          .checkServiceOfferingCompliance(sd.content)
+          .then((complianceCheck) => {
+            setFilteredSelfDescriptions((prevList) =>
+              (prevList ?? []).map((item) =>
+                item === sd
+                  ? {
+                      ...item,
+                      complianceCheck: complianceCheck as complianceResponse,
+                    }
+                  : item
+              )
+            );
+          })
+          .catch((error) => console.error("Compliance check failed", error));
+      });
+    }
+  }, [selfDescriptionsList]); // Re-run when selfDescriptionsList changes
+
   const handleValueChange = (value: { id: string; label: string } | null) => {
     setSelectedOption(value);
     if (!value || !selfDescriptionsList) return;
-  
+
     const key = value.id as keyof SelfDescription;
-  
+
     const sortedList = [...selfDescriptionsList].sort((a, b) => {
       switch (key as "date" | "provider" | "status" | "compliance") {
         case "date":
-          return new Date(a.meta.statusDatetime).getTime() - new Date(b.meta.statusDatetime).getTime();
+          return (
+            new Date(a.meta.statusDatetime).getTime() -
+            new Date(b.meta.statusDatetime).getTime()
+          );
         case "provider":
-          return a.issuerName.toLocaleUpperCase().localeCompare(b.issuerName.toLocaleUpperCase());
+          return a.issuerName
+            .toLocaleUpperCase()
+            .localeCompare(b.issuerName.toLocaleUpperCase());
         case "status":
-          return a.meta.status.toLocaleUpperCase().localeCompare(b.meta.status.toLocaleUpperCase());
+          return a.meta.status
+            .toLocaleUpperCase()
+            .localeCompare(b.meta.status.toLocaleUpperCase());
         // case "compliance":
         //   return (a.complianceCheck.success ?? "").localeCompare(b.complianceCheck.success ?? "");
         default:
@@ -230,7 +273,6 @@ const ServiceOffering = () => {
     });
     setSelfDescriptionsList(sortedList);
   };
-  
 
   const handleCardClick = async (card: SelfDescription) => {
     setSelectedCard(card);
@@ -263,8 +305,10 @@ const ServiceOffering = () => {
       );
     });
 
-    const foundSelectedSo = filtered.find((ele) => ele.meta.id === selectedCard?.meta?.id)
-    if(!foundSelectedSo) {
+    const foundSelectedSo = filtered.find(
+      (ele) => ele.meta.id === selectedCard?.meta?.id
+    );
+    if (!foundSelectedSo) {
       setSelectedCard(undefined);
     }
 
@@ -283,7 +327,7 @@ const ServiceOffering = () => {
         <Grid container spacing={2} sx={{ mb: 3, alignItems: "center" }}>
           <Grid size={{ xs: 4, md: 12 }} sx={{ m: 2 }}>
             <Button variant="contained" onClick={openOnboardingDialog}>
-              Onboard new Data Offer
+              Publish new Data Offer
             </Button>
           </Grid>
           <Grid size={{ xs: 4 }} sx={{ textAlign: "right" }}>
@@ -343,6 +387,8 @@ const ServiceOffering = () => {
                   accessType={selectedCard.accessType}
                   formatType={selectedCard.formatType}
                   requestType={selectedCard.requestType}
+                  openApi={selectedCard.openApi}
+                  serviceAccessPointId={selectedCard.serviceAccessPointId}
                   issuer={selectedCard.meta.issuer}
                   issuanceDate={selectedCard.meta.uploadDatetime}
                   statusDatetime={selectedCard.meta.statusDatetime}
@@ -369,7 +415,7 @@ const ServiceOffering = () => {
         open={openModal}
         setOpen={setOpenModal}
         refreshList={fetchData}
-        dialogTitle="Onboard New Data offer"
+        dialogTitle="Publish New Data offer"
         selfDescriptionType="dataOffering"
       />
     </div>

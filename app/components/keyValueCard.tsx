@@ -4,10 +4,12 @@ import Grid from "@mui/material/Grid2";
 import Typography from "@mui/material/Typography";
 import { styled } from "@mui/material/styles";
 import ReactMarkdown from "react-markdown";
+import { Link } from "@mui/material";
 
 interface KeyValueList {
   key: string;
   value: string;
+  isLink?: boolean;
 }
 
 interface KeyValueCardProps {
@@ -61,6 +63,10 @@ export default function KeyValueCard(props: KeyValueCardProps) {
           <Grid size={{ xs: 6, md: 8 }}>
             {ele.key === "Description" ? (
               <ReactMarkdown>{ele.value}</ReactMarkdown>
+            ) : ele.isLink ? (
+              <Link href={ele.value} target="_blank">
+                {ele.value}
+              </Link>
             ) : (
               <ValueContainer variant="body2">{ele.value}</ValueContainer>
             )}

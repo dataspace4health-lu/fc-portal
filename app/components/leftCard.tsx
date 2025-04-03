@@ -11,7 +11,7 @@ interface LeftCardProps {
   address: string;
   lrnType: string | undefined;
   lrnCode: string;
-  complianceCheck: complianceResponse;
+  complianceCheck: complianceResponse | null;
 }
 
 export default function LeftCard(leftCardProps: LeftCardProps) {
@@ -37,9 +37,9 @@ export default function LeftCard(leftCardProps: LeftCardProps) {
         <Typography variant="h6" fontWeight="bold">
           {name}
         </Typography>
-        <Tooltip title={complianceCheck.message } arrow>
+        {complianceCheck && <Tooltip title={complianceCheck?.message } arrow>
           {complianceCheck.success ? <VerifiedUserIcon sx={{ color: "green" }} /> : <GppMaybeIcon sx={{ color: "red" }} />}
-        </Tooltip>
+        </Tooltip>}
         {/* {logoUrl ? (
           <Image alt={`${name} logo`} src={logoUrl} width={50} height={50} />
         ) : (

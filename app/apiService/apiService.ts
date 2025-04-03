@@ -176,6 +176,57 @@ class ApiService {
     }
   }
 
+  async checkServiceOfferingTrueCompliance(serviceOfferingVp: any) {
+    try {
+      const response = await fetch(`https://jsonplaceholder.typicode.com/posts`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(serviceOfferingVp),
+      });
+
+      let responseData = null;
+
+      try {
+        responseData = await response.json();
+      } catch (jsonError) {
+        console.warn("Failed to parse response JSON:", jsonError);
+      }
+
+      if (!response.ok) {
+        return {
+          success: false,
+          status: response.status,
+          message: responseData?.message || response.statusText || "Unknown error from server",
+          details: responseData || null
+        };
+      }
+
+      return { success: true, data: responseData };
+    } catch (error: unknown) {
+      return { success: false, status: 500, message: (error as Error).message || "Unknown error" };
+    }
+  }
+
+  /**
+   * 
+   * @param dataLink string
+   * @description This function is used to access data from a given link.
+   * It uses axios to make a GET request to the provided link.
+   * If the request fails, it logs an error message to the console.
+   * @returns {Promise<void>}
+   * @throws {Error} If the request fails, an error is logged to the console.
+   * 
+  */
+  async accessTermsAndConditions(link: string): Promise<void> {
+    try {
+      return await axios.get(link);
+    } catch (error) {
+      console.error(error, "Data cannot be accessed");
+    }
+  }
+
   /**
  * User management api services
  */
@@ -293,7 +344,7 @@ class ApiService {
   // Api call for accessing data and needs to be checked later on when it it defined in the backend
   async accessData(dataLink: string) {
     try {
-      await axios.get(dataLink);
+      return await axios.get(dataLink);
     } catch (error) {
       console.error(error, "Data cannot be accessed");
     }

@@ -24,7 +24,7 @@ interface detailsProps {
   address: string;
   lrnType: string | undefined;
   lrnCode: string;
-  complianceCheck: complianceResponse;
+  complianceCheck: complianceResponse | null;
   description: string;
   legalAddress: string;
   headquartersAddress: string;
@@ -154,13 +154,13 @@ export default function DetailsData(detailsProps: detailsProps) {
                 DS4H ID: {id}
               </Typography>
             </Grid>
-            <Tooltip title={complianceCheck.message} arrow>
+            {complianceCheck && <Tooltip title={complianceCheck.message} arrow>
               {complianceCheck.success ? (
                 <VerifiedUserIcon sx={{ color: "green" }} />
               ) : (
                 <GppMaybeIcon sx={{ color: "red" }} />
               )}
-            </Tooltip>
+            </Tooltip>}
           </Grid>
           <Grid
             container
