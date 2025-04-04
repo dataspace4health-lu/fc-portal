@@ -137,20 +137,20 @@ const Participant = () => {
                 participant.credentialSubject["gx:legalAddress"],
                 ["gx:countrySubdivisionCode"]
               ),
-              lrnCode: normalize(lrn.credentialSubject, [
+              lrnCode: lrn ? normalize(lrn.credentialSubject, [
                 "gx:leiCode",
                 "gx:vatID",
                 "gx:EORI",
                 "gx:taxID",
                 "gx:EUID",
-              ]),
-              lrnType: normalizeKey(lrn.credentialSubject, [
+              ]) : "-",
+              lrnType: lrn ? normalizeKey(lrn.credentialSubject, [
                 "gx:leiCode",
                 "gx:vatID",
                 "gx:EORI",
                 "gx:taxID",
                 "gx:EUID",
-              ]),
+              ]) : "-",
               description: normalize(participant.credentialSubject, [
                 "gx:description",
               ]),

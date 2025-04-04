@@ -136,9 +136,9 @@ const ServiceOffering = () => {
           const serviceAccessPoint = serviceOfferingVcSubjects.find(
             (c: any) => c.type.indexOf("gx:ServiceAccessPoint") !== -1
           );
-          const sdName = dataResource ? dataResource["gx:name"] : "";
-          const sdDescription = dataResource
-            ? dataResource["gx:description"]
+          const sdName = serviceOfferingSubject ? serviceOfferingSubject["gx:name"] : "";
+          const sdDescription = serviceOfferingSubject
+            ? serviceOfferingSubject["gx:description"]
             : "";
           const dataProtectionRegime = dataResource
             ? dataResource["gx:dataProtectionRegime"]

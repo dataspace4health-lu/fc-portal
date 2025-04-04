@@ -19,6 +19,7 @@ import { SelfDescription } from "../serviceOffering/page";
 import OnboardDialog from "./onboardDialog";
 import { getUserInfo } from "./oidcIntegration";
 import { complianceResponse } from "../utils/interfaces";
+import ReactMarkdown from "react-markdown";
 
 interface DetailsProps {
   sdName: string;
@@ -339,9 +340,11 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
                       Click here to open the Terms and Conditions document
                     </Link>
                   </Typography>
-                  <Typography variant="body2">
+                  <Box padding={4}>
+                    <ReactMarkdown>
                     {termsAndConditionsData}
-                  </Typography>
+                  </ReactMarkdown>
+                  </Box>
                 </Box>
             )}
           </AccordionDetails>
