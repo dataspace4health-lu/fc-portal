@@ -195,7 +195,7 @@ const Participant = () => {
     if (participantsList && participantsList.length) {
       participantsList.forEach((participant) => {
         apiService
-          .checkServiceOfferingTrueCompliance(participant.content)
+          .checkServiceOfferingCompliance(participant.content)
           .then((complianceCheck) => {
             setFilteredParticipants((prevList) =>
               (prevList ?? []).map((item) =>

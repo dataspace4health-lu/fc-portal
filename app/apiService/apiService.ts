@@ -176,40 +176,6 @@ class ApiService {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async checkServiceOfferingTrueCompliance(serviceOfferingVp: any) {
-    try {
-      const response = await fetch(`https://jsonplaceholder.typicode.com/posts`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(serviceOfferingVp),
-      });
-
-      let responseData = null;
-
-      try {
-        responseData = await response.json();
-      } catch (jsonError) {
-        console.warn("Failed to parse response JSON:", jsonError);
-      }
-
-      if (!response.ok) {
-        return {
-          success: false,
-          status: response.status,
-          message: responseData?.message || response.statusText || "Unknown error from server",
-          details: responseData || null
-        };
-      }
-
-      return { success: true, data: responseData };
-    } catch (error: unknown) {
-      return { success: false, status: 500, message: (error as Error).message || "Unknown error" };
-    }
-  }
-
   /**
    * 
    * @param dataLink string
