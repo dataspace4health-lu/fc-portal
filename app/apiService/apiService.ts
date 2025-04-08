@@ -177,6 +177,24 @@ class ApiService {
   }
 
   /**
+   * 
+   * @param dataLink string
+   * @description This function is used to access data from a given link.
+   * It uses axios to make a GET request to the provided link.
+   * If the request fails, it logs an error message to the console.
+   * @returns {Promise<void>}
+   * @throws {Error} If the request fails, an error is logged to the console.
+   * 
+  */
+  async accessTermsAndConditions(link: string): Promise<void> {
+    try {
+      return await axios.get(link);
+    } catch (error) {
+      console.error(error, "Data cannot be accessed");
+    }
+  }
+
+  /**
  * User management api services
  */
   async getUsers() {
@@ -293,7 +311,7 @@ class ApiService {
   // Api call for accessing data and needs to be checked later on when it it defined in the backend
   async accessData(dataLink: string) {
     try {
-      await axios.get(dataLink);
+      return await axios.get(dataLink);
     } catch (error) {
       console.error(error, "Data cannot be accessed");
     }

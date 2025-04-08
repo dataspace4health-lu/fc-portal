@@ -19,6 +19,7 @@ import { SelfDescription } from "../serviceOffering/page";
 import OnboardDialog from "./onboardDialog";
 import { getUserInfo } from "./oidcIntegration";
 import { complianceResponse } from "../utils/interfaces";
+import ReactMarkdown from "react-markdown";
 
 interface DetailsProps {
   sdName: string;
@@ -28,6 +29,8 @@ interface DetailsProps {
   accessType: string;
   formatType: string;
   requestType: string;
+  openApi: string;
+  serviceAccessPointId: string;
   termsAndConditionsUrl: string;
   status: string;
   issuanceDate: string;
@@ -52,7 +55,8 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
     accessType,
     formatType,
     requestType,
-    // policy,
+    openApi,
+    serviceAccessPointId,
     issuanceDate,
     statusDatetime,
     issuer,
@@ -79,6 +83,7 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
   const [isContractSignedSubmitted, setIsContractSignedSubmitted] =
     useState(false);
   const [userId, setUserId] = useState("");
+  const [termsAndConditionsData, setTermsAndConditionsData] = useState("");
   const router = useRouter();
 
   const selfDescriptionApiService = useMemo(
@@ -97,9 +102,9 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
 
   const generalDatasetInfoList = [
     { key: "Description", value: sdDescription || "-" },
-    { key: "Date of creation of the dataset", value: formatDate(issuanceDate) },
+    { key: "Date of creation of the Data offer", value: formatDate(issuanceDate) },
     {
-      key: "Date of the last update of the dataset",
+      key: "Date of the last update of the Data offer",
       value: formatDate(statusDatetime),
     },
     { key: "Request Type", value: requestType || "-" },
@@ -108,12 +113,12 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
       value: accessType || "-",
     },
     { key: "Format Type", value: formatType || "-" },
-    // { key: "Policy", value: policy || "-" },
+    { key: "API Interface", value: openApi || "-", isLink: true },
   ];
 
   const datasetContactsList = [
-    { key: "Data Owner", value: issuerName || issuer || "-" },
-    { key: "Owner Description", value: issuerDescription || "-" },
+    { key: "Data Holder", value: issuerName || issuer || "-" },
+    { key: "Data Holder's Description", value: issuerDescription || "-" },
     { key: "Legal Address", value: issuerLegalAddress || "-" },
     { key: "Headquarter Address", value: issuerHeadquarterAddress || "-" },
   ];
@@ -175,11 +180,8 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
     URL.revokeObjectURL(url);
   };
 
-  console.log("content", content);
   const handleAccessData = async () => {
-    const dataLink = content.verifiableCredential.find(
-      (vc: any) => vc.type.indexOf("gx:ServiceOffering") !== -1
-    )?.credentialSubject.find((ele: any) => ele.type === "gx:ServiceAccessPoint")?.id;
+    const dataLink = serviceAccessPointId;
     try {
       await selfDescriptionApiService.accessData(dataLink);
     } catch (error) {
@@ -216,6 +218,18 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
     else setIsContractSignedSubmitted(false);
   };
 
+  useEffect(() => {
+    const fetchTermsAndConditions = async () => {
+      if (termsAndConditionsUrl) {
+        const termsAndConditionsData = await selfDescriptionApiService.accessData(termsAndConditionsUrl);
+        if(termsAndConditionsData && termsAndConditionsData.data) {
+          setTermsAndConditionsData(termsAndConditionsData.data);
+        }
+      }
+    };
+    fetchTermsAndConditions();
+  }, [content]);
+
   return (
     <Box
       sx={{
@@ -232,7 +246,7 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
             color="primary"
             onClick={handleDownloadContract}
           >
-            Download contract template
+            Download contract to sign
           </Button>
           {isContractSignedSubmitted ? (
             <Button
@@ -287,9 +301,9 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
 
       {/* Accordion Section */}
       {[
-        { title: "General Dataset Information", data: generalDatasetInfoList },
-        { title: "Dataset contacts", data: datasetContactsList },
-        { title: "Data Sharing Agreement (DSA)", data: null },
+        { title: "General Information", data: generalDatasetInfoList },
+        { title: "Data Holder", data: datasetContactsList },
+        { title: "Terms And Conditions", data: null },
       ].map((section, index) => (
         <Accordion
           key={index}
@@ -320,16 +334,26 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
             {section.data ? (
               <KeyValueCard keyValueList={section.data} />
             ) : (
-              <Link href={termsAndConditionsUrl} target="_blank">
-                Download document
-              </Link>
+                <Box>
+                  <Typography variant="body1" gutterBottom>
+                    <Link href={termsAndConditionsUrl} target="_blank" underline="hover">
+                      Click here to open the Terms and Conditions document
+                    </Link>
+                  </Typography>
+                  <Box padding={4}>
+                    <ReactMarkdown>
+                    {termsAndConditionsData}
+                  </ReactMarkdown>
+                  </Box>
+                </Box>
             )}
           </AccordionDetails>
         </Accordion>
       ))}
 
       {/* Policies section it will be commented for now */}
-      <Accordion
+      {false && <Accordion
+        defaultExpanded
         sx={{
           mb: 2,
           "&:before": { display: "none" },
@@ -399,12 +423,13 @@ export default function ServiceOfferingDetailsData(props: DetailsProps) {
             </Accordion>
           ))}
         </AccordionDetails>
-      </Accordion>
+      </Accordion>}
 
       {/* criteria section*/}
 
       {finalCriteriaList && finalCriteriaList.length > 0 && (
         <Accordion
+          defaultExpanded
           sx={{
             mb: 2,
             "&:before": { display: "none" },
